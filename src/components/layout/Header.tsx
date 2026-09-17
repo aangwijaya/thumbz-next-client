@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { AuthNav } from "@/components/layout/AuthNav";
 import { Container } from "@/components/ui/Container";
+import { getAccessToken } from "@/lib/supabase/server";
 
 const navItems = [
   { href: "/live", label: "Live" },
-  { href: "/matches", label: "Matches" },
   { href: "/tournaments", label: "Tournaments" },
   { href: "/teams", label: "Teams" },
   { href: "/players", label: "Players" },
@@ -22,7 +23,9 @@ function NavLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-export function Header() {
+export async function Header() {
+  const isAuthed = (await getAccessToken()) !== null;
+
   return (
     <header className="border-b border-page-light-border bg-page-light text-page-light-text">
       <Container size="wide" className="flex items-center justify-between gap-6 py-4">
@@ -45,6 +48,7 @@ export function Header() {
             <NavLink key={item.href} href={item.href} label={item.label} />
           ))}
           <NavLink href="/search" label="Search" />
+          <AuthNav isAuthed={isAuthed} />
         </nav>
 
         <details className="group relative md:hidden">
@@ -70,6 +74,7 @@ export function Header() {
             >
               Search
             </Link>
+            <AuthNav isAuthed={isAuthed} asMenuItem />
           </nav>
         </details>
       </Container>

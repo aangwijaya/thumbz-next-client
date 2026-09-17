@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "./client";
 import type {
   ApiEnvelope,
+  CommentsEnvelope,
   GoldSnapshot,
   HomePayload,
   ItemPurchase,
+  MatchComment,
   MatchDetail,
   MatchEvent,
   MatchStage,
@@ -24,6 +26,9 @@ import type {
   TeamDetail,
   TeamStatistics,
   TeamSummary,
+  TicketAvailability,
+  TicketOrder,
+  TicketOrderDetail,
   TournamentDetail,
   TournamentStatus,
   TournamentSummary,
@@ -127,6 +132,7 @@ export const queryKeys = {
   matchLiveStats: (id: string) => ["matches", id, "live-stats"] as const,
   matchEquipment: (id: string) => ["matches", id, "equipment"] as const,
   matchEvents: (id: string) => ["matches", id, "events"] as const,
+  matchTicket: (id: string) => ["matches", id, "ticket"] as const,
   tournaments: (params: TournamentListParams = {}) => ["tournaments", params] as const,
   tournament: (id: string) => ["tournaments", id] as const,
   tournamentSchedule: (id: string, params: ScheduleParams = {}) =>
@@ -384,5 +390,77 @@ export function useSearch(params: SearchParams) {
   return useQuery({
     queryKey: queryKeys.search(params),
     queryFn: () => fetchList<SearchPayload>(withQuery("/search", params)),
+  });
+}
+
+export async function fetchMatchComments(
+  matchId: string,
+  after?: string,
+): Promise<CommentsEnvelope> {
+  return apiFetch<CommentsEnvelope>(
+    withQuery(`/matches/${matchId}/comments`, { after, limit: 30 }),
+  );
+}
+
+export async function postMatchComment(
+  matchId: string,
+  body: string,
+  token: string,
+): Promise<MatchComment> {
+  const envelope = await apiFetch<ApiEnvelope<MatchComment>>(
+    `/matches/${matchId}/comments`,
+    { method: "POST", body: { body }, token },
+  );
+  return envelope.data;
+}
+
+export async function deleteMatchComment(
+  commentId: string,
+  token: string,
+): Promise<void> {
+  await apiFetch<undefined>(`/me/comments/${commentId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export function useMatchTicket(matchId: string) {
+  return useQuery({
+    queryKey: queryKeys.matchTicket(matchId),
+    queryFn: () => fetchData<TicketAvailability | null>(`/matches/${matchId}/ticket`),
+    refetchInterval: LIVE_POLL_MS,
+  });
+}
+
+export async function postMatchOrder(
+  matchId: string,
+  quantity: number,
+  token: string,
+): Promise<TicketOrder> {
+  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(
+    `/matches/${matchId}/orders`,
+    { method: "POST", body: { quantity }, token },
+  );
+  return envelope.data;
+}
+
+export async function fetchTicketOrder(
+  orderId: string,
+  token: string,
+): Promise<TicketOrderDetail> {
+  const envelope = await apiFetch<ApiEnvelope<TicketOrderDetail>>(
+    `/me/orders/${orderId}`,
+    { token },
+  );
+  return envelope.data;
+}
+
+export async function cancelTicketOrder(
+  orderId: string,
+  token: string,
+): Promise<void> {
+  await apiFetch<undefined>(`/me/orders/${orderId}/cancel`, {
+    method: "POST",
+    token,
   });
 }

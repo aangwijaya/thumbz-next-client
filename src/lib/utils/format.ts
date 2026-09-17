@@ -73,6 +73,19 @@ export function formatStage(stage: MatchStage): string {
     .join(" ");
 }
 
+export function formatRelativeTime(iso: string): string {
+  const time = new Date(iso).getTime();
+  if (Number.isNaN(time)) return "";
+  const seconds = Math.max(0, Math.floor((Date.now() - time) / 1000));
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return formatDate(iso);
+}
+
 export function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
