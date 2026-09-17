@@ -303,3 +303,66 @@ export interface MatchEvent {
   details: Record<string, unknown>;
   occurred_at: string;
 }
+
+export interface MatchComment {
+  id: string;
+  match_id: string;
+  user_id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+}
+
+export interface CommentsEnvelope {
+  data: MatchComment[];
+  meta: {
+    next_cursor: string | null;
+    total: number;
+  };
+}
+
+export interface TicketAvailability {
+  match_id: string;
+  venue_name: string;
+  venue_city: string | null;
+  price_usd: number;
+  quota_total: number;
+  quota_remaining: number;
+  sales_open_at: string | null;
+  sales_close_at: string | null;
+  on_sale: boolean;
+}
+
+export type TicketOrderStatus = "pending" | "paid" | "cancelled" | "expired" | "failed";
+
+export interface TicketPayment {
+  provider: string;
+  invoice_url: string | null;
+  payment_id: string | null;
+}
+
+export interface TicketOrder {
+  id: string;
+  match_id: string;
+  quantity: number;
+  unit_price_usd: number;
+  total_usd: number;
+  status: TicketOrderStatus;
+  expires_at: string | null;
+  created_at: string;
+  paid_at: string | null;
+  payment: TicketPayment | null;
+}
+
+export interface MatchTicket {
+  id: string;
+  match_id: string;
+  order_id: string;
+  code: string;
+  status: string;
+  issued_at: string;
+}
+
+export interface TicketOrderDetail extends TicketOrder {
+  tickets: MatchTicket[];
+}
