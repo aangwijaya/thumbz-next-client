@@ -1,1137 +1,447 @@
-# THUMBZ Design System
-
-> **Authoritative visual and UX specification for THUMBZ**
-
----
-
-## 1. Design Authority
-
-This document is the **single source of truth for the visual design and UX direction of THUMBZ**.
-
-Reference materials are available at:
-
-```text
-design/references/steep.md
-design/references/monad.md
-```
-
-These files are **reference materials only**.
-
-They are not independent THUMBZ design systems and must not be reproduced literally.
-
-### Design precedence
-
-When making visual or UX decisions, follow this hierarchy:
-
-1. THUMBZ-specific rules in this document
-2. Page-specific design composition defined in this document
-3. Component-specific rules defined in this document
-4. Referenced principles from `design/references/steep.md`
-5. Referenced principles from `design/references/monad.md`
-6. General design judgment
-
-If a reference conflicts with a THUMBZ rule, **THUMBZ rules always win**.
-
-If Steep and Monad conflict with each other, do not arbitrarily combine them. Follow the page or component composition defined in this document.
-
-Do not copy either reference design wholesale.
-
----
-
-# 2. Product Identity
-
-## Product
-
-**THUMBZ**
-
-THUMBZ is a premium Mobile Legends esports streaming and content platform.
-
-The product combines:
-
-* esports streaming
-* match discovery
-* tournament information
-* team profiles
-* player profiles
-* match statistics
-* esports analytics
-* replay and video content
-
-The primary user journey is:
-
-```text
-Discover
-   ↓
-Browse
-   ↓
-Find a match
-   ↓
-Watch
-   ↓
-Understand the match
-   ↓
-Explore statistics / teams / players
-```
-
----
-
-# 3. Visual Philosophy
-
-THUMBZ combines three visual languages:
-
-```text
-Editorial
-    +
-Technical
-    +
-Streaming
-```
-
-The final result should feel:
-
-* premium
-* modern
-* editorial
-* technical
-* confident
-* restrained
-* esports-focused
-* information-rich
-
-THUMBZ should feel like a **real commercial product**, not a portfolio dashboard or UI exercise.
-
----
-
-# 4. Design Languages
-
-## 4.1 Editorial
-
-### Reference
-
-```text
-design/references/steep.md
-```
-
-Steep is the primary reference for the editorial visual language.
-
-Use its principles rather than copying its visual identity.
-
-### Use Editorial language for
-
-* page headlines
-* section hierarchy
-* featured content
-* team profiles
-* player profiles
-* tournament presentation
-* content discovery
-* large content cards
-* editorial compositions
-* visual storytelling
-
-### Characteristics
-
-* strong typography hierarchy
-* intentional whitespace
-* large visual blocks
-* sophisticated card composition
-* editorial rhythm
-* asymmetric or varied layouts where appropriate
-* clear visual hierarchy
-
-### Avoid
-
-* blindly copying Steep's colors
-* blindly copying its typography
-* reproducing its layouts
-* reproducing its illustrations
-* making THUMBZ look like Steep
-
-Steep is a **design reference**, not a template.
-
----
-
-# 4.2 Technical
-
-### Reference
-
-```text
-design/references/monad.md
-```
-
-Monad is the primary reference for technical and data-oriented UI.
-
-### Use Technical language for
-
-* match metadata
-* statistics
-* timestamps
-* score information
-* performance metrics
-* player statistics
-* tournament statistics
-* technical labels
-* compact information
-* data visualization
-
-### Characteristics
-
-* precise alignment
-* compact metadata
-* monospace information where appropriate
-* thin borders
-* numerical hierarchy
-* technical labels
-* restrained UI
-* high information clarity
-
-### Avoid
-
-* turning the entire application into a dashboard
-* excessive monospace typography
-* excessive data density
-* copying Monad's visual identity
-* using technical styling for content that should feel editorial
-
----
-
-# 4.3 Streaming
-
-Streaming is a **THUMBZ-specific design language**.
-
-It does not derive directly from Steep or Monad.
-
-Use it for:
-
-* video player
-* live streams
-* live match cards
-* stream thumbnails
-* playback controls
-* watch actions
-* viewing states
-* live indicators
-
-### Characteristics
-
-* dark surfaces
-* cinematic imagery
-* strong contrast
-* immersive video areas
-* clear LIVE state
-* minimal visual distraction
-* strong media hierarchy
-
-The streaming experience should feel immersive without becoming a generic Netflix or Twitch clone.
-
----
-
-# 5. Design Composition
-
-Different pages use different combinations of the three design languages.
-
-The percentages below indicate **visual priority**, not literal CSS proportions.
-
----
-
-## Homepage
-
-```text
-Editorial     60%
-Streaming     30%
-Technical     10%
-```
-
-### Primary
-
-Editorial
-
-### Secondary
-
-Streaming
-
-### Tertiary
-
-Technical
-
-### Purpose
-
-The homepage is primarily a **content discovery experience**.
-
-It must not look like an analytics dashboard.
-
-### Sections
-
-1. Navigation
-2. Featured live match
-3. Live now
-4. Upcoming matches
-5. Featured tournaments
-6. Popular teams
-7. Latest content
-8. Continue watching
-
-### Featured Live Match
-
-Prioritize:
-
-* cinematic visual
-* teams
-* score
-* tournament
-* match state
-* LIVE indicator
-* viewer count
-* watch action
-
-### Match Cards
-
-Use:
-
-* editorial composition
-* compact technical metadata
-* minimal statistics
-* strong visual hierarchy
-
-### Avoid
-
-* dense tables
-* KPI dashboards
-* excessive charts
-* sidebar dashboard navigation
-
----
-
-# 6. Live Page
-
-```text
-Streaming     55%
-Editorial     30%
-Technical     15%
-```
-
-### Primary
-
-Streaming
-
-### Purpose
-
-Allow users to immediately discover what is currently live.
-
-### Content
-
-* live matches
-* stream thumbnails
-* team information
-* tournament
-* viewer count
-* match status
-* watch action
-
-### Visual Priority
-
-The stream thumbnail and LIVE state should dominate.
-
-Technical metadata should remain compact.
-
----
-
-# 7. Match Detail
-
-```text
-Streaming     55%
-Technical     25%
-Editorial     20%
-```
-
-### Primary
-
-Streaming
-
-### Secondary
-
-Technical
-
-### Tertiary
-
-Editorial
-
-This is the **core THUMBZ experience**.
-
-The user should immediately understand:
-
-* who is playing
-* current score
-* match status
-* tournament
-* where to watch
+# Todoist — Style Reference
+> Sunlit workspace with a paper planner — warm off-white desk, ink notes, one red pen
+
+**Theme:** light
+
+Source measurements are normalized; roles and recommendations are interpreted. Font summary lists are independent, not paired by position. HTML examples are reconstructions, not source components.
+
+Todoist reads as a sunlit workspace with a paper planner: a warm off-white canvas, near-black ink text, and a single vivid red-orange accent that punctuates actions without dominating the frame. Typography is humanist and quiet — Graphik carries display sizes with tight negative tracking while Inter handles UI chrome with slightly positive tracking — so hierarchy comes from size and weight rather than color volume. Product screenshots and phone mockups float above cream-tinted decorative waves, creating atmosphere that never crosses into illustration noise. Color is rationed as functional punctuation: brand orange for one action per view, blue for links, green for status, with the rest of the screen holding still in warm neutrals. Elevation stays whisper-quiet — a single 1px hairline shadow on cards, no heavy panels or decorative gradients.
+
+## Tokens — Colors
+
+| Name | Value | Token | Role |
+|------|-------|-------|------|
+| Ember Red | `#e34432` | `--color-ember-red` | Orange supporting accent for decorative details and low-frequency emphasis. Do not promote it to the primary CTA color |
+| Deep Ember | `#cf3520` | `--color-deep-ember` | Brand text emphasis, eyebrow labels, decorative iconography, secondary brand presence |
+| Cobalt Link | `#0f66ae` | `--color-cobalt-link` | Hyperlinks, app-internal priority labels, informational icons |
+| Ink | `#25221e` | `--color-ink` | Primary text, headings, dark icon strokes, dark surface fills |
+| Paper | `#fefdfc` | `--color-paper` | Page canvas, card surfaces, button text, elevated containers |
+| Cream | `#fff6f0` | `--color-cream` | Decorative section bands, warm-tinted background washes, footer |
+| Stone | `#d7d6d4` | `--color-stone` | Hairline borders, dividers, input borders, nav separators |
+| Pencil | `#6f6c69` | `--color-pencil` | Secondary body text, helper text, muted descriptions |
+| Graphite | `#94928f` | `--color-graphite` | Tertiary text, disabled icon strokes, low-emphasis labels |
+| Charcoal | `#4a4744` | `--color-charcoal` | Dark button hover/pressed state, inverted surface fills |
+| Teal Dusk | `#497d7e` | `--color-teal-dusk` | Accent stroke in decorative wave illustrations, secondary brand mark |
+| Mint Wash | `#f0f6df` | `--color-mint-wash` | Pale green decorative background wash, soft tinted band |
+| Sky Wash | `#dceaff` | `--color-sky-wash` | Pale blue decorative background wash, soft tinted band |
+| Forest | `#446c3d` | `--color-forest` | Green supporting accent for decorative details and low-frequency emphasis. Use as a supporting accent, not as a status color |
+
+## Tokens — Typography
+
+### Graphik — Display and heading family. Owns hero headlines, section titles, nav links, and large body copy. Tight negative letter-spacing (-0.005em to -0.01em) at sizes 38px+ creates a compressed, confident display feel — headlines feel weighted rather than airy. · `--font-graphik`
+- **Substitute:** Inter, Manrope, or Söhne
+- **Weights:** 400, 600, 700
+- **Sizes:** 16, 22, 38, 44, 55
+- **Line height:** 1.00, 1.15, 1.28
+- **Letter spacing:** -0.55px at 55px, -0.22px at 44px, -0.19px at 38px, -0.11px at 22px
+- **Role:** Display and heading family. Owns hero headlines, section titles, nav links, and large body copy. Tight negative letter-spacing (-0.005em to -0.01em) at sizes 38px+ creates a compressed, confident display feel — headlines feel weighted rather than airy.
+
+### Inter — UI and body family. Owns buttons, badges, inputs, form labels, secondary text, and inline UI. Slightly positive tracking (0.005em–0.025em) keeps small UI text crisp at 12–16px. Carries functional weight without competing with Graphik. · `--font-inter`
+- **Substitute:** system-ui or any modern geometric sans
+- **Weights:** 400, 475, 500, 600, 625, 700
+- **Sizes:** 12, 14, 15, 16, 17, 18, 19, 21
+- **Line height:** 1.00, 1.35, 1.40, 1.50, 1.60, 1.75
+- **Letter spacing:** 0.525px at 21px, 0.18px at 18px, 0.16px at 16px, 0.07px at 14px
+- **Role:** UI and body family. Owns buttons, badges, inputs, form labels, secondary text, and inline UI. Slightly positive tracking (0.005em–0.025em) keeps small UI text crisp at 12–16px. Carries functional weight without competing with Graphik.
+
+### Caecilia — Reserved for testimonial quotes. The serif cut and generous 1.8 line-height distinguish user voices from product copy without needing quotation marks. · `--font-caecilia`
+- **Substitute:** Lora or Source Serif Pro
+- **Weights:** 400
+- **Sizes:** 20
+- **Line height:** 1.80
+- **Letter spacing:** normal
+- **Role:** Reserved for testimonial quotes. The serif cut and generous 1.8 line-height distinguish user voices from product copy without needing quotation marks.
+
+### Shantell Sans — Handwritten accent for inline links inside announcement bars — introduces a human, informal voice inside otherwise neutral UI chrome. · `--font-shantell-sans`
+- **Substitute:** Caveat or Kalam
+- **Weights:** 400
+- **Sizes:** 19
+- **Line height:** 1.60
+- **Letter spacing:** 0.19px at 19px
+- **Role:** Handwritten accent for inline links inside announcement bars — introduces a human, informal voice inside otherwise neutral UI chrome.
+
+### Arial — Arial — detected in extracted data but not described by AI · `--font-arial`
+- **Weights:** 400
+- **Sizes:** 13px
+- **Line height:** 1.2
+- **Role:** Arial — detected in extracted data but not described by AI
+
+### Type Scale
+
+| Role | Family | Weight | Size | Line Height | Letter Spacing | Token |
+|------|--------|--------|------|-------------|----------------|-------|
+| caption | — | — | 12px | 1.5 | 0.14px | `--text-caption` |
+| body-sm | — | — | 14px | 1.5 | 0.07px | `--text-body-sm` |
+| body | — | — | 16px | 1.5 | 0.16px | `--text-body` |
+| body-lg | — | — | 18px | 1.5 | 0.18px | `--text-body-lg` |
+| subheading | — | — | 21px | 1.5 | 0.21px | `--text-subheading` |
+| heading | — | — | 38px | 1.28 | -0.19px | `--text-heading` |
+| heading-lg | — | — | 44px | 1.15 | -0.22px | `--text-heading-lg` |
+| display | — | — | 55px | 1 | -0.55px | `--text-display` |
+
+## Tokens — Spacing & Shapes
+
+**Base unit:** 4px
+
+**Density:** comfortable
+
+### Spacing Scale
+
+| Name | Value | Token |
+|------|-------|-------|
+| 4 | 4px | `--spacing-4` |
+| 8 | 8px | `--spacing-8` |
+| 12 | 12px | `--spacing-12` |
+| 16 | 16px | `--spacing-16` |
+| 20 | 20px | `--spacing-20` |
+| 24 | 24px | `--spacing-24` |
+| 32 | 32px | `--spacing-32` |
+| 48 | 48px | `--spacing-48` |
+| 64 | 64px | `--spacing-64` |
+| 128 | 128px | `--spacing-128` |
+| 192 | 192px | `--spacing-192` |
+
+### Border Radius
+
+| Element | Value |
+|---------|-------|
+| nav | 8px |
+| cards | 8px |
+| badges | 8px |
+| images | 15px |
+| inputs | 8px |
+| buttons | 8px |
+
+### Shadows
+
+| Name | Value | Token |
+|------|-------|-------|
+| subtle | `rgba(37, 34, 30, 0.04) 0px 1px 0px 0px` | `--shadow-subtle` |
+| lg | `rgba(37, 34, 30, 0.07) 0px 14px 19px -9px, rgba(37, 34, 3...` | `--shadow-lg` |
 
 ### Layout
 
-```text
-Match Header
-     ↓
-Video Player
-     ↓
-Match Navigation
-     ↓
-Overview / Statistics / Roster / History
-     ↓
-Related Matches
-```
+- **Page max-width:** 1200px
+- **Section gap:** 48-80px
+- **Card padding:** 16-24px
+- **Element gap:** 16px
 
-### Match Header
+## Components
 
-Display:
+### Primary Action Button
+**Role:** Single dominant CTA per view (Start for free, confirm, get started)
 
-* Team A
-* Team B
-* score
-* match status
-* tournament
-* stage
-* game number
-* scheduled time when applicable
+Filled #e34432 background, #fefdfc text in Inter 600 at 16px, 8px border-radius, 12px 24px padding, two-layer warm shadow on hover. Letter-spacing 0.16px. One per view, never repeated.
 
-### Video Player
+### Ghost Text Link
+**Role:** Secondary navigation and inline actions (Log in, Made For, Resources)
 
-The player should dominate the page.
+Transparent background, #25221 text in Inter 500 at 15–16px, no border, 8px padding, no shadow. Becomes #cf3520 on hover to echo the brand accent without the weight of a filled button.
 
-The player is a THUMBZ-specific component.
+### Top Navigation Bar
+**Role:** Sticky-style site header
 
-Do not copy Steep or Monad for the player.
+#fefdfc background, 16px vertical padding, Graphik 600 at 16px for nav links, brand logo at left (red square + ink wordmark), primary CTA at far right. 8px radius on interactive elements. Optional hairline #d7d6d4 bottom border on scroll.
 
-### Statistics
+### Announcement Banner
+**Role:** Dismissible top-of-page message
 
-Use Monad-inspired technical principles for:
+Cream-tinted #fff6f0 background, centered text in Inter 400 at 14–15px with an inline Shantell Sans 19px link in #cf3520, close icon at far right in #94928f. Full-bleed width, 1px #d7d6d4 bottom border.
 
-* numerical hierarchy
-* compact labels
-* alignment
-* metadata
-* performance metrics
+### Product Showcase Card
+**Role:** Container for desktop and mobile app screenshots
 
-THUMBZ design rules always override Monad.
+#fefdfc surface, 8px border-radius, hairline shadow rgba(37,34,30,0.04) 0 1px 0, 0–4px internal padding around the screenshot. Floats above a cream or pale-green wave background. Optional 15px radius on the image mask itself for desktop variants.
 
----
+### Eyebrow Label
+**Role:** Small caps-style label above a section heading
 
-# 8. Tournament Pages
+Inter 600 at 12px, #cf3520 color, 0.14px letter-spacing, 0 0 8px 0 margin to heading. Used as a quiet signal of section topic before the dark heading appears.
 
-```text
-Editorial     45%
-Technical     40%
-Streaming     15%
-```
+### Voice Confirm Button
+**Role:** Round action button inside mobile and voice input UIs
 
-## Tournament List
+Filled #e34432 circle, white checkmark icon, no text label, 40–48px diameter, 8px radius (visually a full pill at this size). Sits in the bottom-right of a phone frame to confirm voice input.
 
-Focus on:
+### Mobile Preview Frame
+**Role:** Phone-shaped mockup for app screenshots
 
-* tournament identity
-* status
-* dates
-* region
-* prize information where available
-* featured matches
+Rounded rectangle (15px radius on the image, larger on the device frame) containing a full app screenshot. Drop shadow matches the primary button shadow stack for consistency. No visible bezel color — the frame is white with a 1px #d7d6d4 stroke.
 
-## Tournament Detail
+### Testimonial Block
+**Role:** Centered user quote with attribution
 
-Sections may include:
+Caecilia 400 at 20px, #25221, line-height 1.80, centered. Surrounded by generous 64px vertical padding. No card surface — sits directly on canvas. Optional yellow/gold star decorative element in the surrounding band.
 
-* overview
-* schedule
-* standings
-* bracket
-* teams
-* results
-* stages
-* related streams
+### Form Input
+**Role:** Text entry field
 
-### Design
+#fefdfc background, 1px #d7d6d4 border, 8px radius, 12px 16px padding, Inter 400 at 14–15px, #25221 text, #94928f placeholder. Focus state: 1px #cf3520 border with no ring glow.
 
-Use editorial hierarchy for tournament identity.
+### Status Badge
+**Role:** Small pill for success, priority, or category labels
 
-Use technical language for:
+Pale tinted background (e.g. #f0f6df for success, #dceaff for info), #446c3d or #0f66ae text in Inter 600 at 12px, 8px radius, 4px 10px padding. Never uses a saturated background — always a pale wash with chromatic text.
 
-* standings
-* statistics
-* schedules
-* match results
-* rankings
+### Decorative Wave Background
+**Role:** Flowing horizontal bands beneath hero and feature sections
 
-Use streaming language for playable/live content.
+Layered translucent strokes in #497d7, #4c7a45, and #e34432 over a cream #fff6f0 or pale-green #f0f6df base. 1–2px stroke weight, no fill, sits behind product cards. Decorative only — never carries content.
 
----
-
-# 9. Team Pages
-
-```text
-Editorial     40%
-Technical     35%
-Streaming     25%
-```
-
-### Primary Focus
-
-Team identity.
-
-Display:
-
-* team logo
-* team name
-* region
-* roster
-* current form
-* recent matches
-* upcoming matches
-* statistics
-* tournament participation
-
-### Editorial
-
-Use for:
-
-* team identity
-* hero/profile area
-* typography
-* visual hierarchy
-
-### Technical
-
-Use for:
-
-* win rate
-* match statistics
-* performance metrics
-* rankings
-
-### Streaming
-
-Use for:
-
-* recent match thumbnails
-* live match
-* watch actions
-
----
-
-# 10. Player Pages
-
-```text
-Editorial     45%
-Technical     55%
-Streaming     0–10%
-```
-
-Player pages are more information-oriented than team pages.
-
-Display:
-
-* player identity
-* role
-* current team
-* statistics
-* recent matches
-* tournament history
-
-Use technical language for numerical information.
-
-Use editorial language for player identity and content hierarchy.
-
-Streaming should only appear when there is relevant playable content.
-
----
-
-# 11. Search
-
-```text
-Technical     40%
-Editorial     40%
-Streaming     20%
-```
-
-Search must support:
-
-* matches
-* teams
-* players
-* tournaments
-* content
-
-Example:
-
-```text
-/search?q=onic&type=team
-```
-
-Search state should be URL-driven and shareable.
-
-### Results
-
-Use editorial cards for major entities.
-
-Use technical metadata for:
-
-* result type
-* status
-* date
-* statistics
-* match information
-
----
-
-# 12. Navigation
-
-The navigation should be simple and product-oriented.
-
-Primary navigation:
-
-```text
-THUMBZ
-
-Live
-Matches
-Tournaments
-Teams
-Players
-
-Search
-```
-
-Authenticated users may have:
-
-```text
-Profile
-Favorites
-Watch History
-```
-
-### Avoid
-
-* dashboard sidebar as the primary navigation
-* excessive nested menus
-* unnecessary navigation items
-
-The product should feel like a streaming/content platform rather than an enterprise dashboard.
-
----
-
-# 13. Color System
-
-THUMBZ should use a dark-first visual system.
-
-Suggested foundation:
-
-```text
-Background
-#0A0A0A
-
-Surface
-#111111
-
-Surface Elevated
-#181818
-
-Text Primary
-#F5F5F5
-
-Text Secondary
-#A1A1AA
-
-Border
-#27272A
-```
-
-These values are starting points, not immutable requirements.
-
----
-
-## Semantic Colors
-
-### Live
-
-Use a clear warm/red semantic indicator.
-
-```text
-LIVE
-●
-```
-
-LIVE should be immediately recognizable.
-
-### Success
-
-For positive states such as:
-
-* victory
-* successful operation
-* positive performance
-
-### Warning
-
-For:
-
-* upcoming states
-* delayed content
-* degraded conditions
-
-### Error
-
-For:
-
-* playback failures
-* API failures
-* unavailable content
-
-Semantic colors should be restrained.
-
-Do not turn the entire interface into a neon gaming aesthetic.
-
----
-
-# 14. Team Colors
-
-Team colors are **contextual**, not THUMBZ brand colors.
-
-For example:
-
-```text
-ONIC → team-specific accent
-RRQ  → team-specific accent
-EVOS → team-specific accent
-```
-
-Team colors may be used for:
-
-* subtle accents
-* indicators
-* team identity
-* charts
-* contextual highlights
-
-Do not allow team colors to override the THUMBZ design system.
-
----
-
-# 15. Typography
-
-THUMBZ should use three typographic roles.
-
-## Display
-
-Editorial / serif-oriented typography.
-
-Use for:
-
-* major headlines
-* featured content
-* page titles
-* editorial statements
-
-The exact font should be selected during implementation based on availability, performance, licensing, and overall visual fit.
-
----
-
-## Body
-
-Modern sans-serif.
-
-Use for:
-
-* descriptions
-* navigation
-* buttons
-* normal UI content
-* supporting text
-
----
-
-## Technical
-
-Monospace.
-
-Use selectively for:
-
-* timestamps
-* scores
-* match metadata
-* statistics
-* technical labels
-* numerical information
-
-Do not use monospace for the entire interface.
-
----
-
-# 16. Spacing
-
-Use a consistent spacing scale.
-
-Prioritize:
-
-* generous spacing between major sections
-* tighter spacing inside technical components
-* clear separation between content groups
-* consistent card padding
-
-Editorial areas should breathe.
-
-Technical areas may be denser.
-
----
-
-# 17. Cards
-
-Cards are important THUMBZ primitives.
-
-Cards should not all have identical visual treatment.
-
-Use different card compositions for:
-
-* matches
-* streams
-* teams
-* players
-* tournaments
-* content
-
-### General principles
-
-* clear hierarchy
-* strong image/content relationship
-* restrained borders
-* intentional spacing
-* meaningful hover states
-* avoid excessive shadows
-
-Do not make every element a card.
-
----
-
-# 18. Data Visualization
-
-Charts should be used when they communicate meaningful information.
-
-Good candidates:
-
-* team performance
-* player performance
-* win rate
-* historical results
-* tournament progress
-
-Avoid charts merely to make the interface look technical.
-
-Prefer:
-
-* simple
-* readable
-* contextual
-* visually integrated
-
-Do not create a dashboard full of arbitrary graphs.
-
----
-
-# 19. Video Player
-
-The video player is a **THUMBZ-specific component**.
-
-Design priorities:
-
-1. Video
-2. Playback controls
-3. Live state
-4. Match context
-5. Secondary controls
-
-The player should support a future Shaka Player implementation.
-
-The design must accommodate:
-
-* live playback
-* replay
-* loading
-* buffering
-* playback errors
-* quality selection
-* fullscreen
-* picture-in-picture where supported
-* unavailable streams
-
-The visual design must remain usable without relying on JavaScript-rendered decorative elements.
-
----
-
-# 20. Live State
-
-LIVE is a first-class product state.
-
-A live match should clearly communicate:
-
-```text
-● LIVE
-24.8K WATCHING
-```
-
-Live indicators should be:
-
-* visible
-* consistent
-* restrained
-* semantically meaningful
-
-Do not overuse animated flashing effects.
-
----
-
-# 21. Loading States
-
-Every data-driven page should have intentional loading states.
-
-Use:
-
-* skeletons
-* reserved media dimensions
-* stable layouts
-
-Avoid:
-
-* layout jumps
-* blank screens
-* arbitrary spinners everywhere
-
----
-
-# 22. Empty States
-
-Empty states should explain:
-
-* what is missing
-* why it may be missing
-* what the user can do next
-
-Avoid generic:
-
-```text
-No data found.
-```
-
-when more useful context is available.
-
----
-
-# 23. Error States
-
-Errors should be understandable to users.
-
-Do not expose:
-
-* stack traces
-* raw API responses
-* technical error objects
-
-Provide appropriate recovery actions such as:
-
-* retry
-* go back
-* return home
-* try another match
-
----
-
-# 24. Responsive Design
-
-THUMBZ must support:
-
-* desktop
-* laptop
-* tablet
-* mobile
-
-Responsive design must be intentional.
-
-Do not simply shrink desktop layouts.
-
----
-
-## Mobile Priorities
-
-Mobile users should quickly access:
-
-1. Live
-2. Matches
-3. Video
-4. Match information
-
-Avoid excessive desktop-style density on mobile.
-
-Statistics may become:
-
-```text
-desktop:
-multi-column
-
-mobile:
-stacked sections
-```
-
----
-
-# 25. Motion
-
-Motion should communicate state and interaction.
-
-Good uses:
-
-* card hover
-* page transitions
-* live state
-* loading
-* expanding information
-* player controls
-
-Avoid:
-
-* excessive animations
-* distracting background motion
-* constant pulsing
-* unnecessary parallax
-
-Motion should never interfere with content consumption.
-
-Respect reduced-motion preferences.
-
----
-
-# 26. Accessibility
-
-Accessibility is part of the visual system.
-
-Requirements:
-
-* semantic HTML
-* keyboard navigation
-* visible focus states
-* accessible buttons
-* accessible links
-* proper labels
-* sufficient contrast
-* appropriate ARIA usage
-* reduced motion support
-
-Do not use clickable `<div>` elements when a semantic element is appropriate.
-
----
-
-# 27. Component Design Principles
-
-Components should have a clear visual responsibility.
-
-Potential primitives:
-
-```text
-MatchCard
-LiveMatchCard
-StreamCard
-TeamCard
-PlayerCard
-TournamentCard
-SectionHeader
-StatusBadge
-ScoreDisplay
-StatCard
-StatTable
-VideoPlayer
-```
-
-Do not create components merely to split code into arbitrary files.
-
-A component should exist when it provides:
-
-* reuse
-* meaningful visual responsibility
-* meaningful behavior
-* domain clarity
-
----
-
-# 28. Design Consistency Rules
-
-The following rules are mandatory:
+## Do's and Don'ts
 
 ### Do
+- Reserve #e34432 for one primary action per view; never repeat it as a link or icon color in the same viewport.
+- Set body text to #25221 on #fefdfc — the 15.6:1 contrast ratio supports AAA at 16px and keeps the canvas feeling warm rather than clinical.
+- Apply 8px border-radius to every card, button, badge, and input; reserve 15px exclusively for image masks and desktop product frames.
+- Use Graphik for headlines 22px and above with letter-spacing between -0.11px and -0.55px; switch to Inter for anything 21px or smaller.
+- Space sections at 48–80px vertically; use 16–24px internal padding for cards and 12–16px for compact UI rows.
+- Place product screenshots on #fff6f0 or #f0f6df cream/green washes, never on plain white — the warm tint is what makes the product feel sunlit rather than sterile.
+- Keep elevation to a single 1px hairline shadow on cards; reach for the two-layer button shadow only on the most important action.
 
-* preserve the THUMBZ visual hierarchy
-* use the assigned design language for each page
-* reuse established components
-* maintain consistent spacing
-* maintain consistent semantic states
-* use reference documents intentionally
-* prioritize content hierarchy
+### Don't
+- Don't paint large surfaces with #e34432 — the red is a punctuation mark, not a fill color.
+- Don't use #0f66ae for body copy or non-link text; reserve cobalt for hyperlinks and info-level app labels.
+- Don't stack more than one primary action button on a single view; secondary actions must use the ghost link style.
+- Don't mix Graphik and Inter at the same size and role — pick one family per size band and hold the line.
+- Don't use shadows heavier than rgba(37,34,30,0.04) 0 1px 0 on cards; anything stronger breaks the whisper-shadow philosophy.
+- Don't apply radii larger than 8px to UI controls — 15px is reserved for image masks and would make a button look like a chip.
+- Don't use pure #000000 for body text; the warm #25221 is part of the paper-planner atmosphere and reads as ink, not screen.
 
-### Do not
+## Surfaces
 
-* randomly mix Steep and Monad characteristics
-* copy either reference wholesale
-* introduce unrelated UI styles
-* use default shadcn styling without adaptation
-* create a generic SaaS dashboard
-* create a generic gaming/neon interface
-* create a Twitch clone
-* create a Netflix clone
+| Level | Name | Value | Purpose |
+|-------|------|-------|---------|
+| 0 | Paper Canvas | `#fefdfc` | Default page background for hero, content, and neutral sections |
+| 1 | Cream Wash | `#fff6f0` | Decorative warm band behind product showcases and footer |
+| 2 | Tinted Wave | `#f0f6df` | Pale green decorative wash inside flowing wave illustrations |
+| 3 | Card Surface | `#fefdfc` | Product screenshot cards and elevated UI containers |
 
----
+## Elevation
 
-# 29. Reference Mapping
+- **Card:** `rgba(37, 34, 30, 0.04) 0px 1px 0px 0px`
+- **Primary Action Button:** `rgba(37, 34, 30, 0.07) 0px 14px 19px -9px, rgba(37, 34, 30, 0.18) 0px 10px 48px 0px`
 
-| Area         | Primary   | Secondary | Reference     |
-| ------------ | --------- | --------- | ------------- |
-| Homepage     | Editorial | Streaming | Steep         |
-| Live         | Streaming | Editorial | THUMBZ        |
-| Match        | Streaming | Technical | Monad         |
-| Tournament   | Editorial | Technical | Steep + Monad |
-| Team         | Editorial | Technical | Steep + Monad |
-| Player       | Technical | Editorial | Monad + Steep |
-| Search       | Editorial | Technical | Steep + Monad |
-| Video Player | Streaming | —         | THUMBZ        |
-| Statistics   | Technical | Editorial | Monad         |
-| Navigation   | Editorial | Streaming | THUMBZ        |
+## Imagery
 
----
+Imagery is product-first: the hero is built around an in-app desktop screenshot of the Today view, and subsequent sections rotate through mobile phone mockups showing the app on iOS and Android. All screenshots are tightly cropped, floating on cream or pale-green wave backgrounds, never on stark white. Decorative elements are limited to flowing wave illustrations in pale green, blue, and peach — drawn as thin 1–2px strokes with no fill — and occasional gold star/sparkle accents in the testimonial band. There is no photography, no lifestyle imagery, no human faces. Iconography is line-based, monochrome in #25221 or #6f6c69, with simple geometric forms (checkmarks, arrows, calendar grids, priority flags). The visual density is low: text and product UI dominate, with imagery serving as evidence rather than decoration.
 
-# 30. Final Design Principle
+## Layout
 
-THUMBZ should not look like a collection of borrowed design systems.
+Layout is max-width contained at 1200px, centered, with full-bleed decorative wave bands that extend past the container. The hero follows a two-column pattern: left text column (~45% width) carrying eyebrow label, display headline, body paragraph, and primary CTA; right column carrying a single product screenshot or phone mockup. Subsequent feature sections alternate the column direction (text-left/image-right then text-right/image-left) to create rhythm without mirroring. The testimonial band breaks the column structure with centered text and generous 64–80px vertical padding. Navigation sits as a single horizontal bar at the top with brand left, links center, CTA right. Section transitions are seamless — wave backgrounds blur the boundary between bands rather than using hard dividers. Vertical spacing between major sections runs 64–96px; spacing between elements within a section is 16–24px. The overall density is comfortable: one focused idea per screen, never a grid of competing blocks.
 
-The references exist to provide design vocabulary.
+## Agent Prompt Guide
 
-The final product must have its own identity.
+**Quick Color Reference**
+- Text: #25221e on #fefdfc
+- Background: #fefdfc (canvas), #fff6f0 (decorative band)
+- Border: #d7d6d4
+- Accent: #cf3520 (eyebrow/decorative), #0f66ae (link)
+- primary action: no distinct CTA color
 
-The intended visual result is:
+**Example Component Prompts**
+No distinct primary action color was observed; use the extracted neutral button treatments instead of inventing a filled CTA color.
+2. Build a hero headline: Graphik 700 at 55px, #25221e color, letter-spacing -0.55px, line-height 1.0. Add an eyebrow label above it in Inter 600 at 12px, #cf3520, letter-spacing 0.14px, with 8px margin to the headline.
+3. Create a product showcase card: #fefdfc surface, 8px radius, hairline shadow rgba(37,34,30,0.04) 0 1px 0, 0–4px internal padding around a desktop app screenshot. Sit it on a #fff6f0 wave background that extends full-bleed.
+5. Create a testimonial block: Caecilia 400 at 20px, #25221e text, line-height 1.80, centered on the canvas with 64px vertical padding above and below. No card surface — the text sits directly on #fefdfc with a small gold star decoration in the surrounding band.
 
-```text
-              THUMBZ
-                 │
-       ┌─────────┼─────────┐
-       │         │         │
-   Editorial  Technical  Streaming
-       │         │         │
-     Steep      Monad      THUMBZ
-   reference   reference   original
-       │         │         │
-       └─────────┼─────────┘
-                 │
-                 ▼
-          ONE CONSISTENT UI
+## Font Pairing Logic
+
+Graphik and Inter are not competing families — they are split by role. Graphik owns the human voice: headlines, large body paragraphs, the wordmark, and the announcement banner's main message. Its slightly condensed letterforms and tight negative tracking make it read as deliberate and editorial. Inter owns the machine voice: buttons, inputs, badges, nav links, form labels, captions — everything that is functional rather than expressive. Its wider proportions and positive tracking keep it legible at 12–16px. Caecilia and Shantell Sans are accent voices only: Caecilia for user testimonials (serif marks them as quoted, not authored), Shantell Sans for inline links inside the announcement bar (handwritten marks them as friendly, not transactional). Never let Inter appear at 38px or above — that is Graphik's territory.
+
+## Decorative Wave System
+
+The flowing wave backgrounds are a signature element. They are built from 3–5 layered SVG paths drawn as thin strokes (1–2px) in #497d7e, #4c7a45, and #e34432, sitting over a #fff6f0 or #f0f6df fill. Paths always flow left-to-right, never loop or close, and never carry text. They are decorative only — content always sits in front of them in a flat #fefdfc card. The waves blur the boundary between sections rather than acting as dividers, giving the page its continuous, paper-planner feel. Reuse this system on any section that needs atmospheric weight without adding a new color or illustration.
+
+## Similar Brands
+
+- **Notion** — Same warm off-white canvas, restrained single-accent philosophy, and humanist sans for headlines — both treat color as functional punctuation rather than decoration.
+- **Things 3** — Same product-screenshot-forward hero pattern, quiet neutral palette with one warm accent, and generous whitespace around mobile mockups.
+- **Any.do** — Productivity category with the same warm-paper aesthetic, red-orange CTA accent, and product-UI-centered hero composition.
+- **Linear** — Same single-accent discipline (Linear uses indigo, Todoist uses red) with a whisper-shadow elevation system and tight typographic hierarchy.
+- **Calendly** — Same warm-canvas + single-accent approach, Graphik/Inter-adjacent type pairing, and product-screenshot heroes that float on tinted backgrounds.
+
+## Quick Start
+
+### CSS Custom Properties
+
+```css
+:root {
+  /* Colors */
+  --color-ember-red: #e34432;
+  --color-deep-ember: #cf3520;
+  --color-cobalt-link: #0f66ae;
+  --color-ink: #25221e;
+  --color-paper: #fefdfc;
+  --color-cream: #fff6f0;
+  --color-stone: #d7d6d4;
+  --color-pencil: #6f6c69;
+  --color-graphite: #94928f;
+  --color-charcoal: #4a4744;
+  --color-teal-dusk: #497d7e;
+  --color-mint-wash: #f0f6df;
+  --color-sky-wash: #dceaff;
+  --color-forest: #446c3d;
+
+  /* Typography — Font Families */
+  --font-graphik: 'Graphik', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-caecilia: 'Caecilia', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-shantell-sans: 'Shantell Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-arial: 'Arial', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: 0.14px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: 0.07px;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --tracking-body: 0.16px;
+  --text-body-lg: 18px;
+  --leading-body-lg: 1.5;
+  --tracking-body-lg: 0.18px;
+  --text-subheading: 21px;
+  --leading-subheading: 1.5;
+  --tracking-subheading: 0.21px;
+  --text-heading: 38px;
+  --leading-heading: 1.28;
+  --tracking-heading: -0.19px;
+  --text-heading-lg: 44px;
+  --leading-heading-lg: 1.15;
+  --tracking-heading-lg: -0.22px;
+  --text-display: 55px;
+  --leading-display: 1;
+  --tracking-display: -0.55px;
+
+  /* Typography — Weights */
+  --font-weight-regular: 400;
+  --font-weight-w475: 475;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-w625: 625;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-unit: 4px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-128: 128px;
+  --spacing-192: 192px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 48-80px;
+  --card-padding: 16-24px;
+  --element-gap: 16px;
+
+  /* Border Radius */
+  --radius-sm: 2.5px;
+  --radius-lg: 8px;
+  --radius-xl: 15px;
+
+  /* Named Radii */
+  --radius-nav: 8px;
+  --radius-cards: 8px;
+  --radius-badges: 8px;
+  --radius-images: 15px;
+  --radius-inputs: 8px;
+  --radius-buttons: 8px;
+
+  /* Shadows */
+  --shadow-subtle: rgba(37, 34, 30, 0.04) 0px 1px 0px 0px;
+  --shadow-lg: rgba(37, 34, 30, 0.07) 0px 14px 19px -9px, rgba(37, 34, 30, 0.18) 0px 10px 48px 0px;
+
+  /* Surfaces */
+  --surface-paper-canvas: #fefdfc;
+  --surface-cream-wash: #fff6f0;
+  --surface-tinted-wave: #f0f6df;
+  --surface-card-surface: #fefdfc;
+}
 ```
 
-The goal is:
+### Tailwind v4
 
-> **Editorial sophistication + technical credibility + immersive esports streaming.**
+```css
+@theme {
+  /* Colors */
+  --color-ember-red: #e34432;
+  --color-deep-ember: #cf3520;
+  --color-cobalt-link: #0f66ae;
+  --color-ink: #25221e;
+  --color-paper: #fefdfc;
+  --color-cream: #fff6f0;
+  --color-stone: #d7d6d4;
+  --color-pencil: #6f6c69;
+  --color-graphite: #94928f;
+  --color-charcoal: #4a4744;
+  --color-teal-dusk: #497d7e;
+  --color-mint-wash: #f0f6df;
+  --color-sky-wash: #dceaff;
+  --color-forest: #446c3d;
 
-Not:
+  /* Typography */
+  --font-graphik: 'Graphik', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-caecilia: 'Caecilia', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-shantell-sans: 'Shantell Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-arial: 'Arial', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-> Steep + Monad pasted together.
+  /* Typography — Scale */
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: 0.14px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: 0.07px;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --tracking-body: 0.16px;
+  --text-body-lg: 18px;
+  --leading-body-lg: 1.5;
+  --tracking-body-lg: 0.18px;
+  --text-subheading: 21px;
+  --leading-subheading: 1.5;
+  --tracking-subheading: 0.21px;
+  --text-heading: 38px;
+  --leading-heading: 1.28;
+  --tracking-heading: -0.19px;
+  --text-heading-lg: 44px;
+  --leading-heading-lg: 1.15;
+  --tracking-heading-lg: -0.22px;
+  --text-display: 55px;
+  --leading-display: 1;
+  --tracking-display: -0.55px;
 
-THUMBZ must ultimately feel like one coherent product.
+  /* Spacing */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-128: 128px;
+  --spacing-192: 192px;
+
+  /* Border Radius */
+  --radius-sm: 2.5px;
+  --radius-lg: 8px;
+  --radius-xl: 15px;
+
+  /* Shadows */
+  --shadow-subtle: rgba(37, 34, 30, 0.04) 0px 1px 0px 0px;
+  --shadow-lg: rgba(37, 34, 30, 0.07) 0px 14px 19px -9px, rgba(37, 34, 30, 0.18) 0px 10px 48px 0px;
+}
+```
