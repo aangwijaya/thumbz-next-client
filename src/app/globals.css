@@ -1,6 +1,92 @@
 @import "tailwindcss";
 
 @theme {
+  /*
+   * Design system tokens — design/design.md (Todoist paper style).
+   * Spacing is intentionally NOT redefined: Tailwind's 4px scale already
+   * matches the design's base unit, and named --spacing-* keys would
+   * override utilities such as p-8 for the whole app.
+   */
+  --color-ember-red: #e34432;
+  --color-deep-ember: #cf3520;
+  --color-cobalt-link: #0f66ae;
+  --color-ink: #25221e;
+  --color-paper: #fefdfc;
+  --color-cream: #fff6f0;
+  --color-stone: #d7d6d4;
+  --color-pencil: #6f6c69;
+  --color-graphite: #94928f;
+  --color-charcoal: #4a4744;
+  --color-teal-dusk: #497d7e;
+  --color-mint-wash: #f0f6df;
+  --color-sky-wash: #dceaff;
+  --color-forest: #446c3d;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.14px;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: 0.07px;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: 0.16px;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: 0.18px;
+  --text-subheading: 21px;
+  --text-subheading--line-height: 1.5;
+  --text-subheading--letter-spacing: 0.21px;
+  --text-heading: 38px;
+  --text-heading--line-height: 1.28;
+  --text-heading--letter-spacing: -0.19px;
+  --text-heading-lg: 44px;
+  --text-heading-lg--line-height: 1.15;
+  --text-heading-lg--letter-spacing: -0.22px;
+  --text-display: 55px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.55px;
+
+  --font-graphik: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-shantell: var(--font-shantell-sans), ui-rounded, cursive;
+
+  /* Cards, buttons, badges and inputs use Tailwind's rounded-lg (8px). */
+  --radius-image: 15px;
+
+  --shadow-subtle: 0 1px 0 0 rgb(37 34 30 / 0.04);
+  --shadow-button:
+    0 14px 19px -9px rgb(37 34 30 / 0.07), 0 10px 48px 0 rgb(37 34 30 / 0.18);
+
+  --animate-rise: rise 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  --animate-msg: msg 350ms ease-out both;
+
+  @keyframes msg {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  --animate-wave-reveal: wave-reveal 1800ms cubic-bezier(0.22, 0.7, 0.2, 1) both;
+
+  @keyframes wave-reveal {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  /* Legacy palette — pages not yet migrated to design/design.md still use it. */
   --color-background: #0a0a0a;
   --color-surface: #111111;
   --color-surface-elevated: #181818;
@@ -41,8 +127,6 @@
   --color-gold: #ecda98;
   --color-crimson: #f37a0a;
   --color-off-black: #242424;
-  --color-ink: #000000;
-  --color-graphite: #4e4d4d;
   --color-smoke: #797776;
   --color-ash: #cecac8;
 
