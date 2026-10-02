@@ -37,3 +37,21 @@ export async function getAccessToken(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
   return data?.session?.access_token ?? null;
 }
+
+// First letter of the signed-in user's name (or email) for the header avatar.
+// Null when signed out. Display only, never used for authorization: the token
+// claims are read without verifying them, the middleware validates the session.
+export async function getUserInitial(): Promise<string | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+
+  let claims: { email?: string; user_metadata?: { full_name?: string; name?: string } } = {};
+  try {
+    claims = JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString());
+  } catch {
+    // unreadable token: fall back to a generic initial
+  }
+
+  const name = claims?.user_metadata?.full_name ?? claims?.user_metadata?.name ?? claims?.email ?? "";
+  return name.trim().charAt(0).toUpperCase() || "U";
+}

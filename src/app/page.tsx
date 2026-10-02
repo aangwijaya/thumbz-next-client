@@ -1,45 +1,46 @@
-import { MatchCard } from "@/components/cards/MatchCard";
-import { TeamCard } from "@/components/cards/TeamCard";
-import { TournamentCard } from "@/components/cards/TournamentCard";
-import { VideoCard } from "@/components/cards/VideoCard";
-import { LiveSection } from "@/components/home/LiveSection";
-import { UpcomingSchedule } from "@/components/home/UpcomingSchedule";
-import { Container } from "@/components/ui/Container";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { headers } from "next/headers";
+
+import { ContinueWatching } from "@/components/home/ContinueWatching";
+import { FollowProvider } from "@/components/home/FollowProvider";
+import { Hero } from "@/components/home/Hero";
+import { JoinCta } from "@/components/home/JoinCta";
+import { LiveNow } from "@/components/home/LiveNow";
+import { MatchCenter } from "@/components/home/MatchCenter";
+import { MatchLanguageProvider } from "@/components/home/MatchLanguage";
+import { Replays } from "@/components/home/Replays";
+import { Schedule } from "@/components/home/Schedule";
+import { Teams } from "@/components/home/Teams";
+import { Tournaments } from "@/components/home/Tournaments";
+import { YourTeams } from "@/components/home/YourTeams";
 import { apiFetch } from "@/lib/api/client";
-import type { ApiEnvelope, HomePayload, MatchSummary } from "@/lib/api/types";
+import { getHome } from "@/lib/api/home";
+import type { ApiEnvelope, Favorite, MatchSummary, TeamSummary } from "@/lib/api/types";
 import { getAccessToken } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-interface HomeSectionProps {
-  title: string;
-  viewAllHref?: string;
-  gridClass?: string;
-  className?: string;
-  children: React.ReactNode;
-}
-
-function HomeSection({ title, viewAllHref, gridClass, className = "", children }: HomeSectionProps) {
-  return (
-    <section className={`flex flex-col gap-6 sm:gap-8 ${className}`}>
-      <SectionHeader title={title} viewAllHref={viewAllHref} />
-      {gridClass ? <div className={gridClass}>{children}</div> : children}
-    </section>
-  );
-}
-
-async function fetchHome(): Promise<HomePayload> {
-  const token = await getAccessToken();
-  const response = await apiFetch<ApiEnvelope<HomePayload>>("/home", {
-    token: token ?? undefined,
-    cache: "no-store",
-  });
-  return response?.data;
+// The visitor's followed teams. The home page still renders without them.
+async function fetchFollowedTeams(token: string | null): Promise<TeamSummary[]> {
+  if (!token) return [];
+  try {
+    const response = await apiFetch<ApiEnvelope<Favorite[]>>("/me/favorites", {
+      token,
+      cache: "no-store",
+    });
+    return (response?.data ?? [])
+      .filter((favorite) => favorite?.entity_type === "team")
+      .map((favorite) => favorite.entity as TeamSummary);
+  } catch {
+    return [];
+  }
 }
 
 export default async function HomePage() {
-  const home = await fetchHome();
+  const token = await getAccessToken();
+  const [home, followedTeams] = await Promise.all([
+    getHome(token),
+    fetchFollowedTeams(token),
+  ]);
 
   const featured = home?.featured_live_match ?? null;
   const liveNow = home?.live_now ?? [];
@@ -49,106 +50,57 @@ export default async function HomePage() {
   const videos = home?.latest_videos ?? [];
   const continueWatching = home?.continue_watching ?? [];
 
-  const heroes: MatchSummary[] = [];
-  if (featured) heroes.push(featured);
-  const candidates = liveNow.filter(
-    (match) => !heroes.some((hero) => hero?.id === match?.id),
+  // The featured match may or may not also be listed in live_now.
+  const liveById = new Map<string, MatchSummary>();
+  for (const match of [featured, ...liveNow]) {
+    if (match?.id) liveById.set(match.id, match);
+  }
+  const liveMatches = [...liveById.values()];
+  const viewerTotal = liveMatches.reduce(
+    (sum, match) => sum + (match?.viewer_count ?? 0),
+    0,
   );
-  for (const match of candidates) {
-    if (heroes.length >= 2) break;
-    const sameTournament = heroes.some(
-      (hero) => hero?.tournament_id && hero.tournament_id === match?.tournament_id,
-    );
-    if (sameTournament) continue;
-    heroes.push(match);
-  }
-  for (const match of candidates) {
-    if (heroes.length >= 2) break;
-    if (!heroes.some((hero) => hero?.id === match?.id)) heroes.push(match);
-  }
-  const heroIds = new Set(heroes.map((match) => match?.id));
-  const alsoLive = liveNow.filter((match) => !heroIds.has(match?.id));
 
-  const hasContent =
-    liveNow.length > 0 ||
-    upcoming.length > 0 ||
-    tournaments.length > 0 ||
-    teams.length > 0 ||
-    videos.length > 0;
+  // Live match first; when nothing is live, show the next scheduled match.
+  const heroMatch = featured ?? liveMatches[0] ?? upcoming[0] ?? null;
+  const otherLive = liveMatches.filter((match) => match?.id !== heroMatch?.id);
+
+  // API times are UTC, so "today" is the UTC day.
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = upcoming.filter(
+    (match) => match?.scheduled_at?.slice(0, 10) === today,
+  ).length;
+  const host = (await headers()).get("host") ?? "thumbz";
 
   return (
-    <>
-      {heroes.length > 0 ? <LiveSection heroes={heroes} alsoLive={alsoLive} /> : null}
-
-      <div className="flex-1 bg-page-dark">
-        <Container size="wide" className="flex flex-col gap-16 py-10 sm:gap-16 sm:py-14">
-          {upcoming.length > 0 ? (
-            <HomeSection title="Upcoming matches" viewAllHref="/matches">
-              <UpcomingSchedule matches={upcoming} />
-            </HomeSection>
-          ) : null}
-
-          {tournaments.length > 0 ? (
-            <HomeSection
-              title="Featured tournaments"
-              viewAllHref="/tournaments"
-              gridClass="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
-              className="border-t border-page-dark-border pt-14 sm:pt-16"
-            >
-              {tournaments.map((tournament, index) => (
-                <TournamentCard key={tournament?.id ?? index} tournament={tournament} />
-              ))}
-            </HomeSection>
-          ) : null}
-
-          {teams.length > 0 ? (
-            <HomeSection
-              title="Popular teams"
-              viewAllHref="/teams"
-              gridClass="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-              className="border-t border-page-dark-border pt-14 sm:pt-16"
-            >
-              {teams.map((team, index) => (
-                <TeamCard key={team?.id ?? index} team={team} />
-              ))}
-            </HomeSection>
-          ) : null}
-
-          {videos.length > 0 ? (
-            <HomeSection
-              title="Latest content"
-              gridClass="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-              className="border-t border-page-dark-border pt-14 sm:pt-16"
-            >
-              {videos.slice(0, 8).map((video, index) => (
-                <VideoCard key={video?.id ?? index} video={video} />
-              ))}
-            </HomeSection>
-          ) : null}
-
+    <div className="flex-1 bg-paper text-ink">
+      <FollowProvider signedIn={token !== null} initialTeams={followedTeams}>
+        <MatchLanguageProvider initial={heroMatch?.broadcasts?.[0]?.language ?? null}>
+          <Hero
+            match={heroMatch}
+            liveCount={liveMatches.length}
+            viewerTotal={viewerTotal}
+            upcomingCount={upcoming.length}
+            todayCount={todayCount}
+            host={host}
+          />
+          <YourTeams liveMatches={liveMatches} upcoming={upcoming} />
           {continueWatching.length > 0 ? (
-            <HomeSection
-              title="Continue watching"
-              viewAllHref="/history"
-              gridClass="grid gap-4 md:grid-cols-2"
-              className="border-t border-page-dark-border pt-14 sm:pt-16"
-            >
-              {continueWatching.map((item, index) => (
-                <MatchCard key={item?.match_id ?? index} match={item?.match} />
-              ))}
-            </HomeSection>
+            <ContinueWatching items={continueWatching} />
           ) : null}
-
-          {!hasContent && !featured ? (
-            <div className="flex flex-col items-center gap-2 py-16 text-center">
-              <p className="font-display text-2xl tracking-tight">Nothing here yet</p>
-              <p className="max-w-md text-sm text-text-secondary">
-                No matches or content are available right now. Check back soon.
-              </p>
-            </div>
-          ) : null}
-        </Container>
-      </div>
-    </>
+          {heroMatch?.status === "live" ? <MatchCenter match={heroMatch} /> : null}
+        </MatchLanguageProvider>
+        {otherLive.length > 0 ? (
+          <LiveNow matches={otherLive} more={heroMatch?.status === "live"} />
+        ) : null}
+        {upcoming.length > 0 ? <Schedule matches={upcoming} /> : null}
+        {tournaments.length > 0 ? <Tournaments tournaments={tournaments} /> : null}
+        {teams.length > 0 ? (
+          <Teams teams={teams} liveMatches={liveMatches} upcoming={upcoming} />
+        ) : null}
+        {videos.length > 0 ? <Replays videos={videos} /> : null}
+      </FollowProvider>
+      {token === null ? <JoinCta /> : null}
+    </div>
   );
 }

@@ -98,6 +98,15 @@ export interface PlayerDetail extends PlayerSummary {
   }>;
 }
 
+export type BroadcastLanguage = "en" | "id" | "ms" | "tl";
+
+// Contract §6.1: language variants of a live match, ordered by viewer_count desc.
+export interface BroadcastSummary {
+  language: BroadcastLanguage;
+  stream_url: string;
+  viewer_count: number;
+}
+
 export interface MatchSummary {
   id: string;
   tournament_id: string | null;
@@ -119,6 +128,7 @@ export interface MatchSummary {
   thumbnail_url: string | null;
   viewer_count: number;
   featured: boolean;
+  broadcasts?: BroadcastSummary[];
 }
 
 export interface MatchDetail extends MatchSummary {

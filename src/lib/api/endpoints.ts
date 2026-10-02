@@ -4,6 +4,7 @@ import { apiFetch } from "./client";
 import type {
   ApiEnvelope,
   CommentsEnvelope,
+  FavoriteEntityType,
   GoldSnapshot,
   HomePayload,
   ItemPurchase,
@@ -461,6 +462,28 @@ export async function cancelTicketOrder(
 ): Promise<void> {
   await apiFetch<undefined>(`/me/orders/${orderId}/cancel`, {
     method: "POST",
+    token,
+  });
+}
+
+export async function addFavorite(
+  entityType: FavoriteEntityType,
+  entityId: string,
+  token: string,
+): Promise<void> {
+  await apiFetch<unknown>(`/me/favorites/${entityType}/${entityId}`, {
+    method: "PUT",
+    token,
+  });
+}
+
+export async function removeFavorite(
+  entityType: FavoriteEntityType,
+  entityId: string,
+  token: string,
+): Promise<void> {
+  await apiFetch<undefined>(`/me/favorites/${entityType}/${entityId}`, {
+    method: "DELETE",
     token,
   });
 }
