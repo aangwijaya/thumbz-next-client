@@ -33,7 +33,7 @@ interface HeroProps {
 }
 
 function short(team?: TeamSummary | null): string {
-  return shortTeamName(team?.name ?? "TBD");
+  return shortTeamName(team);
 }
 
 // The chip under the scorebug: "Game 4 · Match point RRQ" when scores show,

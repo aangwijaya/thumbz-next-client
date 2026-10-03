@@ -59,7 +59,7 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
 
   if (availability.isLoading) {
     return (
-      <section className={`rounded-xl border border-page-dark-border bg-page-dark-surface p-4 sm:p-5 ${className}`}>
+      <section className={`rounded-xl border border-stone bg-paper p-4 shadow-subtle sm:p-5 ${className}`}>
         <Skeleton className="h-4 w-32" />
         <Skeleton className="mt-4 h-16 w-full" />
       </section>
@@ -119,18 +119,18 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
   return (
     <section
       id="tickets"
-      className={`flex flex-col gap-4 rounded-xl border border-page-dark-border bg-page-dark-surface p-4 sm:p-5 ${className}`}
+      className={`flex flex-col gap-4 rounded-xl border border-stone bg-paper p-4 shadow-subtle sm:p-5 ${className}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-pencil">
           Venue tickets
         </h2>
         {info.on_sale ? (
-          <span className="font-mono text-[10px] uppercase tracking-widest text-success">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-forest">
             On sale
           </span>
         ) : (
-          <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-pencil">
             {soldOut ? "Sold out" : "Sales closed"}
           </span>
         )}
@@ -139,17 +139,17 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-base font-semibold">{info.venue_name ?? "Venue"}</p>
-          <p className="mt-0.5 font-mono text-xs uppercase tracking-wider text-text-secondary">
+          <p className="mt-0.5 font-mono text-xs uppercase tracking-wider text-pencil">
             {[info.venue_city, `${usd(info.price_usd ?? 0)} / ticket`].filter(Boolean).join(" · ")}
           </p>
         </div>
         <div className="min-w-40">
-          <p className="text-right font-mono text-xs tabular-nums text-text-secondary">
+          <p className="text-right font-mono text-xs tabular-nums text-pencil">
             {info.quota_remaining ?? 0} / {info.quota_total ?? 0} left
           </p>
-          <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-page-dark">
+          <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-cream">
             <span
-              className="block h-full bg-text-primary/70"
+              className="block h-full bg-ink/70"
               style={{ width: `${quotaPct}%` }}
             />
           </div>
@@ -158,18 +158,18 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
 
       {order ? (
         order.status === "paid" ? (
-          <div className="flex flex-col gap-3 border-t border-page-dark-border pt-4">
-            <p className="font-mono text-xs uppercase tracking-widest text-success">
+          <div className="flex flex-col gap-3 border-t border-stone pt-4">
+            <p className="font-mono text-xs uppercase tracking-widest text-forest">
               Payment confirmed — {order.quantity} ticket{order.quantity > 1 ? "s" : ""}
             </p>
             <ul className="flex flex-col gap-2">
               {(order.tickets ?? []).map((ticket) => (
                 <li
                   key={ticket?.id}
-                  className="flex items-center justify-between rounded-lg border border-page-dark-border bg-page-dark px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-stone bg-cream px-3 py-2"
                 >
                   <span className="font-mono text-sm tracking-wider">{ticket?.code ?? "—"}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-pencil">
                     {ticket?.status ?? "valid"}
                   </span>
                 </li>
@@ -177,7 +177,7 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
             </ul>
           </div>
         ) : order.status === "pending" ? (
-          <div className="flex flex-col gap-3 border-t border-page-dark-border pt-4">
+          <div className="flex flex-col gap-3 border-t border-stone pt-4">
             <p className="text-sm">
               {order.quantity} ticket{order.quantity > 1 ? "s" : ""} ·{" "}
               <span className="font-mono tabular-nums">{usd(order.total_usd ?? 0)}</span>
@@ -187,26 +187,26 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
                 href={order.payment.invoice_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex w-fit items-center gap-2 rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-text-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+                className="inline-flex w-fit items-center gap-2 rounded-full bg-deep-ember px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-deep-ember/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
               >
                 Pay with crypto ↗
               </a>
             ) : null}
-            <p className="font-mono text-[11px] uppercase tracking-wider text-text-secondary">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-pencil">
               Waiting for payment… held until {formatTime(order.expires_at ?? "")}
             </p>
             <button
               type="button"
               onClick={handleCancel}
               disabled={busy}
-              className="w-fit font-mono text-[11px] uppercase tracking-widest text-text-secondary underline-offset-4 hover:text-error hover:underline disabled:opacity-60"
+              className="w-fit font-mono text-[11px] uppercase tracking-widest text-pencil underline-offset-4 hover:text-deep-ember hover:underline disabled:opacity-60"
             >
               Cancel order
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-3 border-t border-page-dark-border pt-4">
-            <p className="text-sm text-text-secondary">
+          <div className="flex flex-col gap-3 border-t border-stone pt-4">
+            <p className="text-sm text-pencil">
               {order.status === "expired"
                 ? "This order expired before payment completed."
                 : order.status === "cancelled"
@@ -216,7 +216,7 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
             <button
               type="button"
               onClick={resetOrder}
-              className="w-fit rounded-full border border-page-dark-border px-4 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors hover:border-text-secondary"
+              className="w-fit rounded-full border border-stone px-4 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors hover:border-text-secondary"
             >
               Check availability again
             </button>
@@ -226,22 +226,22 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
         ready && !session ? (
           <Link
             href={`/login?next=${encodeURIComponent(`/matches/${matchId}`)}`}
-            className="inline-flex w-fit items-center rounded-full bg-text-primary px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-widest text-background transition-colors hover:bg-text-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+            className="inline-flex w-fit items-center rounded-full bg-deep-ember px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-widest text-paper transition-colors hover:bg-deep-ember/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
           >
             Log in to buy tickets
           </Link>
         ) : (
-          <div className="flex flex-wrap items-center gap-3 border-t border-page-dark-border pt-4">
-            <div className="flex gap-1 rounded-full border border-page-dark-border p-0.5">
+          <div className="flex flex-wrap items-center gap-3 border-t border-stone pt-4">
+            <div className="flex gap-1 rounded-full border border-stone p-0.5">
               {[1, 2, 3, 4].slice(0, maxQuantity).map((value) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setQuantity(value)}
-                  className={`size-8 rounded-full font-mono text-xs tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+                  className={`size-8 rounded-full font-mono text-xs tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember ${
                     quantity === value
-                      ? "bg-text-primary text-background"
-                      : "text-text-secondary hover:text-text-primary"
+                      ? "bg-deep-ember text-paper"
+                      : "text-pencil hover:text-ink"
                   }`}
                 >
                   {value}
@@ -252,14 +252,14 @@ export function TicketPanel({ matchId, className = "" }: TicketPanelProps) {
               type="button"
               onClick={handleBuy}
               disabled={busy || maxQuantity === 0}
-              className="inline-flex items-center gap-2 rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-text-primary/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+              className="inline-flex items-center gap-2 rounded-full bg-deep-ember px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-deep-ember/90 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
             >
               {busy ? "Reserving…" : `Buy ${quantity} · ${usd(quantity * (info.price_usd ?? 0))}`}
             </button>
           </div>
         )
       ) : (
-        <p className="border-t border-page-dark-border pt-4 text-sm text-text-secondary">
+        <p className="border-t border-stone pt-4 text-sm text-pencil">
           {soldOut
             ? "All tickets for this match have been sold."
             : "Ticket sales for this match are not open right now."}

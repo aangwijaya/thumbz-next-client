@@ -12,34 +12,18 @@ import { Schedule } from "@/components/home/Schedule";
 import { Teams } from "@/components/home/Teams";
 import { Tournaments } from "@/components/home/Tournaments";
 import { YourTeams } from "@/components/home/YourTeams";
-import { apiFetch } from "@/lib/api/client";
+import { getFollowedTeams } from "@/lib/api/favorites";
 import { getHome } from "@/lib/api/home";
-import type { ApiEnvelope, Favorite, MatchSummary, TeamSummary } from "@/lib/api/types";
+import type { MatchSummary } from "@/lib/api/types";
 import { getAccessToken } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-// The visitor's followed teams. The home page still renders without them.
-async function fetchFollowedTeams(token: string | null): Promise<TeamSummary[]> {
-  if (!token) return [];
-  try {
-    const response = await apiFetch<ApiEnvelope<Favorite[]>>("/me/favorites", {
-      token,
-      cache: "no-store",
-    });
-    return (response?.data ?? [])
-      .filter((favorite) => favorite?.entity_type === "team")
-      .map((favorite) => favorite.entity as TeamSummary);
-  } catch {
-    return [];
-  }
-}
 
 export default async function HomePage() {
   const token = await getAccessToken();
   const [home, followedTeams] = await Promise.all([
     getHome(token),
-    fetchFollowedTeams(token),
+    getFollowedTeams(token),
   ]);
 
   const featured = home?.featured_live_match ?? null;

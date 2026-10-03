@@ -151,10 +151,12 @@ export function formatStartsIn(iso: string): string {
   return `in ${hours}h ${minutes % 60}m`;
 }
 
-// A short team label for tight spots such as the scorebug. The API has no
-// short names yet, so this takes the first word that is not "Team".
-export function shortTeamName(name: string): string {
-  const words = name.trim().split(/\s+/).filter((word) => !/^team$/i.test(word));
+// A short team label for tight spots such as the scorebug: the API's
+// short_name, else the first word of the name that is not "Team".
+export function shortTeamName(team?: { name?: string | null; short_name?: string | null } | null): string {
+  if (team?.short_name) return team.short_name;
+  const name = team?.name?.trim() || "TBD";
+  const words = name.split(/\s+/).filter((word) => !/^team$/i.test(word));
   return words[0] || name;
 }
 

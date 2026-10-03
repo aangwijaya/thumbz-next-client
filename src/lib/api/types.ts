@@ -36,6 +36,8 @@ export interface TeamSummary {
   logo_url?: string;
   color_primary?: string;
   color_secondary?: string;
+  /** Narrow-space label such as "RRQ"; null when not set. */
+  short_name?: string | null;
   is_active?: boolean;
 }
 
@@ -129,6 +131,8 @@ export interface MatchSummary {
   viewer_count: number;
   featured: boolean;
   broadcasts?: BroadcastSummary[];
+  /** How far the stream runs behind real time; live data newer than this stays hidden. */
+  stream_delay_seconds?: number;
 }
 
 export interface MatchDetail extends MatchSummary {
