@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useRealtimeConnected } from "@/lib/realtime/hooks";
+
 import { apiFetch } from "./client";
 import type {
   ApiEnvelope,
@@ -238,34 +240,42 @@ export function useMatchRelated(id: string, enabled = true) {
 }
 
 export function useMatchEconomy(id: string, live = false) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchEconomy(id),
     queryFn: () => fetchData<GoldSnapshot[]>(`/matches/${id}/economy`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
 export function useMatchLiveStats(id: string, live = false) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchLiveStats(id),
     queryFn: () => fetchData<PlayerSnapshot[]>(`/matches/${id}/live-stats`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
 export function useMatchEquipment(id: string, live = false) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchEquipment(id),
     queryFn: () => fetchData<ItemPurchase[]>(`/matches/${id}/equipment`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
 export function useMatchEvents(id: string, live = false) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchEvents(id),
     queryFn: () => fetchData<MatchEvent[]>(`/matches/${id}/events`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
@@ -455,10 +465,12 @@ export async function deleteMatchComment(
 }
 
 export function useMatchTicket(matchId: string) {
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchTicket(matchId),
     queryFn: () => fetchData<TicketAvailability | null>(`/matches/${matchId}/ticket`),
-    refetchInterval: LIVE_POLL_MS,
+    // tickets:changed pushes invalidate this while connected.
+    refetchInterval: connected ? false : LIVE_POLL_MS,
   });
 }
 

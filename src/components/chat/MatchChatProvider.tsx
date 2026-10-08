@@ -4,12 +4,16 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 
 import { useSpoilers } from "@/components/spoiler/SpoilerProvider";
 import { fetchMatchComments } from "@/lib/api/endpoints";
+import { useRealtimeConnected, useRealtimeRoom } from "@/lib/realtime/hooks";
 import type { MatchComment } from "@/lib/api/types";
 
 import { appendOlder, mergeNewer } from "./comment-list";
 
-// Contract §6.2: poll comments about every 5s, never faster.
+// Contract §6.2: poll comments about every 5s, never faster. While the
+// realtime channel is up, comments are pushed and polling is only a slow
+// safety net.
 const POLL_MS = 5_000;
+const CONNECTED_POLL_MS = 60_000;
 // A burst larger than one page is drained with immediate follow-up calls.
 const MAX_CATCH_UP_CALLS = 5;
 
@@ -94,16 +98,37 @@ export function MatchChatProvider({
     }
   }, [matchId, olderCursor, loadingOlder]);
 
+  const connected = useRealtimeConnected();
+  useRealtimeRoom(
+    live ? `match:${matchId}` : null,
+    {
+      "comment:new": (data) => {
+        const comment = data as MatchComment;
+        setComments((previous) => mergeNewer([comment], previous));
+        setTotal((count) => (count == null ? count : count + 1));
+      },
+      "comment:deleted": (data) => {
+        const id = (data as { id?: string })?.id;
+        setComments((previous) => previous.filter((comment) => comment?.id !== id));
+      },
+    },
+    // Missed pushes: catch up from the cursor.
+    () => void poll(),
+  );
+
   // The chat is covered while scores are hidden, so it does not poll then.
   useEffect(() => {
     if (!visible) return;
     poll();
     if (!live) return;
-    const timer = setInterval(() => {
-      if (!document.hidden) poll();
-    }, POLL_MS);
+    const timer = setInterval(
+      () => {
+        if (!document.hidden) poll();
+      },
+      connected ? CONNECTED_POLL_MS : POLL_MS,
+    );
     return () => clearInterval(timer);
-  }, [poll, visible, live]);
+  }, [poll, visible, live, connected]);
 
   function addComment(comment: MatchComment) {
     setComments((previous) => mergeNewer([comment], previous));

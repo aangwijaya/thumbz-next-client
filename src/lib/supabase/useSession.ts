@@ -73,3 +73,15 @@ function subscribe(listener: () => void) {
 export function useSupabaseSession(): SessionState {
   return useSyncExternalStore(subscribe, () => state, () => SERVER_STATE);
 }
+
+/** Current access token outside React (realtime handshake); undefined when signed out. */
+export function currentAccessToken(): string | undefined {
+  return state.session?.token;
+}
+
+/** Notified whenever the session changes (sign-in, sign-out, token refresh). */
+export function onSessionChange(listener: () => void): () => void {
+  start();
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}

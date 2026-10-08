@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { LiveListRefresher } from "@/components/match/LiveListRefresher";
 import { MatchDayList } from "@/components/match/MatchDayList";
 import { MatchListItem } from "@/components/match/MatchListItem";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -23,6 +24,7 @@ export default async function LivePage() {
   return (
     <div className="flex-1 bg-paper">
       <Container size="page" className="flex flex-col gap-10 py-10 min-[801px]:py-14">
+        <LiveListRefresher />
         <PageHeader
           eyebrow="On air"
           title="Live now"

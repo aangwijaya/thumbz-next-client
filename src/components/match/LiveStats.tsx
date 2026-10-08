@@ -24,6 +24,7 @@ import {
 import { formatViewerCount, initialsOf, shortTeamName } from "@/lib/utils/format";
 import { ROLE_ORDER } from "@/lib/utils/live";
 import { teamColors, tint } from "@/lib/utils/team-colors";
+import { useLiveMatch } from "@/components/match/LiveMatchProvider";
 
 const TICK_MS = 5_000;
 const SLOTS = 6;
@@ -139,7 +140,8 @@ function Roster({ team, lines, color }: { team?: TeamSummary | null; lines: Line
   );
 }
 
-export function LiveStats({ match }: { match: MatchSummary }) {
+export function LiveStats({ match: initial }: { match: MatchSummary }) {
+  const match = useLiveMatch(initial);
   const id = match?.id ?? "";
   const live = match?.status === "live";
   const { isVisible } = useSpoilers();

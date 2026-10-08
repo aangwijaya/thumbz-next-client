@@ -15,6 +15,7 @@ import {
   shortTeamName,
 } from "@/lib/utils/format";
 import { seriesInfo } from "@/lib/utils/series";
+import { useLiveMatch } from "@/components/match/LiveMatchProvider";
 
 interface ScoreStripProps {
   match: MatchDetail;
@@ -49,7 +50,8 @@ function Team({ team, side }: { team?: TeamSummary | null; side: "a" | "b" }) {
   );
 }
 
-export function ScoreStrip({ match, broadcasts, winners }: ScoreStripProps) {
+export function ScoreStrip({ match: initial, broadcasts, winners }: ScoreStripProps) {
+  const match = useLiveMatch(initial);
   const toast = useToast();
   const { isVisible } = useSpoilers();
   const { language, setLanguage } = useMatchLanguage();

@@ -10,6 +10,7 @@ import type { MatchEvent, MatchSummary } from "@/lib/api/types";
 import { dummyEconomy, dummyEvents, orDummy } from "@/lib/dummy/match";
 import { shortTeamName } from "@/lib/utils/format";
 import { teamColors, tint } from "@/lib/utils/team-colors";
+import { useLiveMatch } from "@/components/match/LiveMatchProvider";
 
 const TICK_MS = 5_000;
 
@@ -26,7 +27,8 @@ function typeLabel(type: string): string {
   return TYPE_LABELS[type] ?? type.slice(0, 4).toUpperCase();
 }
 
-export function MatchMoments({ match }: { match: MatchSummary }) {
+export function MatchMoments({ match: initial }: { match: MatchSummary }) {
+  const match = useLiveMatch(initial);
   const id = match?.id ?? "";
   const live = match?.status === "live";
   const { isVisible } = useSpoilers();

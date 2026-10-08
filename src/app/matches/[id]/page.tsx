@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { MatchChatProvider } from "@/components/chat/MatchChatProvider";
 import { FollowProvider } from "@/components/home/FollowProvider";
 import { MatchLanguageProvider } from "@/components/home/MatchLanguage";
+import { LiveMatchProvider, LiveStatusLine } from "@/components/match/LiveMatchProvider";
 import { LiveStats } from "@/components/match/LiveStats";
 import { MatchChat } from "@/components/match/MatchChat";
 import { MatchMoments } from "@/components/match/MatchMoments";
@@ -93,8 +94,12 @@ export default async function MatchPage({
         </h1>
         <FollowProvider signedIn={token !== null} initialTeams={followed}>
           <MatchLanguageProvider initial={broadcasts[0]?.language ?? null}>
+            <LiveMatchProvider matchId={match?.id ?? id}>
             <MatchChatProvider matchId={match?.id ?? id} live={isLive}>
-              <Container size="watch" className="max-[900px]:hidden">
+              <Container
+                size="watch"
+                className="flex items-center justify-between gap-4 max-[900px]:hidden"
+              >
                 <nav
                   aria-label="Breadcrumb"
                   className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 py-3.5 text-[13px] text-pencil"
@@ -131,6 +136,7 @@ export default async function MatchPage({
                     </>
                   ) : null}
                 </nav>
+                {isLive ? <LiveStatusLine /> : null}
               </Container>
 
               <WatchLayout
@@ -164,6 +170,11 @@ export default async function MatchPage({
                       broadcasts={broadcasts}
                       winners={gameWinners(match)}
                     />
+                    {isLive ? (
+                      <div className="px-5 pb-3 min-[641px]:px-6 min-[901px]:hidden">
+                        <LiveStatusLine />
+                      </div>
+                    ) : null}
                   </>
                 }
                 chat={<MatchChat live={isLive} />}
@@ -179,6 +190,7 @@ export default async function MatchPage({
                 }
               />
             </MatchChatProvider>
+            </LiveMatchProvider>
           </MatchLanguageProvider>
         </FollowProvider>
       </div>
