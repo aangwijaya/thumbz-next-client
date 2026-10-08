@@ -33,7 +33,7 @@ Priority order:
 1. Explicit requirements from the current task
 2. `design/DESIGN.md`
 3. `PLAN.md`
-4. `../docs/API-CONTRACT.md` when available
+4. `../thumbz-server/docs/API-CONTRACT.md` when available
 5. Existing repository implementation and conventions
 6. Relevant installed skills
 7. Agent assumptions
@@ -105,7 +105,7 @@ Follow the plan unless an implementation problem makes it impossible or unsafe t
 
 ---
 
-## `../docs/API-CONTRACT.md`
+## `../thumbz-server/docs/API-CONTRACT.md`
 
 This defines the communication contract between frontend and backend.
 
@@ -380,7 +380,7 @@ Do not blindly add optional chaining to values whose existence is guaranteed by 
 The frontend must consume the API defined in:
 
 ```text
-../docs/API-CONTRACT.md
+../thumbz-server/docs/API-CONTRACT.md
 ```
 
 Do not:
@@ -713,7 +713,7 @@ Architecture changes must be deliberate.
 If implementation requires a change to:
 
 ```text
-../docs/API-CONTRACT.md
+../thumbz-server/docs/API-CONTRACT.md
 ```
 
 stop the affected implementation.

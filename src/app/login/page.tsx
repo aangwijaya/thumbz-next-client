@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 
 function GoogleIcon() {
   return (
@@ -21,7 +22,7 @@ function LoginForm() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
+  const next = safeNextPath(searchParams.get("next"));
 
   const [mode, setMode] = useState<"login" | "register">(
     searchParams.get("mode") === "register" ? "register" : "login",

@@ -9,6 +9,7 @@ import { useMatchEconomy, useMatchEvents } from "@/lib/api/endpoints";
 import type { MatchEvent, MatchSummary } from "@/lib/api/types";
 import { dummyEconomy, dummyEvents, orDummy } from "@/lib/dummy/match";
 import { shortTeamName } from "@/lib/utils/format";
+import { teamColors, tint } from "@/lib/utils/team-colors";
 
 const TICK_MS = 5_000;
 
@@ -65,9 +66,7 @@ export function MatchMoments({ match }: { match: MatchSummary }) {
   const latest = points[points.length - 1];
   const nameA = shortTeamName(match?.team_a);
   const nameB = shortTeamName(match?.team_b);
-  const colorA = match?.team_a?.color_primary || "#e34432";
-  const colorB = match?.team_b?.color_primary || "#0f66ae";
-  const tint = (color: string, share: number) => `color-mix(in oklab, ${color} ${share}%, var(--color-paper))`;
+  const [colorA, colorB] = teamColors(match);
   const newestFirst = [...moments].sort((a, b) => Date.parse(b.occurred_at) - Date.parse(a.occurred_at));
 
   const side = (event: MatchEvent) =>

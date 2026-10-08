@@ -22,6 +22,8 @@ import {
   orDummy,
 } from "@/lib/dummy/match";
 import { formatViewerCount, initialsOf, shortTeamName } from "@/lib/utils/format";
+import { ROLE_ORDER } from "@/lib/utils/live";
+import { teamColors, tint } from "@/lib/utils/team-colors";
 
 const TICK_MS = 5_000;
 const SLOTS = 6;
@@ -35,7 +37,6 @@ const ROLE_LABELS: Record<PlayerRole, string> = {
   flex: "FLEX",
   coach: "COACH",
 };
-const ROLE_ORDER: PlayerRole[] = ["exp", "jungle", "mid", "gold", "roam", "flex", "coach"];
 
 interface Line {
   id: string;
@@ -49,9 +50,6 @@ interface Line {
   level: number | null;
   items: string[];
 }
-
-const tint = (color: string, share: number) =>
-  `color-mix(in oklab, ${color} ${share}%, var(--color-paper))`;
 
 function Objective({
   label,
@@ -157,8 +155,7 @@ export function LiveStats({ match }: { match: MatchSummary }) {
     return () => clearInterval(timer);
   }, [live]);
 
-  const colorA = match?.team_a?.color_primary || "#e34432";
-  const colorB = match?.team_b?.color_primary || "#0f66ae";
+  const [colorA, colorB] = teamColors(match);
   const cutoff = live ? now - holdBackMs(match) : Number.POSITIVE_INFINITY;
   const shown = (iso: string) => Date.parse(iso) <= cutoff;
 

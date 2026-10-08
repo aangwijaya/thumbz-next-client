@@ -1,49 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { useMatchChat } from "@/components/chat/MatchChatProvider";
+import { useCommentComposer } from "@/components/chat/useCommentComposer";
 
 import { RevealButton } from "@/components/spoiler/Spoiler";
-import { useToast } from "@/components/ui/Toast";
-import { postMatchComment } from "@/lib/api/endpoints";
-import { isApiError } from "@/lib/api/errors";
-import { useSupabaseSession } from "@/lib/supabase/useSession";
 
 // Desktop: the chat as a phone overlapping the player's lower right corner.
 export { MatchChatProvider as HeroChatProvider } from "@/components/chat/MatchChatProvider";
 
 export function HeroChatPhone() {
-  const { matchId, comments, total, loaded, visible, addComment } = useMatchChat();
-  const { session } = useSupabaseSession();
-  const toast = useToast();
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
-
-  async function handleSend(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const body = draft.trim();
-    if (!session || body.length === 0 || sending) return;
-    setSending(true);
-    try {
-      addComment(await postMatchComment(matchId, body, session.token));
-      setDraft("");
-    } catch (error) {
-      const status = isApiError(error) ? error.status : 0;
-      toast(
-        status === 429
-          ? "Slow down: one comment every few seconds."
-          : status === 401
-            ? "Your session expired. Please log in again."
-            : status === 422
-              ? "Comments are open while the match is live."
-              : "Could not send your comment. Try again.",
-      );
-    } finally {
-      setSending(false);
-    }
-  }
+  const { matchId, comments, total, loaded, visible } = useMatchChat();
+  const { session, draft, setDraft, sending, send } = useCommentComposer();
 
   // Newest last, like a chat.
   const shown = comments.slice(0, 9).reverse();
@@ -96,7 +65,7 @@ export function HeroChatPhone() {
 
         <div className="border-t border-stone/50 p-2">
           {session ? (
-            <form onSubmit={handleSend} className="flex gap-1.5">
+            <form onSubmit={send} className="flex gap-1.5">
               <label htmlFor="hero-chat-input" className="sr-only">
                 Write a comment
               </label>

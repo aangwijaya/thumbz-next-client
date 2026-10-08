@@ -5,7 +5,7 @@
 > Authoritative inputs:
 > 1. `design/design.md` — the authoritative visual/UX specification (dark-first, editorial + technical + streaming).
 > 2. `design/references/steep.md`, `design/references/monad.md` — reference material only; THUMBZ rules always win (design.md §1).
-> 3. `../docs/API-CONTRACT.md` — the API the client MUST consume.
+> 3. `../thumbz-server/docs/API-CONTRACT.md` — the API the client MUST consume.
 
 ---
 

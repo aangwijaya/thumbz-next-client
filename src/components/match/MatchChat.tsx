@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { useMatchChat } from "@/components/chat/MatchChatProvider";
+import { useCommentComposer } from "@/components/chat/useCommentComposer";
 import { RevealButton } from "@/components/spoiler/Spoiler";
-import { useToast } from "@/components/ui/Toast";
-import { postMatchComment } from "@/lib/api/endpoints";
-import { isApiError } from "@/lib/api/errors";
-import { useSupabaseSession } from "@/lib/supabase/useSession";
 
 // Name colors, all readable on paper. Picked from the author name so a
 // person keeps their color.
@@ -21,35 +17,8 @@ function nameColor(name: string): string {
 }
 
 export function MatchChat({ live }: { live: boolean }) {
-  const { matchId, comments, loaded, visible, addComment } = useMatchChat();
-  const { session } = useSupabaseSession();
-  const toast = useToast();
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
-
-  async function handleSend(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const body = draft.trim();
-    if (!session || body.length === 0 || sending) return;
-    setSending(true);
-    try {
-      addComment(await postMatchComment(matchId, body, session.token));
-      setDraft("");
-    } catch (error) {
-      const status = isApiError(error) ? error.status : 0;
-      toast(
-        status === 429
-          ? "Slow down: one comment every few seconds."
-          : status === 401
-            ? "Your session expired. Please log in again."
-            : status === 422
-              ? "Comments are open while the match is live."
-              : "Could not send your comment. Try again.",
-      );
-    } finally {
-      setSending(false);
-    }
-  }
+  const { matchId, comments, loaded, visible } = useMatchChat();
+  const { session, draft, setDraft, sending, send } = useCommentComposer();
 
   // Newest last, like a chat.
   const shown = comments.slice(0, 30).reverse();
@@ -94,7 +63,7 @@ export function MatchChat({ live }: { live: boolean }) {
         {!live ? (
           <p className="py-2 text-center text-[13px] text-pencil">Chat opens when the match goes live.</p>
         ) : session ? (
-          <form onSubmit={handleSend}>
+          <form onSubmit={send}>
             <div className="flex gap-2">
               <label htmlFor="match-chat-input" className="sr-only">
                 Write a comment
