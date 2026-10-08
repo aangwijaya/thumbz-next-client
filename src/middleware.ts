@@ -54,6 +54,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip static assets, image files, PWA files and metadata routes.
-    "/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest.webmanifest|sw.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|txt|xml|json)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|icon|apple-icon|manifest.webmanifest|sw.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|txt|xml|json)$).*)",
   ],
 };
