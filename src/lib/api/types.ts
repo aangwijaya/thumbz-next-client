@@ -228,6 +228,34 @@ export interface VideoSummary {
   thumbnail_url: string | null;
   duration_seconds: number;
   published_at: string;
+  /** Present when the video is served as a protected (DRM) asset — play it via a playback session. */
+  media?: { id: string; protection: MediaProtection } | null;
+}
+
+export type MediaProtection = "none" | "clearkey_aes" | "multidrm";
+
+export interface KeySystemConfig {
+  license_url: string;
+  headers?: Record<string, string>;
+  certificate_url?: string;
+}
+
+/** Contract §17: a short-lived, per-device playback session. */
+export interface PlaybackSession {
+  session_id: string;
+  token: string;
+  expires_at: string;
+  heartbeat_seconds: number;
+  asset: {
+    id: string;
+    title: string;
+    protection: MediaProtection;
+    duration_seconds: number | null;
+  };
+  sources: {
+    dash: { manifest_url: string; key_systems: Record<string, KeySystemConfig> } | null;
+    hls: { manifest_url: string } | null;
+  };
 }
 
 export interface WatchHistoryItem {

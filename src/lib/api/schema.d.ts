@@ -615,6 +615,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/videos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Videos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/search": {
         parameters: {
             query?: never;
@@ -623,6 +639,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["Search_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Search_suggest"];
         put?: never;
         post?: never;
         delete?: never;
@@ -711,6 +743,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/orders/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pay a pending order with another method (supersedes earlier attempts). */
+        post: operations["MeTickets_startPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/orders/{id}/cancel": {
         parameters: {
             query?: never;
@@ -759,6 +808,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/tickets/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Venue scanners: verify a ticket QR and admit it once. */
+        post: operations["AdminTickets_checkIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/orders": {
         parameters: {
             query?: never;
@@ -784,7 +850,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["PaymentWebhooks_handleNowPayments"];
+        post: operations["PaymentWebhooks_nowpayments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/xendit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PaymentWebhooks_xendit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1111,6 +1193,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/playback/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Signed-in viewers open a session for a protected asset. */
+        post: operations["Playback_createSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/playback/sessions/{sid}/heartbeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Playback_heartbeat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/playback/sessions/{sid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["Playback_end"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/drm/clearkey/license": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** EME ClearKey license; the playback token travels as a Bearer header. */
+        post: operations["Playback_license"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/playback/{sid}/hls/master.m3u8": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Safari's native player cannot send headers, so HLS URLs carry the token. */
+        get: operations["Playback_hlsMaster"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/playback/{sid}/hls/variant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Playback_hlsVariant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/drm/hls/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Playback_hlsKey"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/drm/authorize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Callback for commercial DRM license services (token in the body). */
+        post: operations["Playback_authorize"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Jobs_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1120,16 +1350,32 @@ export interface components {
             total_seconds?: number;
         };
         CreateOrderDto: {
+            /**
+             * @description Defaults to crypto (the original, still-supported flow).
+             * @default crypto
+             * @enum {string}
+             */
+            payment_method: "crypto" | "qris" | "va_bca" | "va_bni" | "va_bri" | "va_mandiri" | "va_permata";
             quantity: number;
+        };
+        StartPaymentDto: {
+            /** @enum {string} */
+            method: "crypto" | "qris" | "va_bca" | "va_bni" | "va_bri" | "va_mandiri" | "va_permata";
         };
         TicketConfigDto: {
             venue_name: string;
             venue_city?: string;
             price_usd: number;
+            /** @description Price for QRIS / bank VA (whole rupiah). Omit to offer crypto only. */
+            price_idr?: number;
             quota_total: number;
             sales_open_at?: string;
             sales_close_at?: string;
             is_active?: boolean;
+        };
+        CheckInDto: {
+            /** @description The QR payload printed on the ticket (THMZ1.<code>.<mac>). */
+            payload: string;
         };
         CreateMatchDto: {
             /** Format: uuid */
@@ -1149,7 +1395,7 @@ export interface components {
             /** Format: uuid */
             winner_team_id?: string | null;
             /** @enum {string} */
-            status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+            status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
             scheduled_at: string;
             started_at?: string | null;
             ended_at?: string | null;
@@ -1179,7 +1425,7 @@ export interface components {
             /** Format: uuid */
             winner_team_id?: string | null;
             /** @enum {string} */
-            status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+            status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
             scheduled_at?: string;
             started_at?: string | null;
             ended_at?: string | null;
@@ -1415,6 +1661,8 @@ export interface components {
         CreateCommentDto: {
             body: string;
         };
+        CreateSessionDto: Record<string, never>;
+        TokenQuery: Record<string, never>;
     };
     responses: never;
     parameters: never;
@@ -1844,7 +2092,7 @@ export interface operations {
                 page?: number;
                 pageSize?: number;
                 stage?: "group_stage" | "regular_season" | "playoffs" | "semifinal" | "third_place" | "grand_final";
-                status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+                status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
                 from?: string;
                 to?: string;
             };
@@ -1948,6 +2196,8 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
+                /** @description Opaque cursor from a previous response (meta.next_cursor) */
+                cursor?: string;
                 region?: string;
                 tournament_id?: string;
                 sort?: "name" | "created_at";
@@ -2010,7 +2260,7 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
-                status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+                status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
                 from?: string;
                 to?: string;
             };
@@ -2054,6 +2304,8 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
+                /** @description Opaque cursor from a previous response (meta.next_cursor) */
+                cursor?: string;
                 team_id?: string;
                 role?: "gold" | "mid" | "exp" | "jungle" | "roam" | "flex" | "coach";
                 sort?: "nickname";
@@ -2078,7 +2330,7 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
-                status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+                status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
             };
             header?: never;
             path: {
@@ -2139,7 +2391,9 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
-                status?: "scheduled" | "live" | "completed" | "cancelled" | "postponed";
+                /** @description Opaque cursor from a previous response (meta.next_cursor) */
+                cursor?: string;
+                status?: "live" | "scheduled" | "completed" | "cancelled" | "postponed";
                 tournament_id?: string;
                 team_id?: string;
                 from?: string;
@@ -2425,11 +2679,32 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
+                /** @description Opaque cursor from a previous response (meta.next_cursor) */
+                cursor?: string;
                 type?: "replay" | "highlight" | "vod";
                 match_id?: string;
             };
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Videos_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -2449,6 +2724,26 @@ export interface operations {
                 pageSize?: number;
                 q: string;
                 type?: "all" | "match" | "team" | "player" | "tournament" | "video";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Search_suggest: {
+        parameters: {
+            query: {
+                q: string;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -2503,7 +2798,10 @@ export interface operations {
     MatchTickets_createOrder: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description 8–128 chars [A-Za-z0-9_-]; retries with the same key replay the first response */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: string;
             };
@@ -2528,7 +2826,7 @@ export interface operations {
             query?: {
                 page?: number;
                 pageSize?: number;
-                status?: "cancelled" | "pending" | "paid" | "expired" | "failed";
+                status?: "cancelled" | "failed" | "expired" | "pending" | "paid" | "refund_required";
             };
             header?: never;
             path?: never;
@@ -2556,6 +2854,32 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeTickets_startPayment: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description 8–128 chars [A-Za-z0-9_-]; retries with the same key replay the first response */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartPaymentDto"];
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2626,13 +2950,34 @@ export interface operations {
             };
         };
     };
+    AdminTickets_checkIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckInDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AdminTickets_listOrders: {
         parameters: {
             query?: {
                 page?: number;
                 pageSize?: number;
                 match_id?: string;
-                status?: "cancelled" | "pending" | "paid" | "expired" | "failed";
+                status?: "cancelled" | "failed" | "expired" | "pending" | "paid" | "refund_required";
             };
             header?: never;
             path?: never;
@@ -2648,11 +2993,30 @@ export interface operations {
             };
         };
     };
-    PaymentWebhooks_handleNowPayments: {
+    PaymentWebhooks_nowpayments: {
         parameters: {
             query?: never;
             header: {
                 "x-nowpayments-sig": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentWebhooks_xendit: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-callback-token": string;
             };
             path?: never;
             cookie?: never;
@@ -3146,8 +3510,11 @@ export interface operations {
     MatchComments_list: {
         parameters: {
             query?: {
-                limit?: number;
+                /** @description Only newer comments: meta.next_cursor from a previous response (an ISO timestamp is still accepted) */
                 after?: string;
+                /** @description Only older comments: meta.prev_cursor from a previous response */
+                before?: string;
+                limit?: number;
             };
             header?: never;
             path: {
@@ -3219,6 +3586,171 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_createSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_heartbeat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_end: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_license: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_hlsMaster: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    Playback_hlsVariant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    Playback_hlsKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Playback_authorize: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenQuery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Jobs_overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

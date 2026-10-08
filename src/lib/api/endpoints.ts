@@ -36,6 +36,7 @@ import type {
   TicketOrderDetail,
   MatchTicket,
   PaymentMethod,
+  PlaybackSession,
   TournamentDetail,
   TournamentStatus,
   TournamentSummary,
@@ -513,6 +514,42 @@ export async function postOrderPayment(
     headers: { "Idempotency-Key": idempotencyKey },
   });
   return envelope.data;
+}
+
+/** Opens a protected playback session (contract §17); 409 = device limit reached. */
+export async function createPlaybackSession(assetId: string, token: string): Promise<PlaybackSession> {
+  const envelope = await apiFetch<ApiEnvelope<PlaybackSession>>("/playback/sessions", {
+    method: "POST",
+    body: { asset_id: assetId },
+    token,
+  });
+  return envelope.data;
+}
+
+/** Keeps the session counted as active and returns a rotated playback token. */
+export async function heartbeatPlaybackSession(
+  sessionId: string,
+  token: string,
+): Promise<{ token: string; expires_at: string }> {
+  const envelope = await apiFetch<ApiEnvelope<{ token: string; expires_at: string }>>(
+    `/playback/sessions/${sessionId}/heartbeat`,
+    { method: "POST", token },
+  );
+  return envelope.data;
+}
+
+/**
+ * Frees the device slot. `keepalive` lets the request outlive a closing tab
+ * (sendBeacon cannot carry the Authorization header).
+ */
+export function endPlaybackSession(sessionId: string, token: string): void {
+  const base = process.env.NEXT_PUBLIC_API_URL;
+  if (!base) return;
+  void fetch(`${base}/playback/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 /** Sandbox gateway only: completes a demo payment. */

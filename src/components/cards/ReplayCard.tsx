@@ -5,7 +5,7 @@ import { Thumbnail } from "@/components/ui/Thumbnail";
 import type { VideoSummary, VideoType } from "@/lib/api/types";
 import { formatAge, formatDuration } from "@/lib/utils/format";
 
-const typeLabels: Record<
+export const typeLabels: Record<
   VideoType,
   { label: string; tone: "ember" | "neutral" | "blue"; colors: string[] }
 > = {
@@ -28,8 +28,14 @@ const typeLabels: Record<
 
 export function ReplayCard({ video }: { video: VideoSummary }) {
   const type = video?.type ? typeLabels[video.type] : undefined;
-  const external = !video?.match_id;
-  const href = video?.match_id ? `/matches/${video.match_id}` : (video?.url ?? "#");
+  // Protected replays play on their own page; others open the match or the source.
+  const internal = Boolean(video?.media) || Boolean(video?.match_id);
+  const external = !internal;
+  const href = video?.media
+    ? `/videos/${video.id}`
+    : video?.match_id
+      ? `/matches/${video.match_id}`
+      : (video?.url ?? "#");
   const duration = formatDuration(video?.duration_seconds ?? 0);
   const published = formatAge(video?.published_at ?? "");
 
@@ -54,6 +60,7 @@ export function ReplayCard({ video }: { video: VideoSummary }) {
 
       <div className="flex flex-wrap items-center gap-2 text-[13px] text-pencil">
         {type ? <Badge tone={type.tone}>{type.label}</Badge> : null}
+        {video?.media ? <Badge tone="dark">Protected</Badge> : null}
         {published ? <span>{published}</span> : null}
       </div>
       <h3 className="text-pretty font-graphik text-[17px] font-bold leading-[1.35] text-ink transition-colors group-hover:text-deep-ember">
