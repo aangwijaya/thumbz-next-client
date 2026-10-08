@@ -1,8 +1,14 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-type Tab = "chat" | "moments" | "stats" | "more";
+const TABS = ["chat", "moments", "stats", "more"] as const;
+type Tab = (typeof TABS)[number];
+
+function isTab(value: string | null): value is Tab {
+  return (TABS as readonly string[]).includes(value ?? "");
+}
 
 interface WatchLayoutProps {
   stage: React.ReactNode;
@@ -18,7 +24,20 @@ const tabClass =
 // Desktop: the player with chat and moments beside it, stats and more below.
 // Phones: the player, then tabs that switch between all four.
 export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutProps) {
-  const [tab, setTab] = useState<Tab>("chat");
+  const searchParams = useSearchParams();
+  const initial = searchParams.get("tab");
+  const [tab, setTabState] = useState<Tab>(isTab(initial) ? initial : "chat");
+
+  // Deep-linkable (?tab=stats) without a server round trip: the native
+  // History API updates the URL and Next keeps useSearchParams in sync.
+  function setTab(next: Tab) {
+    setTabState(next);
+    const params = new URLSearchParams(window.location.search);
+    if (next === "chat") params.delete("tab");
+    else params.set("tab", next);
+    const query = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+  }
   // The side panel only has Chat and Moments; Stats and More are on the page.
   const side = tab === "moments" ? "moments" : "chat";
   const onPhoneOnly = (shown: boolean) => (shown ? "" : "max-[900px]:hidden");

@@ -4,6 +4,7 @@ import { apiFetch } from "./client";
 import type {
   ApiEnvelope,
   CommentsEnvelope,
+  CursorEnvelope,
   FavoriteEntityType,
   GoldSnapshot,
   HomePayload,
@@ -22,6 +23,7 @@ import type {
   PlayerSummary,
   ScheduleGroup,
   SearchPayload,
+  SearchSuggestion,
   StageInfo,
   StandingsPayload,
   TeamDetail,
@@ -154,7 +156,9 @@ export const queryKeys = {
     ["players", id, "matches", params] as const,
   playerStatistics: (id: string) => ["players", id, "statistics"] as const,
   videos: (params: VideoListParams = {}) => ["videos", params] as const,
+  videoFeed: (type?: VideoType) => ["videos", "feed", type ?? "all"] as const,
   search: (params: SearchParams) => ["search", params] as const,
+  suggest: (q: string) => ["search", "suggest", q.toLowerCase()] as const,
 };
 
 export function useHome() {
@@ -394,12 +398,37 @@ export function useSearch(params: SearchParams) {
   });
 }
 
+/** Typeahead suggestions for the header search (contract §6.7). */
+export async function fetchSuggestions(q: string, signal?: AbortSignal): Promise<SearchSuggestion[]> {
+  const envelope = await apiFetch<ApiEnvelope<SearchSuggestion[]>>(
+    withQuery("/search/suggest", { q, limit: 8 }),
+    { signal },
+  );
+  return envelope?.data ?? [];
+}
+
+/** One keyset page of the replay feed (contract §4.1). */
+export function fetchVideoPage(
+  params: { type?: VideoType; cursor?: string | null; pageSize?: number },
+  signal?: AbortSignal,
+): Promise<CursorEnvelope<VideoSummary[]>> {
+  return apiFetch<CursorEnvelope<VideoSummary[]>>(
+    withQuery("/videos", {
+      type: params.type,
+      cursor: params.cursor ?? undefined,
+      pageSize: params.pageSize ?? 12,
+    }),
+    { signal },
+  );
+}
+
+/** Comments page: `after` for newer (delta polling), `before` for older (scroll-back). */
 export async function fetchMatchComments(
   matchId: string,
-  after?: string,
+  cursor: { after?: string; before?: string } = {},
 ): Promise<CommentsEnvelope> {
   return apiFetch<CommentsEnvelope>(
-    withQuery(`/matches/${matchId}/comments`, { after, limit: 30 }),
+    withQuery(`/matches/${matchId}/comments`, { ...cursor, limit: 30 }),
   );
 }
 

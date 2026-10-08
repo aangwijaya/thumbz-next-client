@@ -21,6 +21,24 @@ export interface PaginationMeta {
   pageSize: number;
   total: number;
   totalPages: number;
+  /** Keyset cursor for the next page (contract §4.1); absent on older endpoints. */
+  next_cursor?: string | null;
+  has_more?: boolean;
+}
+
+/** Meta of a keyset (cursor) page: offset fields are null, no total is counted. */
+export interface CursorMeta {
+  page: number | null;
+  pageSize: number;
+  total: number | null;
+  totalPages: number | null;
+  next_cursor: string | null;
+  has_more: boolean;
+}
+
+export interface CursorEnvelope<T> {
+  data: T;
+  meta: CursorMeta;
 }
 
 export interface ApiEnvelope<T> {
@@ -229,6 +247,19 @@ export interface HomePayload {
   continue_watching: WatchHistoryItem[];
 }
 
+export type SearchType = "all" | "match" | "team" | "player" | "tournament" | "video";
+
+export type SearchCounts = Record<"matches" | "teams" | "players" | "tournaments" | "videos", number>;
+
+export interface SearchSuggestion {
+  type: "team" | "player" | "tournament";
+  id: string;
+  slug: string;
+  label: string;
+  sublabel: string | null;
+  image_url: string | null;
+}
+
 export interface SearchPayload {
   query: string;
   matches: MatchSummary[];
@@ -330,7 +361,12 @@ export interface MatchComment {
 export interface CommentsEnvelope {
   data: MatchComment[];
   meta: {
+    /** Pass as `after` for newer comments. */
     next_cursor: string | null;
+    /** Pass as `before` for older comments; null at the start of the chat. */
+    prev_cursor?: string | null;
+    /** More newer comments are waiting: fetch again right away. */
+    has_more?: boolean;
     total: number;
   };
 }

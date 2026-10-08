@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AccountMenu, LogoutButton } from "@/components/layout/AccountMenu";
 import { HeaderShell } from "@/components/layout/HeaderShell";
+import { SearchCommand } from "@/components/search/SearchCommand";
 import { SpoilerToggle } from "@/components/spoiler/SpoilerToggle";
 import { Badge } from "@/components/ui/Badge";
 import { LiveDot } from "@/components/ui/LiveDot";
@@ -11,11 +12,11 @@ import type { ApiEnvelope, MatchSummary } from "@/lib/api/types";
 import { getUserInitial } from "@/lib/supabase/server";
 
 const navItems = [
-  { href: "/#live-now", label: "Live" },
-  { href: "/#schedule", label: "Schedule" },
+  { href: "/live", label: "Live" },
+  { href: "/matches", label: "Matches" },
   { href: "/tournaments", label: "Tournaments" },
-  { href: "/#teams", label: "Teams" },
-  { href: "/#replays", label: "Replays" },
+  { href: "/teams", label: "Teams" },
+  { href: "/videos", label: "Replays" },
 ];
 
 const focusRing =
@@ -37,22 +38,6 @@ async function fetchLiveCount(): Promise<number> {
   } catch {
     return 0;
   }
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      className="size-[18px]"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
 }
 
 export async function Header() {
@@ -99,13 +84,9 @@ export async function Header() {
   const actions = (
     <>
       <SpoilerToggle variant="icon" />
-      <Link
-        href="/search"
-        aria-label="Search"
-        className={`grid size-11 place-items-center min-[641px]:size-10 rounded-lg text-pencil transition-colors hover:bg-cream hover:text-ink ${focusRing}`}
-      >
-        <SearchIcon />
-      </Link>
+      <SearchCommand
+        triggerClassName={`grid size-11 place-items-center min-[641px]:size-10 rounded-lg text-pencil transition-colors hover:bg-cream hover:text-ink ${focusRing}`}
+      />
       {initial ? (
         <AccountMenu initial={initial} />
       ) : (

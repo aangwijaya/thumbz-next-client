@@ -71,16 +71,16 @@ export default async function RootLayout({
       className={`${sourceSerif4.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} ${shantellSans.variable}`}
     >
       <body className="flex min-h-screen flex-col">
-        <ToastProvider>
-          <SpoilerProvider initialHidden={hideScores}>
-            {banner}
-            <Header />
-            <main className="flex flex-1 flex-col">
-              <QueryProvider>{children}</QueryProvider>
-            </main>
-            <Footer />
-          </SpoilerProvider>
-        </ToastProvider>
+        <QueryProvider>
+          <ToastProvider>
+            <SpoilerProvider initialHidden={hideScores}>
+              {banner}
+              <Header />
+              <main className="flex flex-1 flex-col">{children}</main>
+              <Footer />
+            </SpoilerProvider>
+          </ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );
