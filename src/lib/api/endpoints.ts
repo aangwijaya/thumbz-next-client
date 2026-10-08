@@ -34,6 +34,8 @@ import type {
   TicketAvailability,
   TicketOrder,
   TicketOrderDetail,
+  MatchTicket,
+  PaymentMethod,
   TournamentDetail,
   TournamentStatus,
   TournamentSummary,
@@ -113,7 +115,7 @@ function withQuery(path: string, params?: object): string {
   return query ? `${path}?${query}` : path;
 }
 
-async function fetchData<T>(path: string): Promise<T> {
+export async function fetchData<T>(path: string): Promise<T> {
   const envelope = await apiFetch<ApiEnvelope<T>>(path);
   return envelope.data;
 }
@@ -138,6 +140,9 @@ export const queryKeys = {
   matchEquipment: (id: string) => ["matches", id, "equipment"] as const,
   matchEvents: (id: string) => ["matches", id, "events"] as const,
   matchTicket: (id: string) => ["matches", id, "ticket"] as const,
+  order: (id: string) => ["me", "orders", id] as const,
+  myOrders: (page: number) => ["me", "orders", "list", page] as const,
+  myTickets: (page: number) => ["me", "tickets", page] as const,
   tournaments: (params: TournamentListParams = {}) => ["tournaments", params] as const,
   tournament: (id: string) => ["tournaments", id] as const,
   tournamentSchedule: (id: string, params: ScheduleParams = {}) =>
@@ -474,27 +479,69 @@ export function useMatchTicket(matchId: string) {
   });
 }
 
+/**
+ * Reserves tickets and opens the first payment attempt. `idempotencyKey` is
+ * reused when the same click is retried, so a flaky network can never create
+ * two orders (contract §16).
+ */
 export async function postMatchOrder(
   matchId: string,
-  quantity: number,
+  body: { quantity: number; payment_method: PaymentMethod },
   token: string,
+  idempotencyKey: string,
 ): Promise<TicketOrder> {
-  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(
-    `/matches/${matchId}/orders`,
-    { method: "POST", body: { quantity }, token },
-  );
+  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(`/matches/${matchId}/orders`, {
+    method: "POST",
+    body,
+    token,
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
   return envelope.data;
+}
+
+/** Pays a pending order with another method (supersedes earlier attempts). */
+export async function postOrderPayment(
+  orderId: string,
+  method: PaymentMethod,
+  token: string,
+  idempotencyKey: string,
+): Promise<TicketOrder> {
+  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(`/me/orders/${orderId}/payments`, {
+    method: "POST",
+    body: { method },
+    token,
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
+  return envelope.data;
+}
+
+/** Sandbox gateway only: completes a demo payment. */
+export async function simulatePayment(paymentId: string, token: string): Promise<void> {
+  await apiFetch<unknown>(`/me/payments/${paymentId}/simulate`, { method: "POST", token });
+}
+
+export async function fetchMyOrders(token: string, page = 1): Promise<ApiEnvelope<TicketOrder[]>> {
+  return apiFetch<ApiEnvelope<TicketOrder[]>>(withQuery("/me/orders", { page, pageSize: 20 }), {
+    token,
+  });
+}
+
+export async function fetchMyTickets(token: string, page = 1): Promise<ApiEnvelope<MatchTicket[]>> {
+  return apiFetch<ApiEnvelope<MatchTicket[]>>(withQuery("/me/tickets", { page, pageSize: 50 }), {
+    token,
+  });
 }
 
 export async function fetchTicketOrder(
   orderId: string,
   token: string,
 ): Promise<TicketOrderDetail> {
-  const envelope = await apiFetch<ApiEnvelope<TicketOrderDetail>>(
+  // Tickets travel next to `data` in this response (contract §6).
+  const envelope = await apiFetch<{ data: TicketOrder; tickets?: MatchTicket[] }>(
     `/me/orders/${orderId}`,
     { token },
   );
-  return envelope.data;
+  return { ...envelope.data, tickets: envelope.tickets ?? [] };
 }
 
 export async function cancelTicketOrder(

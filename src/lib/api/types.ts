@@ -372,23 +372,53 @@ export interface CommentsEnvelope {
   };
 }
 
+export type PaymentMethod = "crypto" | "qris" | "va_bca" | "va_bni" | "va_bri" | "va_mandiri" | "va_permata";
+
+export interface PaymentMethodOption {
+  method: PaymentMethod;
+  label: string;
+  family: "crypto" | "idr";
+  currency: "USD" | "IDR";
+  /** Price of one ticket in `currency`. */
+  unit_amount: number;
+  bank: string | null;
+  provider: "nowpayments" | "xendit" | "sandbox";
+}
+
 export interface TicketAvailability {
   match_id: string;
   venue_name: string;
   venue_city: string | null;
   price_usd: number;
+  /** Price for QRIS / bank VA; null = crypto only. */
+  price_idr?: number | null;
   quota_total: number;
   quota_remaining: number;
   sales_open_at: string | null;
   sales_close_at: string | null;
   on_sale: boolean;
+  /** Methods payable right now (contract §16). */
+  payment_methods?: PaymentMethodOption[];
 }
 
-export type TicketOrderStatus = "pending" | "paid" | "cancelled" | "expired" | "failed";
+export type TicketOrderStatus = "pending" | "paid" | "cancelled" | "expired" | "failed" | "refund_required";
 
+export type PaymentStatus = "pending" | "succeeded" | "failed" | "expired" | "cancelled";
+
+/** One payment attempt (contract §16); legacy orders only have provider/invoice_url/payment_id. */
 export interface TicketPayment {
+  id?: string;
   provider: string;
+  method?: PaymentMethod;
+  status?: PaymentStatus;
+  currency?: "USD" | "IDR";
+  amount?: number;
+  kind?: "redirect" | "qr" | "va" | null;
   invoice_url: string | null;
+  qr_string?: string | null;
+  va_number?: string | null;
+  bank?: string | null;
+  expires_at?: string;
   payment_id: string | null;
 }
 
@@ -410,8 +440,11 @@ export interface MatchTicket {
   match_id: string;
   order_id: string;
   code: string;
+  /** Signed payload to render as the QR code. */
+  qr_payload?: string;
   status: string;
   issued_at: string;
+  match?: MatchSummary;
 }
 
 export interface TicketOrderDetail extends TicketOrder {

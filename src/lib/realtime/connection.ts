@@ -64,6 +64,11 @@ function apiOrigin(): string | null {
   }
 }
 
+/** Private rooms (user:<id>) are joined by the server on authentication. */
+function isPrivate(name: string): boolean {
+  return name.startsWith("user:");
+}
+
 function deliver(event: string, payload: Envelope) {
   const room = payload?.room ? rooms.get(payload.room) : undefined;
   if (!room) return;
@@ -108,7 +113,9 @@ function connect(): Promise<Socket | null> {
     });
     active.on("connect", () => {
       setStatus("connected");
-      rooms.forEach((_room, name) => void join(active, name));
+      rooms.forEach((_room, name) => {
+        if (!isPrivate(name)) void join(active, name);
+      });
     });
     active.on("disconnect", () => setStatus("reconnecting"));
     active.on("connect_error", () => setStatus("reconnecting"));
@@ -138,7 +145,7 @@ export function listen(name: string, listener: RoomListener): () => void {
   room.listeners.add(listener);
   if (first) {
     void connect().then((active) => {
-      if (active?.connected && rooms.has(name)) void join(active, name);
+      if (active?.connected && rooms.has(name) && !isPrivate(name)) void join(active, name);
     });
   }
   return () => {
@@ -147,7 +154,7 @@ export function listen(name: string, listener: RoomListener): () => void {
     current.listeners.delete(listener);
     if (current.listeners.size === 0) {
       rooms.delete(name);
-      socket?.emit("unsubscribe", { room: name });
+      if (!isPrivate(name)) socket?.emit("unsubscribe", { room: name });
     }
   };
 }

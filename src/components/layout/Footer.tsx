@@ -27,7 +27,8 @@ const columns = [
     links: [
       { href: "/login", label: "Log in" },
       { href: "/login", label: "Favorites" },
-      { href: "/login", label: "Tickets" },
+      { href: "/me/tickets", label: "Tickets" },
+      { href: "/me/orders", label: "Orders" },
     ],
   },
 ];

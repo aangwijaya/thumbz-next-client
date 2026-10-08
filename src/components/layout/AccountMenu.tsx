@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -37,8 +38,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
   );
 }
 
-// Avatar with a small menu. The design has no account page yet, so the menu
-// only holds Log out.
+// Avatar with a small account menu.
 export function AccountMenu({ initial }: { initial: string }) {
   const [open, setOpen] = useState(false);
 
@@ -67,6 +67,19 @@ export function AccountMenu({ initial }: { initial: string }) {
           id="account-menu"
           className="absolute right-0 top-full z-10 mt-2 min-w-36 rounded-lg border border-stone bg-paper p-1 shadow-subtle"
         >
+          {[
+            { href: "/me/tickets", label: "Your tickets" },
+            { href: "/me/orders", label: "Orders" },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className={`block rounded-lg px-3 py-2 text-body-sm font-medium text-ink transition-colors hover:bg-cream ${focusRing}`}
+            >
+              {item.label}
+            </Link>
+          ))}
           <LogoutButton
             className={`w-full rounded-lg px-3 py-2 text-left text-body-sm font-medium text-ink transition-colors hover:bg-cream ${focusRing}`}
           />
