@@ -20,8 +20,6 @@ import type {
 } from "@/lib/api/types";
 import { formatDate, formatStage, initialsOf } from "@/lib/utils/format";
 
-export const dynamic = "force-dynamic";
-
 const TAB_ITEMS = [
   { value: "schedule", label: "Schedule" },
   { value: "standings", label: "Standings" },
@@ -35,7 +33,7 @@ async function fetchTournament(id: string): Promise<TournamentDetail> {
   try {
     const response = await apiFetch<ApiEnvelope<TournamentDetail>>(
       `/tournaments/${id}`,
-      { cache: "no-store" },
+      { next: { revalidate: 30, tags: ["catalog"] } },
     );
     return response?.data;
   } catch (error) {
@@ -60,7 +58,7 @@ function MatchList({ matches, emptyTitle }: { matches: MatchSummary[]; emptyTitl
 async function ScheduleTab({ id }: { id: string }) {
   const response = await apiFetch<ApiEnvelope<ScheduleGroup[]>>(
     `/tournaments/${id}/schedule?pageSize=50`,
-    { cache: "no-store" },
+    { next: { revalidate: 30, tags: ["catalog"] } },
   );
   const groups = response?.data ?? [];
   if (groups.length === 0) {
@@ -83,7 +81,7 @@ async function ScheduleTab({ id }: { id: string }) {
 async function StandingsTab({ id }: { id: string }) {
   const response = await apiFetch<ApiEnvelope<StandingsPayload>>(
     `/tournaments/${id}/standings`,
-    { cache: "no-store" },
+    { next: { revalidate: 30, tags: ["catalog"] } },
   );
   return <StandingsTable standings={response?.data} />;
 }
@@ -91,7 +89,7 @@ async function StandingsTab({ id }: { id: string }) {
 async function TeamsTab({ id }: { id: string }) {
   const response = await apiFetch<ApiEnvelope<TeamSummary[]>>(
     `/tournaments/${id}/teams`,
-    { cache: "no-store" },
+    { next: { revalidate: 30, tags: ["catalog"] } },
   );
   const teams = response?.data ?? [];
   if (teams.length === 0) {
@@ -109,7 +107,7 @@ async function TeamsTab({ id }: { id: string }) {
 async function ResultsTab({ id }: { id: string }) {
   const response = await apiFetch<ApiEnvelope<MatchSummary[]>>(
     `/tournaments/${id}/results?pageSize=50`,
-    { cache: "no-store" },
+    { next: { revalidate: 30, tags: ["catalog"] } },
   );
   return (
     <MatchList

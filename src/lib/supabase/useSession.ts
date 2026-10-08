@@ -1,40 +1,75 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-import { createClient } from "./client";
 
 export interface ClientSession {
   userId: string;
   token: string;
+  /** First letter of the display name or email, for the avatar. */
+  initial: string;
 }
 
-export function useSupabaseSession(): { session: ClientSession | null; ready: boolean } {
-  const supabase = useMemo(() => {
-    try {
-      return createClient();
-    } catch {
-      return null;
-    }
-  }, []);
-  const [session, setSession] = useState<ClientSession | null>(null);
-  const [ready, setReady] = useState(false);
+function toClientSession(session: {
+  access_token: string;
+  user: { id: string; email?: string; user_metadata?: Record<string, unknown> };
+}): ClientSession {
+  const meta = session.user.user_metadata ?? {};
+  const name =
+    (typeof meta.full_name === "string" && meta.full_name) ||
+    (typeof meta.name === "string" && meta.name) ||
+    session.user.email ||
+    "";
+  return {
+    userId: session.user.id,
+    token: session.access_token,
+    initial: name.trim().charAt(0).toUpperCase() || "U",
+  };
+}
 
-  useEffect(() => {
-    if (!supabase) {
-      setReady(true);
-      return;
-    }
-    supabase.auth.getSession().then(({ data }) => {
-      const s = data?.session;
-      setSession(s ? { userId: s.user.id, token: s.access_token } : null);
-      setReady(true);
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s ? { userId: s.user.id, token: s.access_token } : null);
-    });
-    return () => listener?.subscription.unsubscribe();
-  }, [supabase]);
+interface SessionState {
+  session: ClientSession | null;
+  ready: boolean;
+}
 
-  return { session, ready };
+/*
+ * One session store per tab: a single Supabase client and auth listener no
+ * matter how many components ask. supabase-js is imported on first use, so
+ * it stays off the critical path of every page that only needs the header.
+ */
+const SERVER_STATE: SessionState = { session: null, ready: false };
+let state: SessionState = SERVER_STATE;
+let started = false;
+const listeners = new Set<() => void>();
+
+function set(next: SessionState) {
+  state = next;
+  listeners.forEach((listener) => listener());
+}
+
+function start() {
+  if (started) return;
+  started = true;
+  import("./client")
+    .then(({ createClient }) => createClient())
+    .then((supabase) => {
+      supabase.auth.getSession().then(({ data }) => {
+        const s = data?.session;
+        set({ session: s ? toClientSession(s) : null, ready: true });
+      });
+      supabase.auth.onAuthStateChange((_event, s) => {
+        set({ session: s ? toClientSession(s) : null, ready: true });
+      });
+    })
+    .catch(() => set({ session: null, ready: true }));
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  start();
+  return () => listeners.delete(listener);
+}
+
+export function useSupabaseSession(): SessionState {
+  return useSyncExternalStore(subscribe, () => state, () => SERVER_STATE);
 }

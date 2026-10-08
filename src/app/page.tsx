@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { Suspense } from "react";
 
 import { ContinueWatching } from "@/components/home/ContinueWatching";
 import { FollowProvider } from "@/components/home/FollowProvider";
@@ -10,17 +11,22 @@ import { MatchLanguageProvider } from "@/components/home/MatchLanguage";
 import { Replays } from "@/components/home/Replays";
 import { Schedule } from "@/components/home/Schedule";
 import { Teams } from "@/components/home/Teams";
-import { Tournaments } from "@/components/home/Tournaments";
+import { Tournaments, TournamentsFallback } from "@/components/home/Tournaments";
 import { YourTeams } from "@/components/home/YourTeams";
 import { getFollowedTeams } from "@/lib/api/favorites";
 import { getHome } from "@/lib/api/home";
 import type { MatchSummary } from "@/lib/api/types";
+import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
+import { hideScoresFromCookie } from "@/lib/spoiler-server";
 import { getAccessToken } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const token = await getAccessToken();
+  const [token, hideScores] = await Promise.all([
+    getAccessToken(),
+    hideScoresFromCookie(),
+  ]);
   const [home, followedTeams] = await Promise.all([
     getHome(token),
     getFollowedTeams(token),
@@ -57,34 +63,49 @@ export default async function HomePage() {
   const host = (await headers()).get("host") ?? "thumbz";
 
   return (
-    <div className="flex-1 bg-paper text-ink">
-      <FollowProvider signedIn={token !== null} initialTeams={followedTeams}>
-        <MatchLanguageProvider initial={heroMatch?.broadcasts?.[0]?.language ?? null}>
-          <Hero
-            match={heroMatch}
-            liveCount={liveMatches.length}
-            viewerTotal={viewerTotal}
-            upcomingCount={upcoming.length}
-            todayCount={todayCount}
-            host={host}
-          />
-          <YourTeams liveMatches={liveMatches} upcoming={upcoming} />
-          {continueWatching.length > 0 ? (
-            <ContinueWatching items={continueWatching} />
+    <SpoilerProvider initialHidden={hideScores}>
+      <div className="flex-1 bg-paper text-ink">
+        <FollowProvider signedIn={token !== null} initialTeams={followedTeams}>
+          <MatchLanguageProvider
+            initial={heroMatch?.broadcasts?.[0]?.language ?? null}
+          >
+            <Hero
+              match={heroMatch}
+              liveCount={liveMatches.length}
+              viewerTotal={viewerTotal}
+              upcomingCount={upcoming.length}
+              todayCount={todayCount}
+              host={host}
+            />
+            <YourTeams liveMatches={liveMatches} upcoming={upcoming} />
+            {continueWatching.length > 0 ? (
+              <ContinueWatching items={continueWatching} />
+            ) : null}
+            {heroMatch?.status === "live" ? (
+              <MatchCenter match={heroMatch} />
+            ) : null}
+          </MatchLanguageProvider>
+          {otherLive.length > 0 ? (
+            <LiveNow matches={otherLive} more={heroMatch?.status === "live"} />
           ) : null}
-          {heroMatch?.status === "live" ? <MatchCenter match={heroMatch} /> : null}
-        </MatchLanguageProvider>
-        {otherLive.length > 0 ? (
-          <LiveNow matches={otherLive} more={heroMatch?.status === "live"} />
-        ) : null}
-        {upcoming.length > 0 ? <Schedule matches={upcoming} /> : null}
-        {tournaments.length > 0 ? <Tournaments tournaments={tournaments} /> : null}
-        {teams.length > 0 ? (
-          <Teams teams={teams} liveMatches={liveMatches} upcoming={upcoming} />
-        ) : null}
-        {videos.length > 0 ? <Replays videos={videos} /> : null}
-      </FollowProvider>
-      {token === null ? <JoinCta /> : null}
-    </div>
+          {upcoming.length > 0 ? <Schedule matches={upcoming} /> : null}
+          {tournaments.length > 0 ? (
+            // Standings per tournament stream in without holding up the page.
+            <Suspense fallback={<TournamentsFallback />}>
+              <Tournaments tournaments={tournaments} />
+            </Suspense>
+          ) : null}
+          {teams.length > 0 ? (
+            <Teams
+              teams={teams}
+              liveMatches={liveMatches}
+              upcoming={upcoming}
+            />
+          ) : null}
+          {videos.length > 0 ? <Replays videos={videos} /> : null}
+        </FollowProvider>
+        {token === null ? <JoinCta /> : null}
+      </div>
+    </SpoilerProvider>
   );
 }

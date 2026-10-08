@@ -240,7 +240,8 @@ export interface WatchHistoryItem {
 export interface HomePayload {
   featured_live_match: MatchDetail | null;
   live_now: MatchSummary[];
-  upcoming: MatchSummary[];
+  /** Upcoming matches carry their venue-ticket availability (no per-match calls). */
+  upcoming: Array<MatchSummary & { ticket?: TicketAvailability | null }>;
   featured_tournaments: TournamentSummary[];
   popular_teams: TeamSummary[];
   latest_videos: VideoSummary[];

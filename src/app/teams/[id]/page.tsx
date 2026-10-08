@@ -14,6 +14,14 @@ import type { MatchSummary, PlayerSummary, TeamDetail, TeamStatistics } from "@/
 
 type Props = { params: Promise<{ id: string }> };
 
+// ISR: each page renders on its first request, is then served from the CDN
+// cache, and refreshes every 30 s or when the API's revalidation webhook
+// marks its tags stale.
+export const revalidate = 30;
+export function generateStaticParams() {
+  return [];
+}
+
 const policy = (id: string) => ({ revalidate: 30, tags: [`team:${id}`, "catalog"] });
 // Shared by generateMetadata and the page: one request per render.
 const getTeam = cache((id: string) => getOrNotFound<TeamDetail>(`/teams/${id}`, policy(id)));

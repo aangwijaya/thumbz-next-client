@@ -14,6 +14,14 @@ import { initialsOf } from "@/lib/utils/format";
 
 type Props = { params: Promise<{ id: string }> };
 
+// ISR: each page renders on its first request, is then served from the CDN
+// cache, and refreshes every 30 s or when the API's revalidation webhook
+// marks its tags stale.
+export const revalidate = 30;
+export function generateStaticParams() {
+  return [];
+}
+
 const getPlayer = cache((id: string) => getOrNotFound<PlayerDetail>(`/players/${id}`));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

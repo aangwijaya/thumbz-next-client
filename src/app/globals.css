@@ -155,3 +155,18 @@
     @apply bg-background font-body text-text-primary antialiased;
   }
 }
+
+/* Spoiler mode before hydration on static pages (see Spoiler.tsx and the
+   head script that sets data-hide-scores from the cookie). */
+.spoiler-shown {
+  display: contents;
+}
+.spoiler-safe {
+  display: none;
+}
+:root[data-hide-scores] .spoiler-shown {
+  display: none;
+}
+:root[data-hide-scores] .spoiler-safe {
+  display: contents;
+}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { AccountMenu, LogoutButton } from "@/components/layout/AccountMenu";
+import { AccountArea, DrawerAccountLink } from "@/components/layout/AccountArea";
 import { HeaderShell } from "@/components/layout/HeaderShell";
 import { SearchCommand } from "@/components/search/SearchCommand";
 import { SpoilerToggle } from "@/components/spoiler/SpoilerToggle";
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/Badge";
 import { LiveDot } from "@/components/ui/LiveDot";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope, MatchSummary } from "@/lib/api/types";
-import { getUserInitial } from "@/lib/supabase/server";
 
 const navItems = [
   { href: "/live", label: "Live" },
@@ -41,7 +40,7 @@ async function fetchLiveCount(): Promise<number> {
 }
 
 export async function Header() {
-  const [initial, liveCount] = await Promise.all([getUserInitial(), fetchLiveCount()]);
+  const liveCount = await fetchLiveCount();
 
   const logo = (
     <Link href="/" aria-label="THUMBZ home" className={`rounded-lg ${focusRing}`}>
@@ -87,18 +86,7 @@ export async function Header() {
       <SearchCommand
         triggerClassName={`grid size-11 place-items-center min-[641px]:size-10 rounded-lg text-pencil transition-colors hover:bg-cream hover:text-ink ${focusRing}`}
       />
-      {initial ? (
-        <AccountMenu initial={initial} />
-      ) : (
-        <>
-          <Link href="/login" className={ghostLink}>
-            Log in
-          </Link>
-          <Link href="/login?mode=register" className={ghostLink}>
-            Sign up
-          </Link>
-        </>
-      )}
+      <AccountArea linkClassName={ghostLink} />
     </>
   );
 
@@ -115,13 +103,7 @@ export async function Header() {
           ) : null}
         </Link>
       ))}
-      {initial ? (
-        <LogoutButton className={drawerLink} />
-      ) : (
-        <Link href="/login" className={drawerLink}>
-          Log in
-        </Link>
-      )}
+      <DrawerAccountLink className={drawerLink} />
     </>
   );
 

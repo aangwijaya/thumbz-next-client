@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   IBM_Plex_Mono,
   Inter,
@@ -6,14 +7,14 @@ import {
   Shantell_Sans,
   Source_Serif_4,
 } from "next/font/google";
-import { cookies } from "next/headers";
 
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
 import { ToastProvider } from "@/components/ui/Toast";
-import { SPOILER_COOKIE } from "@/lib/spoiler";
+import { SPOILER_HEAD_SCRIPT } from "@/lib/spoiler-store";
 
 import "./globals.css";
 
@@ -59,21 +60,29 @@ export const metadata: Metadata = {
     "Premium Mobile Legends esports streaming and content platform — live matches, tournaments, teams, players and statistics.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
   banner,
 }: Readonly<{ children: React.ReactNode; banner: React.ReactNode }>) {
-  const hideScores = (await cookies()).get(SPOILER_COOKIE)?.value === "1";
-
   return (
     <html
       lang="en"
+      // The head script may add data-hide-scores before React hydrates.
+      suppressHydrationWarning
       className={`${sourceSerif4.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} ${shantellSans.variable}`}
     >
+      <head>
+        {/* Before first paint: spoiler preference from the cookie onto <html>. */}
+        <script dangerouslySetInnerHTML={{ __html: SPOILER_HEAD_SCRIPT }} />
+      </head>
       <body className="flex min-h-screen flex-col">
+        {/* Suspense: useSearchParams must not opt static pages out of prerendering. */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <QueryProvider>
           <ToastProvider>
-            <SpoilerProvider initialHidden={hideScores}>
+            <SpoilerProvider>
               {banner}
               <Header />
               <main className="flex flex-1 flex-col">{children}</main>

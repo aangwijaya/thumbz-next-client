@@ -5,8 +5,6 @@ import { TournamentCard } from "@/components/cards/TournamentCard";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope, TournamentSummary, TournamentStatus } from "@/lib/api/types";
 
-export const dynamic = "force-dynamic";
-
 const STATUS_ORDER: Array<{ status: TournamentStatus; title: string }> = [
   { status: "ongoing", title: "Ongoing" },
   { status: "upcoming", title: "Upcoming" },
@@ -16,7 +14,7 @@ const STATUS_ORDER: Array<{ status: TournamentStatus; title: string }> = [
 async function fetchTournaments(): Promise<TournamentSummary[]> {
   const response = await apiFetch<ApiEnvelope<TournamentSummary[]>>(
     "/tournaments?pageSize=50",
-    { cache: "no-store" },
+    { next: { revalidate: 60, tags: ["catalog"] } },
   );
   return response?.data ?? [];
 }

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { fetchSuggestions, queryKeys } from "@/lib/api/endpoints";
 import type { SearchSuggestion } from "@/lib/api/types";
+import { startNavigationProgress } from "@/components/layout/NavigationProgress";
 import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { initialsOf } from "@/lib/utils/format";
 
@@ -132,6 +133,7 @@ export function SearchCommand({ triggerClassName }: { triggerClassName: string }
     if (option.kind !== "suggestion") rememberSearch(option.kind === "search" ? trimmed : option.label);
     else rememberSearch(option.label);
     hide();
+    startNavigationProgress();
     router.push(option.href);
   }
 

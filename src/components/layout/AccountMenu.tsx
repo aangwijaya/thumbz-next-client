@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { createClient } from "@/lib/supabase/client";
 
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
@@ -15,6 +14,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
   async function handleLogout() {
     setPending(true);
     try {
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch {
