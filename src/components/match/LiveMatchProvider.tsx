@@ -6,7 +6,7 @@ import { createContext, useContext, useState } from "react";
 
 import { LiveDot } from "@/components/ui/LiveDot";
 import { queryKeys } from "@/lib/api/endpoints";
-import type { MatchDetail, MatchSummary } from "@/lib/api/types";
+import type { MatchDetail, MatchGame, MatchSummary } from "@/lib/api/types";
 import { useRealtimeRoom, useRealtimeStatus } from "@/lib/realtime/hooks";
 
 type MatchPatch = Partial<
@@ -49,9 +49,11 @@ export function LiveMatchProvider({ matchId, children }: { matchId: string; chil
         setPatch((previous) => {
           // A status change (e.g. live → completed) reshapes the page.
           if (previous?.status && next.status && previous.status !== next.status) router.refresh();
-          // A new game starts: live data is per game, so fetch the new game's.
+          // A new game starts: live data is per game, so fetch the new game's,
+          // and reload the match for the game's start time (pushes omit it).
           if (next.game_number != null && previous?.game_number != null && next.game_number !== previous.game_number) {
             for (const key of Object.values(LIVE_KINDS)) void queryClient.invalidateQueries({ queryKey: key(matchId) });
+            router.refresh();
           }
           return { ...previous, ...next };
         });
@@ -86,7 +88,15 @@ export function LiveMatchProvider({ matchId, children }: { matchId: string; chil
 export function useLiveMatch<T extends { id?: string } | null | undefined>(match: T): T {
   const live = useContext(LiveMatchContext);
   if (!match || !live?.patch || live.id !== match.id) return match;
-  return { ...match, ...live.patch };
+  const known = (match as { games?: MatchGame[] }).games;
+  const pushed = live.patch.games;
+  // Pushed games carry status and winner only: keep the start/end times the
+  // page already has for them (the item timeline and game clock need them).
+  const games = pushed?.map((game) => ({
+    ...known?.find((row) => row?.game_number === game?.game_number),
+    ...game,
+  }));
+  return { ...match, ...live.patch, ...(games ? { games } : {}) };
 }
 
 /** "Live updates · 128 watching on THUMBZ", or the fallback state. */
