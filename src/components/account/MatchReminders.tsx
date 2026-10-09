@@ -19,6 +19,14 @@ type Status =
 const buttonClass =
   "inline-flex min-h-11 items-center rounded-lg px-4 text-body-sm font-semibold transition-colors disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
 
+/** Some engines never settle push calls (no push service): don't wait forever. */
+function withinSeconds<T>(promise: Promise<T>, seconds: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("push service timed out")), seconds * 1000)),
+  ]);
+}
+
 async function workerRegistration(): Promise<ServiceWorkerRegistration | null> {
   // The worker is registered by production builds only (see ServiceWorkerRegister).
   if (process.env.NODE_ENV !== "production") return null;
@@ -49,7 +57,9 @@ export function MatchReminders() {
       if (cancelled) return;
       if (!config?.enabled || !registration) return setStatus("unavailable");
       if (Notification.permission === "denied") return setStatus("blocked");
-      const existing = await registration.pushManager.getSubscription();
+      // Without permission no subscription can exist: skip the push service.
+      if (Notification.permission !== "granted") return setStatus("off");
+      const existing = await withinSeconds(registration.pushManager.getSubscription(), 5);
       if (existing) {
         // Re-save: another account may have used this browser since.
         await savePushSubscription(existing.toJSON(), token);
@@ -97,7 +107,7 @@ export function MatchReminders() {
     setMessage(null);
     try {
       const registration = await workerRegistration();
-      const subscription = await registration?.pushManager.getSubscription();
+      const subscription = registration ? await withinSeconds(registration.pushManager.getSubscription(), 5) : null;
       if (subscription) {
         await deletePushSubscription(subscription.endpoint, token);
         await subscription.unsubscribe();

@@ -74,6 +74,23 @@ describe("MatchReminders", () => {
     expect(subscription.unsubscribe).toHaveBeenCalled();
   });
 
+  it("does not touch the push service before permission is granted", async () => {
+    const { pushManager } = installBrowser({ permission: "default" });
+    render(<MatchReminders />);
+    expect(await screen.findByRole("button", { name: "Turn on" })).toBeTruthy();
+    expect(pushManager.getSubscription).not.toHaveBeenCalled();
+  });
+
+  it("gives up on a push service that never answers", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const { pushManager } = installBrowser({ permission: "granted" });
+    pushManager.getSubscription.mockReturnValue(new Promise(() => undefined));
+    render(<MatchReminders />);
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(await screen.findByText(/not available on this device/)).toBeTruthy();
+    vi.useRealTimers();
+  });
+
   it("explains blocked notifications instead of offering a dead button", async () => {
     installBrowser({ permission: "denied" });
     render(<MatchReminders />);
