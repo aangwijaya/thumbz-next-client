@@ -49,7 +49,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npx playwright test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report
@@ -76,7 +76,7 @@ jobs:
           if [ -n "$BYPASS" ]; then headers="--collect.settings.extraHeaders={\"x-vercel-protection-bypass\":\"$BYPASS\"}"; fi
           npx -y @lhci/cli@0.15.1 collect $urls $headers
           npx -y @lhci/cli@0.15.1 assert
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: lighthouse
