@@ -1,0 +1,84 @@
+name: Preview checks
+
+# Runs when Vercel finishes a preview deployment (or by hand against any URL):
+# cross-browser end-to-end tests and Lighthouse budgets on the real build.
+#
+# Repository settings:
+#   vars.E2E_API_URL                      API the preview talks to (staging), e.g. https://api-staging.example/api/v1
+#   secrets.E2E_EMAIL / E2E_PASSWORD      a demo account on that API's Supabase project
+#   secrets.VERCEL_AUTOMATION_BYPASS_SECRET  only if previews use Deployment Protection
+# The staging API needs PAYMENTS_SANDBOX=true and Supabase email confirmation
+# off (the checkout test signs up a fresh account per run).
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Site to test, e.g. https://thumbz-git-feature-x.vercel.app
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.event.deployment_status.environment_url || inputs.base_url }}
+  cancel-in-progress: true
+
+env:
+  BASE_URL: ${{ inputs.base_url || github.event.deployment_status.environment_url }}
+
+jobs:
+  e2e:
+    name: Playwright (Chrome, Safari, iPhone, Pixel)
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: ${{ inputs.base_url || github.event.deployment_status.environment_url }}
+      E2E_API_URL: ${{ vars.E2E_API_URL }}
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      E2E_SW: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse budgets
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Collect and assert (lighthouserc.json budgets)
+        env:
+          BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          urls=""
+          for path in / /matches /videos /tournaments "/search?q=onic"; do urls="$urls --collect.url=${BASE_URL%/}$path"; done
+          headers=""
+          if [ -n "$BYPASS" ]; then headers="--collect.settings.extraHeaders={\"x-vercel-protection-bypass\":\"$BYPASS\"}"; fi
+          npx -y @lhci/cli@0.15.1 collect $urls $headers
+          npx -y @lhci/cli@0.15.1 assert
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          retention-days: 14
