@@ -1,131 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+
+import { useMatchChat } from "@/components/chat/MatchChatProvider";
+import { useCommentComposer } from "@/components/chat/useCommentComposer";
 
 import { RevealButton } from "@/components/spoiler/Spoiler";
-import { useSpoilers } from "@/components/spoiler/SpoilerProvider";
-import { useToast } from "@/components/ui/Toast";
-import { fetchMatchComments, postMatchComment } from "@/lib/api/endpoints";
-import { isApiError } from "@/lib/api/errors";
-import type { MatchComment } from "@/lib/api/types";
-import { useSupabaseSession } from "@/lib/supabase/useSession";
-
-// Contract §6.2: poll comments about every 5s, never faster.
-const POLL_MS = 5_000;
-const KEEP = 30;
-const SHOWN = 9;
-
-function merge(incoming: MatchComment[], previous: MatchComment[]): MatchComment[] {
-  const known = new Set(previous.map((comment) => comment?.id));
-  const fresh = incoming.filter((comment) => comment?.id && !known.has(comment.id));
-  return fresh.length > 0 ? [...fresh, ...previous].slice(0, KEEP) : previous;
-}
-
-interface HeroChatValue {
-  matchId: string;
-  /** Newest first. */
-  comments: MatchComment[];
-  total: number | null;
-  loaded: boolean;
-  /** False while scores are hidden for this match: the chat can mention them. */
-  visible: boolean;
-  addComment: (comment: MatchComment) => void;
-}
-
-const HeroChatContext = createContext<HeroChatValue | null>(null);
-
-function useHeroChat(): HeroChatValue {
-  const value = useContext(HeroChatContext);
-  if (!value) throw new Error("useHeroChat must be used inside HeroChatProvider");
-  return value;
-}
-
-// Polls the featured match's chat once for both views: the phone next to the
-// player on desktop and the one-line ticker under it on phones.
-export function HeroChatProvider({
-  matchId,
-  children,
-}: {
-  matchId: string;
-  children: React.ReactNode;
-}) {
-  const { isVisible } = useSpoilers();
-  const visible = isVisible(matchId);
-  const [comments, setComments] = useState<MatchComment[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const cursor = useRef<string | null>(null);
-
-  const poll = useCallback(async () => {
-    try {
-      const response = await fetchMatchComments(matchId, cursor.current ?? undefined);
-      setComments((previous) => merge(response?.data ?? [], previous));
-      if (response?.meta?.next_cursor) cursor.current = response.meta.next_cursor;
-      if (typeof response?.meta?.total === "number") setTotal(response.meta.total);
-    } catch {
-      // Keep what we have and try again on the next tick.
-    } finally {
-      setLoaded(true);
-    }
-  }, [matchId]);
-
-  // The chat is covered while scores are hidden, so it does not poll then.
-  useEffect(() => {
-    if (!visible) return;
-    poll();
-    const timer = setInterval(() => {
-      if (!document.hidden) poll();
-    }, POLL_MS);
-    return () => clearInterval(timer);
-  }, [poll, visible]);
-
-  function addComment(comment: MatchComment) {
-    setComments((previous) => merge([comment], previous));
-    setTotal((count) => (count == null ? count : count + 1));
-  }
-
-  return (
-    <HeroChatContext.Provider value={{ matchId, comments, total, loaded, visible, addComment }}>
-      {children}
-    </HeroChatContext.Provider>
-  );
-}
 
 // Desktop: the chat as a phone overlapping the player's lower right corner.
-export function HeroChatPhone() {
-  const { matchId, comments, total, loaded, visible, addComment } = useHeroChat();
-  const { session } = useSupabaseSession();
-  const toast = useToast();
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
+export { MatchChatProvider as HeroChatProvider } from "@/components/chat/MatchChatProvider";
 
-  async function handleSend(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const body = draft.trim();
-    if (!session || body.length === 0 || sending) return;
-    setSending(true);
-    try {
-      addComment(await postMatchComment(matchId, body, session.token));
-      setDraft("");
-    } catch (error) {
-      const status = isApiError(error) ? error.status : 0;
-      toast(
-        status === 429
-          ? "Slow down: one comment every few seconds."
-          : status === 401
-            ? "Your session expired. Please log in again."
-            : status === 422
-              ? "Comments are open while the match is live."
-              : "Could not send your comment. Try again.",
-      );
-    } finally {
-      setSending(false);
-    }
-  }
+export function HeroChatPhone() {
+  const { matchId, comments, total, loaded, visible } = useMatchChat();
+  const { session, draft, setDraft, sending, send } = useCommentComposer();
 
   // Newest last, like a chat.
-  const shown = comments.slice(0, SHOWN).reverse();
+  const shown = comments.slice(0, 9).reverse();
 
   return (
     <section
@@ -175,7 +65,7 @@ export function HeroChatPhone() {
 
         <div className="border-t border-stone/50 p-2">
           {session ? (
-            <form onSubmit={handleSend} className="flex gap-1.5">
+            <form onSubmit={send} className="flex gap-1.5">
               <label htmlFor="hero-chat-input" className="sr-only">
                 Write a comment
               </label>
@@ -212,7 +102,7 @@ export function HeroChatPhone() {
 
 // Phones: the newest message on one line under the player.
 export function HeroChatTicker() {
-  const { matchId, comments, total, loaded, visible } = useHeroChat();
+  const { matchId, comments, total, loaded, visible } = useMatchChat();
   const latest = comments[0];
 
   return (

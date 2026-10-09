@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -5,7 +7,11 @@ import { TournamentCard } from "@/components/cards/TournamentCard";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope, TournamentSummary, TournamentStatus } from "@/lib/api/types";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Tournaments",
+  description: "Mobile Legends esports leagues and championships — schedules, standings and venue tickets.",
+  alternates: { canonical: "/tournaments" },
+};
 
 const STATUS_ORDER: Array<{ status: TournamentStatus; title: string }> = [
   { status: "ongoing", title: "Ongoing" },
@@ -13,16 +19,24 @@ const STATUS_ORDER: Array<{ status: TournamentStatus; title: string }> = [
   { status: "completed", title: "Completed" },
 ];
 
-async function fetchTournaments(): Promise<TournamentSummary[]> {
-  const response = await apiFetch<ApiEnvelope<TournamentSummary[]>>(
-    "/tournaments?pageSize=50",
-    { cache: "no-store" },
-  );
-  return response?.data ?? [];
+/** null = the API could not be reached (distinct from "no tournaments"). */
+async function fetchTournaments(): Promise<TournamentSummary[] | null> {
+  try {
+    const response = await apiFetch<ApiEnvelope<TournamentSummary[]>>(
+      "/tournaments?pageSize=50",
+      { next: { revalidate: 60, tags: ["catalog"] } },
+    );
+    return response?.data ?? [];
+  } catch {
+    // Static page: an unreachable API must not fail the build. The next ISR
+    // revalidation (60 s) replaces this state once the API is back.
+    return null;
+  }
 }
 
 export default async function TournamentsPage() {
-  const tournaments = await fetchTournaments();
+  const result = await fetchTournaments();
+  const tournaments = result ?? [];
 
   return (
     <div className="flex-1 bg-page-dark">
@@ -37,7 +51,12 @@ export default async function TournamentsPage() {
           </p>
         </div>
 
-        {tournaments.length === 0 ? (
+        {result === null ? (
+          <EmptyState
+            title="Tournaments are temporarily unavailable"
+            description="We could not load tournaments right now. Please check back in a minute."
+          />
+        ) : tournaments.length === 0 ? (
           <EmptyState
             title="No tournaments yet"
             description="Tournaments will appear here once they are announced."

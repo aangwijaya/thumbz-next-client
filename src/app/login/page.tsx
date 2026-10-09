@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 
 function GoogleIcon() {
   return (
@@ -19,9 +20,8 @@ function GoogleIcon() {
 
 function LoginForm() {
   const supabase = createClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
+  const next = safeNextPath(searchParams.get("next"));
 
   const [mode, setMode] = useState<"login" | "register">(
     searchParams.get("mode") === "register" ? "register" : "login",
@@ -46,8 +46,7 @@ function LoginForm() {
       if (signInError) {
         setError("Invalid email or password.");
       } else {
-        router.push(next);
-        router.refresh();
+        enterSignedIn(next);
       }
     } else {
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -57,8 +56,7 @@ function LoginForm() {
       if (signUpError) {
         setError(signUpError.message);
       } else if (data.session) {
-        router.push(next);
-        router.refresh();
+        enterSignedIn(next);
       } else {
         setMessage("Account created. Check your email to confirm your sign-up.");
       }
@@ -160,6 +158,15 @@ function LoginForm() {
       </p>
     </div>
   );
+}
+
+/**
+ * A full navigation, not router.push: links prefetched while signed out
+ * (footer, menu) sit in the client Router Cache as redirects to /login and
+ * would send the user straight back here.
+ */
+function enterSignedIn(next: string) {
+  window.location.assign(next);
 }
 
 export default function LoginPage() {

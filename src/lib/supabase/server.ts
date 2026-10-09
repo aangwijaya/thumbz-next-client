@@ -26,32 +26,45 @@ export async function createClient() {
   );
 }
 
+function isConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
+
+/**
+ * The session's access token, to forward as `Bearer` to the API (which
+ * verifies it against the JWKS). Read from the cookie session: never use it
+ * for authorization decisions in this app — use getVerifiedClaims() for that.
+ */
 export async function getAccessToken(): Promise<string | null> {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    return null;
-  }
+  if (!isConfigured()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getSession();
   return data?.session?.access_token ?? null;
 }
 
+interface SessionClaims {
+  sub: string;
+  email?: string;
+  user_metadata?: { full_name?: string; name?: string };
+}
+
+/** JWT claims verified against the Supabase JWKS; null when signed out. */
+export async function getVerifiedClaims(): Promise<SessionClaims | null> {
+  if (!isConfigured()) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims as SessionClaims | undefined;
+  if (error || typeof claims?.sub !== "string") return null;
+  return claims;
+}
+
 // First letter of the signed-in user's name (or email) for the header avatar.
-// Null when signed out. Display only, never used for authorization: the token
-// claims are read without verifying them, the middleware validates the session.
 export async function getUserInitial(): Promise<string | null> {
-  const token = await getAccessToken();
-  if (!token) return null;
-
-  let claims: { email?: string; user_metadata?: { full_name?: string; name?: string } } = {};
-  try {
-    claims = JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString());
-  } catch {
-    // unreadable token: fall back to a generic initial
-  }
-
-  const name = claims?.user_metadata?.full_name ?? claims?.user_metadata?.name ?? claims?.email ?? "";
+  const claims = await getVerifiedClaims();
+  if (!claims) return null;
+  const name =
+    claims.user_metadata?.full_name ?? claims.user_metadata?.name ?? claims.email ?? "";
   return name.trim().charAt(0).toUpperCase() || "U";
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 
 import { FollowingBadge } from "@/components/home/FollowControls";
 import { Badge } from "@/components/ui/Badge";
 import { LogoMark } from "@/components/ui/LogoMark";
 import type { MatchSummary, TicketAvailability } from "@/lib/api/types";
 import { formatStage } from "@/lib/utils/format";
+import { dateKey, useTimeZone } from "@/lib/hooks/useTimeZone";
 
 interface SchedulePlannerProps {
   matches: MatchSummary[];
@@ -22,24 +22,8 @@ interface Day {
   matches: MatchSummary[];
 }
 
-const noSubscription = () => () => {};
-
-// The server and the first client render use UTC, so they match. Right after
-// hydration this switches to the visitor's own time zone.
-function useTimeZone(): string {
-  return useSyncExternalStore(
-    noSubscription,
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
-    () => "UTC",
-  );
-}
-
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
-
-function dateKey(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(date);
-}
 
 function groupByDay(matches: MatchSummary[], timeZone: string): Day[] {
   const days = new Map<string, Day>();

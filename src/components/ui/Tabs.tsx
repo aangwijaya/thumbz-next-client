@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState, useTransition } from "react";
 
 export interface TabItem {
   value: string;
@@ -27,16 +27,25 @@ export function Tabs({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [pending, startTransition] = useTransition();
+  // Shows the clicked tab immediately while the server renders its panel.
+  const [optimistic, setOptimistic] = useState<string | null>(null);
+  const current = pending && optimistic ? optimistic : activeValue;
 
   const activeIndex = Math.max(
     0,
-    items.findIndex((item) => item.value === activeValue),
+    items.findIndex((item) => item.value === current),
   );
 
   function select(value: string) {
+    if (value === current) return;
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set(paramName, value);
-    router.push(`${pathname}?${params.toString()}`);
+    setOptimistic(value);
+    // replace: switching tabs should not fill the back stack.
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   }
 
   function onKeyDown(event: React.KeyboardEvent) {
@@ -65,10 +74,11 @@ export function Tabs({
     <div
       role="tablist"
       aria-label={ariaLabel}
+      aria-busy={pending}
       className={`flex gap-1 overflow-x-auto border-b border-border ${className}`}
     >
       {items.map((item, index) => {
-        const isActive = item.value === activeValue;
+        const isActive = item.value === current;
         return (
           <button
             key={item.value}

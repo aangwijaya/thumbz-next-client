@@ -1,9 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useRealtimeConnected } from "@/lib/realtime/hooks";
+
 import { apiFetch } from "./client";
 import type {
   ApiEnvelope,
   CommentsEnvelope,
+  CursorEnvelope,
+  Favorite,
   FavoriteEntityType,
   GoldSnapshot,
   HomePayload,
@@ -22,6 +26,7 @@ import type {
   PlayerSummary,
   ScheduleGroup,
   SearchPayload,
+  SearchSuggestion,
   StageInfo,
   StandingsPayload,
   TeamDetail,
@@ -30,11 +35,16 @@ import type {
   TicketAvailability,
   TicketOrder,
   TicketOrderDetail,
+  MatchTicket,
+  PaymentMethod,
+  PlaybackSession,
   TournamentDetail,
   TournamentStatus,
   TournamentSummary,
   VideoType,
   VideoSummary,
+  UserProfile,
+  WatchHistoryItem,
 } from "./types";
 
 export type SortOrder = "asc" | "desc";
@@ -109,7 +119,7 @@ function withQuery(path: string, params?: object): string {
   return query ? `${path}?${query}` : path;
 }
 
-async function fetchData<T>(path: string): Promise<T> {
+export async function fetchData<T>(path: string): Promise<T> {
   const envelope = await apiFetch<ApiEnvelope<T>>(path);
   return envelope.data;
 }
@@ -125,15 +135,25 @@ export const queryKeys = {
   featuredMatches: () => ["matches", "featured"] as const,
   matches: (params: MatchListParams = {}) => ["matches", params] as const,
   match: (id: string) => ["matches", id] as const,
-  matchStatistics: (id: string) => ["matches", id, "statistics"] as const,
+  matchStatistics: (id: string, game?: number) =>
+    (game ? (["matches", id, "statistics", game] as const) : (["matches", id, "statistics"] as const)),
   matchRoster: (id: string) => ["matches", id, "roster"] as const,
   matchHistory: (id: string) => ["matches", id, "history"] as const,
   matchRelated: (id: string) => ["matches", id, "related"] as const,
   matchEconomy: (id: string) => ["matches", id, "economy"] as const,
-  matchLiveStats: (id: string) => ["matches", id, "live-stats"] as const,
-  matchEquipment: (id: string) => ["matches", id, "equipment"] as const,
-  matchEvents: (id: string) => ["matches", id, "events"] as const,
+  matchLiveStats: (id: string, game?: number) =>
+    (game ? (["matches", id, "live-stats", game] as const) : (["matches", id, "live-stats"] as const)),
+  matchEquipment: (id: string, game?: number) =>
+    (game ? (["matches", id, "equipment", game] as const) : (["matches", id, "equipment"] as const)),
+  matchEvents: (id: string, game?: number) =>
+    (game ? (["matches", id, "events", game] as const) : (["matches", id, "events"] as const)),
   matchTicket: (id: string) => ["matches", id, "ticket"] as const,
+  order: (id: string) => ["me", "orders", id] as const,
+  myOrders: (page: number) => ["me", "orders", "list", page] as const,
+  myTickets: (page: number) => ["me", "tickets", page] as const,
+  me: () => ["me", "profile"] as const,
+  myFavorites: () => ["me", "favorites"] as const,
+  myHistory: () => ["me", "history"] as const,
   tournaments: (params: TournamentListParams = {}) => ["tournaments", params] as const,
   tournament: (id: string) => ["tournaments", id] as const,
   tournamentSchedule: (id: string, params: ScheduleParams = {}) =>
@@ -154,7 +174,9 @@ export const queryKeys = {
     ["players", id, "matches", params] as const,
   playerStatistics: (id: string) => ["players", id, "statistics"] as const,
   videos: (params: VideoListParams = {}) => ["videos", params] as const,
+  videoFeed: (type?: VideoType) => ["videos", "feed", type ?? "all"] as const,
   search: (params: SearchParams) => ["search", params] as const,
+  suggest: (q: string) => ["search", "suggest", q.toLowerCase()] as const,
 };
 
 export function useHome() {
@@ -201,10 +223,13 @@ export function useMatch(id: string) {
   });
 }
 
-export function useMatchStatistics(id: string, enabled = true) {
+/** `?game_number=` for one game of the series; omitted, the API picks the current/last game. */
+const forGame = (path: string, game?: number) => (game ? `${path}?game_number=${game}` : path);
+
+export function useMatchStatistics(id: string, enabled = true, game?: number) {
   return useQuery({
-    queryKey: queryKeys.matchStatistics(id),
-    queryFn: () => fetchData<MatchStatistics>(`/matches/${id}/statistics`),
+    queryKey: queryKeys.matchStatistics(id, game),
+    queryFn: () => fetchData<MatchStatistics>(forGame(`/matches/${id}/statistics`, game)),
     enabled,
   });
 }
@@ -234,34 +259,42 @@ export function useMatchRelated(id: string, enabled = true) {
 }
 
 export function useMatchEconomy(id: string, live = false) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchEconomy(id),
     queryFn: () => fetchData<GoldSnapshot[]>(`/matches/${id}/economy`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
-export function useMatchLiveStats(id: string, live = false) {
+export function useMatchLiveStats(id: string, live = false, game?: number) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchLiveStats(id),
-    queryFn: () => fetchData<PlayerSnapshot[]>(`/matches/${id}/live-stats`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    queryKey: queryKeys.matchLiveStats(id, game),
+    queryFn: () => fetchData<PlayerSnapshot[]>(forGame(`/matches/${id}/live-stats`, game)),
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
-export function useMatchEquipment(id: string, live = false) {
+export function useMatchEquipment(id: string, live = false, game?: number) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchEquipment(id),
-    queryFn: () => fetchData<ItemPurchase[]>(`/matches/${id}/equipment`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    queryKey: queryKeys.matchEquipment(id, game),
+    queryFn: () => fetchData<ItemPurchase[]>(forGame(`/matches/${id}/equipment`, game)),
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
-export function useMatchEvents(id: string, live = false) {
+export function useMatchEvents(id: string, live = false, game?: number) {
+  // Pushes replace polling while the realtime channel is up (contract §14).
+  const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchEvents(id),
-    queryFn: () => fetchData<MatchEvent[]>(`/matches/${id}/events`),
-    refetchInterval: live ? LIVE_POLL_MS : undefined,
+    queryKey: queryKeys.matchEvents(id, game),
+    queryFn: () => fetchData<MatchEvent[]>(forGame(`/matches/${id}/events`, game)),
+    refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
@@ -394,12 +427,37 @@ export function useSearch(params: SearchParams) {
   });
 }
 
+/** Typeahead suggestions for the header search (contract §6.7). */
+export async function fetchSuggestions(q: string, signal?: AbortSignal): Promise<SearchSuggestion[]> {
+  const envelope = await apiFetch<ApiEnvelope<SearchSuggestion[]>>(
+    withQuery("/search/suggest", { q, limit: 8 }),
+    { signal },
+  );
+  return envelope?.data ?? [];
+}
+
+/** One keyset page of the replay feed (contract §4.1). */
+export function fetchVideoPage(
+  params: { type?: VideoType; cursor?: string | null; pageSize?: number },
+  signal?: AbortSignal,
+): Promise<CursorEnvelope<VideoSummary[]>> {
+  return apiFetch<CursorEnvelope<VideoSummary[]>>(
+    withQuery("/videos", {
+      type: params.type,
+      cursor: params.cursor ?? undefined,
+      pageSize: params.pageSize ?? 12,
+    }),
+    { signal },
+  );
+}
+
+/** Comments page: `after` for newer (delta polling), `before` for older (scroll-back). */
 export async function fetchMatchComments(
   matchId: string,
-  after?: string,
+  cursor: { after?: string; before?: string } = {},
 ): Promise<CommentsEnvelope> {
   return apiFetch<CommentsEnvelope>(
-    withQuery(`/matches/${matchId}/comments`, { after, limit: 30 }),
+    withQuery(`/matches/${matchId}/comments`, { ...cursor, limit: 30 }),
   );
 }
 
@@ -426,34 +484,157 @@ export async function deleteMatchComment(
 }
 
 export function useMatchTicket(matchId: string) {
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.matchTicket(matchId),
     queryFn: () => fetchData<TicketAvailability | null>(`/matches/${matchId}/ticket`),
-    refetchInterval: LIVE_POLL_MS,
+    // tickets:changed pushes invalidate this while connected.
+    refetchInterval: connected ? false : LIVE_POLL_MS,
   });
 }
 
+/**
+ * Reserves tickets and opens the first payment attempt. `idempotencyKey` is
+ * reused when the same click is retried, so a flaky network can never create
+ * two orders (contract §16).
+ */
 export async function postMatchOrder(
   matchId: string,
-  quantity: number,
+  body: { quantity: number; payment_method: PaymentMethod },
   token: string,
+  idempotencyKey: string,
 ): Promise<TicketOrder> {
-  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(
-    `/matches/${matchId}/orders`,
-    { method: "POST", body: { quantity }, token },
+  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(`/matches/${matchId}/orders`, {
+    method: "POST",
+    body,
+    token,
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
+  return envelope.data;
+}
+
+/** Pays a pending order with another method (supersedes earlier attempts). */
+export async function postOrderPayment(
+  orderId: string,
+  method: PaymentMethod,
+  token: string,
+  idempotencyKey: string,
+): Promise<TicketOrder> {
+  const envelope = await apiFetch<ApiEnvelope<TicketOrder>>(`/me/orders/${orderId}/payments`, {
+    method: "POST",
+    body: { method },
+    token,
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
+  return envelope.data;
+}
+
+/** Opens a protected playback session (contract §17); 409 = device limit reached. */
+export async function createPlaybackSession(assetId: string, token: string): Promise<PlaybackSession> {
+  const envelope = await apiFetch<ApiEnvelope<PlaybackSession>>("/playback/sessions", {
+    method: "POST",
+    body: { asset_id: assetId },
+    token,
+  });
+  return envelope.data;
+}
+
+/** Keeps the session counted as active and returns a rotated playback token. */
+export async function heartbeatPlaybackSession(
+  sessionId: string,
+  token: string,
+): Promise<{ token: string; expires_at: string }> {
+  const envelope = await apiFetch<ApiEnvelope<{ token: string; expires_at: string }>>(
+    `/playback/sessions/${sessionId}/heartbeat`,
+    { method: "POST", token },
   );
   return envelope.data;
+}
+
+/**
+ * Frees the device slot. `keepalive` lets the request outlive a closing tab
+ * (sendBeacon cannot carry the Authorization header).
+ */
+export function endPlaybackSession(sessionId: string, token: string): void {
+  const base = process.env.NEXT_PUBLIC_API_URL;
+  if (!base) return;
+  void fetch(`${base}/playback/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+    keepalive: true,
+  }).catch(() => undefined);
+}
+
+export async function fetchMe(token: string): Promise<UserProfile> {
+  return (await apiFetch<ApiEnvelope<UserProfile>>("/me", { token, cache: "no-store" })).data;
+}
+
+export async function fetchMyFavorites(token: string): Promise<Favorite[]> {
+  return (await apiFetch<ApiEnvelope<Favorite[]>>("/me/favorites", { token, cache: "no-store" }))?.data ?? [];
+}
+
+/** One offset page of the watch history, newest first (contract §4.1, §6.8: no cursor here). */
+export function fetchMyHistoryPage(
+  token: string,
+  page: number,
+  signal?: AbortSignal,
+): Promise<ApiEnvelope<WatchHistoryItem[]>> {
+  return apiFetch<ApiEnvelope<WatchHistoryItem[]>>(withQuery("/me/history", { page, pageSize: 20 }), {
+    token,
+    cache: "no-store",
+    signal,
+  });
+}
+
+export async function deleteHistoryItem(matchId: string, token: string): Promise<void> {
+  await apiFetch<undefined>(`/me/history/${matchId}`, { method: "DELETE", token });
+}
+
+/** Web Push availability and the VAPID key (contract §18). */
+export async function fetchPushConfig(): Promise<{ enabled: boolean; public_key: string | null }> {
+  return (await apiFetch<ApiEnvelope<{ enabled: boolean; public_key: string | null }>>("/push/config", { cache: "no-store" }))
+    .data;
+}
+
+export async function savePushSubscription(subscription: PushSubscriptionJSON, token: string): Promise<void> {
+  await apiFetch<unknown>("/me/push-subscriptions", { method: "PUT", body: subscription, token });
+}
+
+export async function deletePushSubscription(endpoint: string, token: string): Promise<void> {
+  await apiFetch<undefined>(withQuery("/me/push-subscriptions", { endpoint }), { method: "DELETE", token });
+}
+
+export async function sendTestPush(token: string): Promise<void> {
+  await apiFetch<unknown>("/me/push-subscriptions/test", { method: "POST", token });
+}
+
+/** Sandbox gateway only: completes a demo payment. */
+export async function simulatePayment(paymentId: string, token: string): Promise<void> {
+  await apiFetch<unknown>(`/me/payments/${paymentId}/simulate`, { method: "POST", token });
+}
+
+export async function fetchMyOrders(token: string, page = 1): Promise<ApiEnvelope<TicketOrder[]>> {
+  return apiFetch<ApiEnvelope<TicketOrder[]>>(withQuery("/me/orders", { page, pageSize: 20 }), {
+    token,
+  });
+}
+
+export async function fetchMyTickets(token: string, page = 1): Promise<ApiEnvelope<MatchTicket[]>> {
+  return apiFetch<ApiEnvelope<MatchTicket[]>>(withQuery("/me/tickets", { page, pageSize: 50 }), {
+    token,
+  });
 }
 
 export async function fetchTicketOrder(
   orderId: string,
   token: string,
 ): Promise<TicketOrderDetail> {
-  const envelope = await apiFetch<ApiEnvelope<TicketOrderDetail>>(
+  // Tickets travel next to `data` in this response (contract §6).
+  const envelope = await apiFetch<{ data: TicketOrder; tickets?: MatchTicket[] }>(
     `/me/orders/${orderId}`,
     { token },
   );
-  return envelope.data;
+  return { ...envelope.data, tickets: envelope.tickets ?? [] };
 }
 
 export async function cancelTicketOrder(
