@@ -9,12 +9,12 @@ import { fetchVideoPage, queryKeys } from "@/lib/api/endpoints";
 import type { CursorEnvelope, VideoSummary, VideoType } from "@/lib/api/types";
 import { useInView } from "@/lib/hooks/useInView";
 
-const PAGE_SIZE = 12;
-
 interface VideoFeedProps {
   /** First page, rendered on the server (offset page 1 also carries next_cursor). */
   initial: CursorEnvelope<VideoSummary[]>;
   type?: VideoType;
+  /** Same size as the first page, so pages line up. */
+  pageSize: number;
 }
 
 const buttonClass =
@@ -26,11 +26,11 @@ const buttonClass =
  * fallback. Pages live in the query cache, so returning via the back button
  * restores the whole list (and with it the scroll position).
  */
-export function VideoFeed({ initial, type }: VideoFeedProps) {
+export function VideoFeed({ initial, type, pageSize }: VideoFeedProps) {
   const feed = useInfiniteQuery({
     queryKey: queryKeys.videoFeed(type),
     queryFn: ({ pageParam, signal }) =>
-      fetchVideoPage({ type, cursor: pageParam, pageSize: PAGE_SIZE }, signal),
+      fetchVideoPage({ type, cursor: pageParam, pageSize }, signal),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => (last?.meta?.has_more ? last.meta.next_cursor : undefined),
     initialData: { pages: [initial], pageParams: [null] },

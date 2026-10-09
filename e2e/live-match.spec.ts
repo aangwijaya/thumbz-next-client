@@ -4,6 +4,9 @@ test.describe("live match page", () => {
   test("plays the stream and shows real series and per-game stats", async ({ page, browserName }) => {
     const id = await firstLiveMatchId();
     test.skip(!id, "no live match in this environment");
+    // A game that has just started shows its first stats once the stream
+    // delay has passed (up to 30 s), so allow for that.
+    test.setTimeout(90_000);
     await page.goto(`/matches/${id}`);
 
     // Public stream through shaka (MSE) or native HLS: frames decode and time moves.
@@ -32,7 +35,7 @@ test.describe("live match page", () => {
     const stats = page.locator("section[aria-labelledby=live-stats-title]");
     await expect(stats.getByRole("heading", { name: /^Game \d/ })).toBeVisible();
     // Player rows carry nickname, hero and level from the live snapshots.
-    await expect(stats.getByText(/ · Lv \d+/).first()).toBeVisible();
+    await expect(stats.getByText(/ · Lv \d+/).first()).toBeVisible({ timeout: 45_000 });
   });
 
   test("phone tabs stay reachable under the sticky header", async ({ page }) => {

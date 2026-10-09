@@ -135,14 +135,18 @@ export const queryKeys = {
   featuredMatches: () => ["matches", "featured"] as const,
   matches: (params: MatchListParams = {}) => ["matches", params] as const,
   match: (id: string) => ["matches", id] as const,
-  matchStatistics: (id: string) => ["matches", id, "statistics"] as const,
+  matchStatistics: (id: string, game?: number) =>
+    (game ? (["matches", id, "statistics", game] as const) : (["matches", id, "statistics"] as const)),
   matchRoster: (id: string) => ["matches", id, "roster"] as const,
   matchHistory: (id: string) => ["matches", id, "history"] as const,
   matchRelated: (id: string) => ["matches", id, "related"] as const,
   matchEconomy: (id: string) => ["matches", id, "economy"] as const,
-  matchLiveStats: (id: string) => ["matches", id, "live-stats"] as const,
-  matchEquipment: (id: string) => ["matches", id, "equipment"] as const,
-  matchEvents: (id: string) => ["matches", id, "events"] as const,
+  matchLiveStats: (id: string, game?: number) =>
+    (game ? (["matches", id, "live-stats", game] as const) : (["matches", id, "live-stats"] as const)),
+  matchEquipment: (id: string, game?: number) =>
+    (game ? (["matches", id, "equipment", game] as const) : (["matches", id, "equipment"] as const)),
+  matchEvents: (id: string, game?: number) =>
+    (game ? (["matches", id, "events", game] as const) : (["matches", id, "events"] as const)),
   matchTicket: (id: string) => ["matches", id, "ticket"] as const,
   order: (id: string) => ["me", "orders", id] as const,
   myOrders: (page: number) => ["me", "orders", "list", page] as const,
@@ -219,10 +223,13 @@ export function useMatch(id: string) {
   });
 }
 
-export function useMatchStatistics(id: string, enabled = true) {
+/** `?game_number=` for one game of the series; omitted, the API picks the current/last game. */
+const forGame = (path: string, game?: number) => (game ? `${path}?game_number=${game}` : path);
+
+export function useMatchStatistics(id: string, enabled = true, game?: number) {
   return useQuery({
-    queryKey: queryKeys.matchStatistics(id),
-    queryFn: () => fetchData<MatchStatistics>(`/matches/${id}/statistics`),
+    queryKey: queryKeys.matchStatistics(id, game),
+    queryFn: () => fetchData<MatchStatistics>(forGame(`/matches/${id}/statistics`, game)),
     enabled,
   });
 }
@@ -261,32 +268,32 @@ export function useMatchEconomy(id: string, live = false) {
   });
 }
 
-export function useMatchLiveStats(id: string, live = false) {
+export function useMatchLiveStats(id: string, live = false, game?: number) {
   // Pushes replace polling while the realtime channel is up (contract §14).
   const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchLiveStats(id),
-    queryFn: () => fetchData<PlayerSnapshot[]>(`/matches/${id}/live-stats`),
+    queryKey: queryKeys.matchLiveStats(id, game),
+    queryFn: () => fetchData<PlayerSnapshot[]>(forGame(`/matches/${id}/live-stats`, game)),
     refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
-export function useMatchEquipment(id: string, live = false) {
+export function useMatchEquipment(id: string, live = false, game?: number) {
   // Pushes replace polling while the realtime channel is up (contract §14).
   const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchEquipment(id),
-    queryFn: () => fetchData<ItemPurchase[]>(`/matches/${id}/equipment`),
+    queryKey: queryKeys.matchEquipment(id, game),
+    queryFn: () => fetchData<ItemPurchase[]>(forGame(`/matches/${id}/equipment`, game)),
     refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
 
-export function useMatchEvents(id: string, live = false) {
+export function useMatchEvents(id: string, live = false, game?: number) {
   // Pushes replace polling while the realtime channel is up (contract §14).
   const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchEvents(id),
-    queryFn: () => fetchData<MatchEvent[]>(`/matches/${id}/events`),
+    queryKey: queryKeys.matchEvents(id, game),
+    queryFn: () => fetchData<MatchEvent[]>(forGame(`/matches/${id}/events`, game)),
     refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }

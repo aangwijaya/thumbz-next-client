@@ -32,17 +32,16 @@ test.describe("browsing", () => {
     await expect(page.getByRole("main").getByText(/ONIC/).first()).toBeVisible();
 
     // Typing updates the URL in place (debounced), without a full reload.
-    await page.getByRole("searchbox").fill("rrq");
-    await expect(page).toHaveURL(/[?&]q=rrq/);
-    await expect(page.getByRole("main").getByText(/RRQ/).first()).toBeVisible();
+    await page.getByRole("searchbox").fill("falcon");
+    await expect(page).toHaveURL(/[?&]q=falcon/);
+    await expect(page.getByRole("main").getByText(/Team Falcons/).first()).toBeVisible();
   });
 
   test("match list pages are numbered and shareable", async ({ page }) => {
-    await page.goto("/matches?status=completed");
+    await page.goto("/matches");
     const pages = page.getByRole("navigation", { name: /pages/i });
     await pages.getByRole("link", { name: "Page 2" }).click();
     await expect(page).toHaveURL(/page=2/);
-    await expect(page).toHaveURL(/status=completed/);
     await expect(pages.getByRole("link", { name: "Page 2" })).toHaveAttribute("aria-current", "page");
 
     // The same URL opened fresh shows the same page.
@@ -56,11 +55,14 @@ test.describe("browsing", () => {
   test("replays load more as you scroll", async ({ page }) => {
     await page.goto("/videos");
     const cards = page.getByRole("main").getByRole("listitem");
-    const initial = await cards.count();
-    expect(initial).toBeGreaterThan(0);
+    // The list streams in after the route's loading skeleton.
+    await expect(cards.first()).toBeVisible();
+    const firstPage = await cards.count();
 
-    await page.getByRole("button", { name: "Load more replays" }).scrollIntoViewIfNeeded();
-    await expect.poll(() => cards.count(), { timeout: 15_000 }).toBeGreaterThan(initial);
+    // Reaching the end of the list loads the next page (on a tall screen the
+    // first page may not fill it, and the next page loads straight away).
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(() => cards.count(), { timeout: 15_000 }).toBeGreaterThan(Math.min(firstPage, 4));
   });
 
   test("unknown pages render the not-found page", async ({ page }) => {

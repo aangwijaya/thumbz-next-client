@@ -10,6 +10,9 @@ import { query } from "@/lib/api/server";
 import type { CursorEnvelope, VideoSummary, VideoType } from "@/lib/api/types";
 import { enumParam, hrefWith, type SearchParamsRecord } from "@/lib/utils/search-params";
 
+/** Small pages: the demo has one week of replays, and the feed should still page. */
+const PAGE_SIZE = 4;
+
 const TYPES = ["highlight", "replay", "vod"] as const satisfies readonly VideoType[];
 const TYPE_LABELS: Record<VideoType, string> = {
   highlight: "Highlights",
@@ -30,7 +33,7 @@ export default async function VideosPage({
 }) {
   const type = enumParam(await searchParams, "type", TYPES);
   const first = await apiFetch<CursorEnvelope<VideoSummary[]>>(
-    `/videos${query({ type, pageSize: 12 })}`,
+    `/videos${query({ type, pageSize: PAGE_SIZE })}`,
     { next: { revalidate: 60, tags: ["catalog"] } },
   );
 
@@ -57,7 +60,7 @@ export default async function VideosPage({
           <EmptyState title="No videos yet" description="Replays appear here after each match." />
         ) : (
           // Keyed by type so switching filters starts a fresh feed.
-          <VideoFeed key={type ?? "all"} initial={first} type={type} />
+          <VideoFeed key={type ?? "all"} initial={first} type={type} pageSize={PAGE_SIZE} />
         )}
       </Container>
     </div>

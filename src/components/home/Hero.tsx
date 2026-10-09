@@ -277,8 +277,8 @@ export function Hero({
 
         <div className="contents min-[901px]:col-start-1 min-[901px]:row-start-2 min-[901px]:block min-[901px]:pb-[clamp(40px,5vw,80px)]">
           <p className="col-start-1 row-start-2 max-w-[38ch] font-graphik text-[clamp(17px,calc(0.45vw+13.5px),20px)] font-semibold leading-normal text-pencil motion-safe:animate-lift motion-safe:[animation-delay:120ms]">
-            Live streams, series scores and replays for Indonesia, the Philippines,
-            Malaysia and the world stage.
+            Live streams, series scores, full builds and replays from MPL
+            Philippines, game by game.
           </p>
 
           <div className="col-start-1 row-start-4 mt-5 flex items-center gap-3 motion-safe:animate-rise motion-safe:[animation-delay:180ms] min-[901px]:mt-8 min-[901px]:flex-wrap min-[901px]:gap-x-5">

@@ -1529,6 +1529,10 @@ export interface components {
             /** @enum {string} */
             phase: "phase2" | "phase3";
             slot?: number | null;
+            /** @description 1 component · 2 intermediate · 3 final (§19). */
+            tier?: number | null;
+            /** Format: uri */
+            icon_url?: string | null;
             purchased_at?: string;
             /** @description Game of the series (contract §19); default: the match's current game. */
             game_number?: number;
@@ -1553,6 +1557,8 @@ export interface components {
             game_number?: number;
             /** @description Hero picked for this game (§19). */
             hero?: string | null;
+            /** Format: uri */
+            hero_icon_url?: string | null;
         };
         UpsertLiveStatsDto: {
             snapshots: components["schemas"]["PlayerSnapshotDto"][];
@@ -1599,6 +1605,12 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        GameAssetDto: {
+            id: string;
+            name: string;
+            /** Format: uri */
+            icon_url?: string | null;
+        };
         PlayerStatsDto: {
             /** Format: uuid */
             player_id: string;
@@ -1612,12 +1624,21 @@ export interface components {
             damage_taken?: number;
             level?: number | null;
             hero_picked?: string | null;
+            /** Format: uri */
+            hero_icon_url?: string | null;
+            tower_damage?: number;
+            emblem?: components["schemas"]["GameAssetDto"] | null;
+            talents?: components["schemas"]["GameAssetDto"][];
+            /** @description Final build, slot order. */
+            items?: components["schemas"]["GameAssetDto"][];
             mvp?: boolean;
             details?: {
                 [key: string]: unknown;
             };
         };
         UpsertStatisticsDto: {
+            /** @description Game of the series (contract §19); default: the match's current game, else 1. */
+            game_number?: number;
             teams?: components["schemas"]["TeamStatsDto"][];
             players?: components["schemas"]["PlayerStatsDto"][];
         };
@@ -2573,7 +2594,9 @@ export interface operations {
     };
     Matches_statistics: {
         parameters: {
-            query?: never;
+            query?: {
+                game_number?: number;
+            };
             header?: never;
             path: {
                 id: string;

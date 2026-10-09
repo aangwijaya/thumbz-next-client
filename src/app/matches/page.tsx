@@ -17,7 +17,8 @@ import {
 } from "@/lib/utils/search-params";
 
 const STATUSES = ["live", "scheduled", "completed"] as const satisfies readonly MatchStatus[];
-const PAGE_SIZE = 20;
+/** Sized for the demo's one week of matches, so the list still pages. */
+const PAGE_SIZE = 6;
 
 const STATUS_LABELS: Record<(typeof STATUSES)[number], string> = {
   live: "Live",

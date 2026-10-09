@@ -82,6 +82,17 @@ export function Footer() {
 
         <div className="mt-8 flex flex-wrap justify-between gap-4 border-t border-stone pt-6 text-[13px] text-pencil min-[641px]:mt-12">
           <span>© {new Date().getFullYear()} THUMBZ</span>
+          <span>
+            Match data: MPL Philippines (
+            <a
+              href="https://ph-mpl.com/schedule"
+              rel="noopener"
+              className="rounded underline underline-offset-2 hover:text-deep-ember focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
+            >
+              ph-mpl.com
+            </a>
+            ), © Moonton. Non-commercial portfolio project.
+          </span>
         </div>
       </Container>
     </footer>

@@ -172,8 +172,17 @@ export interface MatchDetail extends MatchSummary {
   team_b: TeamSummary & { region: string };
 }
 
+/** An emblem, talent or item with its icon (contract §19). */
+export interface GameAsset {
+  id: string;
+  name: string;
+  icon_url: string | null;
+}
+
+/** Statistics of one game of the series (contract §19). */
 export interface MatchStatistics {
   match_id: string;
+  game_number?: number;
   teams: Array<{
     team_id: string;
     team: TeamSummary;
@@ -193,7 +202,15 @@ export interface MatchStatistics {
     deaths: number;
     assists: number;
     gold: number;
+    damage?: number;
+    damage_taken?: number;
+    tower_damage?: number;
     hero_picked: string;
+    hero_icon_url?: string | null;
+    emblem?: GameAsset | null;
+    talents?: GameAsset[];
+    /** Final build, slot order. */
+    items?: GameAsset[];
     mvp: boolean;
     details: Record<string, unknown>;
   }>;
@@ -372,6 +389,7 @@ export interface PlayerSnapshot {
   level: number;
   /** Hero picked for this game; null before the draft is known (§19). */
   hero?: string | null;
+  hero_icon_url?: string | null;
   player?: { id: string; nickname: string; role: PlayerRole | null } | null;
   game_number?: number;
   recorded_at: string;
@@ -384,6 +402,9 @@ export interface ItemPurchase {
   item_name: string;
   phase: "phase2" | "phase3";
   slot: number | null;
+  /** 1 component · 2 intermediate · 3 final (§19). */
+  tier?: number | null;
+  icon_url?: string | null;
   game_number?: number;
   purchased_at: string;
 }
