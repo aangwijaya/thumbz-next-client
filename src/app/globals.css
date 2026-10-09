@@ -86,13 +86,16 @@
     }
   }
 
-  /* Legacy palette — pages not yet migrated to design/design.md still use it. */
-  --color-background: #0a0a0a;
-  --color-surface: #111111;
-  --color-surface-elevated: #181818;
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #a1a1aa;
-  --color-border: #27272a;
+  /*
+   * Legacy token names, now mapped onto the paper palette so every page reads
+   * as one product. New code should use the design tokens above directly.
+   */
+  --color-background: var(--color-paper);
+  --color-surface: var(--color-cream);
+  --color-surface-elevated: var(--color-paper);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-pencil);
+  --color-border: var(--color-stone);
 
   --color-live: #e5484d;
   --color-success: #30a46c;
@@ -104,9 +107,9 @@
   --color-page-light-text-secondary: #6b6660;
   --color-page-light-border: #ddd7d3;
 
-  --color-page-dark: #131110;
-  --color-page-dark-surface: #1c1916;
-  --color-page-dark-border: #2b2723;
+  --color-page-dark: var(--color-paper);
+  --color-page-dark-surface: var(--color-cream);
+  --color-page-dark-border: var(--color-stone);
 
   --color-paper-white: #ffffff;
   --color-ink-black: #17191c;
@@ -143,9 +146,11 @@
     }
   }
 
-  --font-display: var(--font-source-serif-4), ui-serif, Georgia, serif;
+  /* Two families per design.md: Graphik (Manrope) for headings, Inter for UI.
+     Numbers that need fixed width use the system monospace (no download). */
+  --font-display: var(--font-graphik);
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --default-font-family: var(--font-body);
 }

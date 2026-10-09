@@ -1,12 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import {
-  IBM_Plex_Mono,
-  Inter,
-  Manrope,
-  Shantell_Sans,
-  Source_Serif_4,
-} from "next/font/google";
+import { Inter, Manrope, Shantell_Sans } from "next/font/google";
 
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -19,23 +13,9 @@ import { SPOILER_HEAD_SCRIPT } from "@/lib/spoiler-store";
 
 import "./globals.css";
 
-const sourceSerif4 = Source_Serif_4({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-source-serif-4",
-  display: "swap",
-});
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["400", "500"],
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
   display: "swap",
 });
 
@@ -82,7 +62,7 @@ export default function RootLayout({
       lang="en"
       // The head script may add data-hide-scores before React hydrates.
       suppressHydrationWarning
-      className={`${sourceSerif4.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} ${shantellSans.variable}`}
+      className={`${inter.variable} ${manrope.variable} ${shantellSans.variable}`}
     >
       <head>
         {/* Before first paint: spoiler preference from the cookie onto <html>. */}
