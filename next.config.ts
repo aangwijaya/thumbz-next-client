@@ -19,7 +19,8 @@ const contentSecurityPolicy = [
   // Next.js inlines bootstrap scripts; dev mode additionally needs eval.
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://wsrv.nl",
+  // Thumbnails come through the wsrv.nl CDN or straight from Supabase Storage.
+  ["img-src 'self' data: blob: https://wsrv.nl", supabaseOrigin].filter(Boolean).join(" "),
   "font-src 'self' data:",
   // Streams and DRM licenses come from the API, Supabase Storage and stream hosts.
   "media-src 'self' blob: https:",
