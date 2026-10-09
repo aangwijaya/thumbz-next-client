@@ -20,6 +20,7 @@ from its OpenAPI document (`npm run gen:api`).
 | Lists | Numbered, shareable pagination; infinite replay feed (keyset cursors, IntersectionObserver, "Load more" fallback, scroll restored on back) | `src/components/ui/Pagination.tsx`, `src/components/video/VideoFeed.tsx` |
 | Search | Deep-linkable `/search?q=&type=&page=` (server-rendered), debounced URL updates, ⌘K command palette with suggestions | `src/app/search/`, `src/components/search/` |
 | Realtime | Lazy Socket.IO client, rooms, sequence-gap detection → REST resync, polling only while disconnected | `src/lib/realtime/`, `src/components/match/LiveMatchProvider.tsx` |
+| Match data | Real MPL PH week: per-game tabs, hero/item/emblem/talent icons, final builds, and an item-sequence timeline (each player's purchases as an ordered list for screen readers) | `src/components/match/LiveStats.tsx`, `src/components/match/ItemTimeline.tsx`, `src/lib/utils/builds.ts` |
 | Video & DRM | shaka-player; picks Widevine/PlayReady → ClearKey → native HLS (Apple) → HLS via MSE; rotating playback tokens, heartbeats, device limit, quality menu, PiP, iOS fullscreen, keyboard shortcuts | `src/components/video/`, `src/lib/player/` |
 | Checkout | QRIS (QR rendered client-side), bank VA, crypto; idempotent retries; payment status over the socket | `src/components/checkout/` |
 | PWA | Manifest + maskable icons, hand-written service worker with offline fallback, install prompt / iOS steps, Web Push reminders ([ADR 0002](docs/adr/0002-hand-written-service-worker.md)) | `public/sw.js`, `src/components/pwa/`, `src/components/account/MatchReminders.tsx` |
@@ -52,7 +53,7 @@ The service worker registers in production builds only:
 | End to end | `npm run test:e2e` | Playwright: Desktop Chrome, Desktop Safari, iPhone, Pixel, against a running stack ([ADR 0003](docs/adr/0003-cross-browser-testing.md)) |
 | Lighthouse | `npm run lighthouse` | Budgets in `lighthouserc.json` |
 
-Local results on the production build: 48 e2e tests pass on all four browser
+Local results on the production build: 52 e2e tests pass on all four browser
 projects (5 skipped by design); Lighthouse accessibility, best practices and
 SEO are 100 on the audited pages (`/search` is `noindex` on purpose).
 
@@ -64,6 +65,9 @@ account), `E2E_SW=1` to include service-worker tests (production build),
 CI: `ci.yml` (lint, types, unit + coverage, build) on every push and PR;
 `preview-checks.yml` runs Playwright and Lighthouse against each Vercel
 preview.
+
+Match data: MPL Philippines (ph-mpl.com), © Moonton, used for a
+non-commercial portfolio.
 
 ## Deployment
 
