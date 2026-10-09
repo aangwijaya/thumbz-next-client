@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { isIosSafari, isStandalone } from "@/lib/platform";
+
 /** Chromium's install prompt event (not in the DOM typings). */
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -9,20 +11,6 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 type Mode = { kind: "hidden" } | { kind: "prompt"; event: BeforeInstallPromptEvent } | { kind: "ios" };
-
-function isStandalone(): boolean {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
-}
-
-/** iPhone/iPad Safari: no install prompt, only Share → Add to Home Screen. */
-function isIosSafari(): boolean {
-  const ua = navigator.userAgent;
-  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  return ios && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
-}
 
 const buttonClass =
   "inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone bg-paper px-4 text-body-sm font-semibold text-ink transition-colors hover:border-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
@@ -75,7 +63,7 @@ export function InstallApp() {
       {showSteps ? (
         <p className="mt-2 max-w-[34ch] text-body-sm text-pencil">
           Tap <span className="font-semibold text-ink">Share</span>, then{" "}
-          <span className="font-semibold text-ink">Add to Home Screen</span>.
+          <span className="font-semibold text-ink">Add to Home Screen</span>. Match reminders work once it&apos;s installed.
         </p>
       ) : null}
     </div>

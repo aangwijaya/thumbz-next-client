@@ -583,6 +583,24 @@ export async function deleteHistoryItem(matchId: string, token: string): Promise
   await apiFetch<undefined>(`/me/history/${matchId}`, { method: "DELETE", token });
 }
 
+/** Web Push availability and the VAPID key (contract §18). */
+export async function fetchPushConfig(): Promise<{ enabled: boolean; public_key: string | null }> {
+  return (await apiFetch<ApiEnvelope<{ enabled: boolean; public_key: string | null }>>("/push/config", { cache: "no-store" }))
+    .data;
+}
+
+export async function savePushSubscription(subscription: PushSubscriptionJSON, token: string): Promise<void> {
+  await apiFetch<unknown>("/me/push-subscriptions", { method: "PUT", body: subscription, token });
+}
+
+export async function deletePushSubscription(endpoint: string, token: string): Promise<void> {
+  await apiFetch<undefined>(withQuery("/me/push-subscriptions", { endpoint }), { method: "DELETE", token });
+}
+
+export async function sendTestPush(token: string): Promise<void> {
+  await apiFetch<unknown>("/me/push-subscriptions/test", { method: "POST", token });
+}
+
 /** Sandbox gateway only: completes a demo payment. */
 export async function simulatePayment(paymentId: string, token: string): Promise<void> {
   await apiFetch<unknown>(`/me/payments/${paymentId}/simulate`, { method: "POST", token });
