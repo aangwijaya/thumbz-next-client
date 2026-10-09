@@ -151,8 +151,32 @@
 }
 
 @layer base {
+  :root {
+    /* Sticky header height; sticky sub-bars sit right under it. */
+    --header-h: calc(68px + env(safe-area-inset-top));
+  }
+  html {
+    /* iOS would otherwise inflate text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-background font-body text-text-primary antialiased;
+    /* dvh follows the iOS/Android toolbars; vh is the fallback. */
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* viewport-fit=cover: keep content clear of the notch in landscape. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* iOS Safari zooms into any focused field under 16px; touch devices get 16px. */
+  @media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
   }
 }
 

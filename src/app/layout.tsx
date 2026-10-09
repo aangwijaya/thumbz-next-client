@@ -88,7 +88,7 @@ export default function RootLayout({
         {/* Before first paint: spoiler preference from the cookie onto <html>. */}
         <script dangerouslySetInnerHTML={{ __html: SPOILER_HEAD_SCRIPT }} />
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex flex-col">
         {/* Suspense: useSearchParams must not opt static pages out of prerendering. */}
         <Suspense fallback={null}>
           <NavigationProgress />

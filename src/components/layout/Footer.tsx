@@ -36,7 +36,7 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-stone bg-cream pb-7 pt-10 text-ink min-[641px]:pb-8 min-[641px]:pt-14">
+    <footer className="border-t border-stone bg-cream pb-[calc(1.75rem+env(safe-area-inset-bottom))] pt-10 text-ink min-[641px]:pb-[calc(2rem+env(safe-area-inset-bottom))] min-[641px]:pt-14">
       <Container size="page">
         <div className="grid grid-cols-2 gap-x-4 gap-y-7 min-[761px]:grid-cols-[2fr_repeat(3,1fr)] min-[761px]:gap-8">
           <div className="col-span-full min-[761px]:col-auto">

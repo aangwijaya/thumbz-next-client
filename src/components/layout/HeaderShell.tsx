@@ -27,7 +27,7 @@ export function HeaderShell({ logo, nav, actions, drawer }: HeaderShellProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b bg-paper text-ink transition-colors duration-200 ${
+      className={`sticky top-0 z-40 border-b bg-paper pt-[env(safe-area-inset-top)] text-ink transition-colors duration-200 ${
         scrolled ? "border-stone" : "border-transparent"
       }`}
       onKeyDown={(event) => {

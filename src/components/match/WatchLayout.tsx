@@ -59,7 +59,7 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
         <div
           role="tablist"
           aria-label="Match"
-          className="sticky top-0 z-30 mt-3.5 flex border-b border-stone/50 bg-paper px-2.5 min-[901px]:hidden"
+          className="sticky top-(--header-h) z-30 mt-3.5 flex border-b border-stone/50 bg-paper px-2.5 min-[901px]:hidden"
         >
           {tabs.map((item) => (
             <button
