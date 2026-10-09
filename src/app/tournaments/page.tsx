@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
+
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { TournamentCard } from "@/components/cards/TournamentCard";
 import { apiFetch } from "@/lib/api/client";
 import type { ApiEnvelope, TournamentSummary, TournamentStatus } from "@/lib/api/types";
+
+export const metadata: Metadata = {
+  title: "Tournaments",
+  description: "Mobile Legends esports leagues and championships — schedules, standings and venue tickets.",
+  alternates: { canonical: "/tournaments" },
+};
 
 const STATUS_ORDER: Array<{ status: TournamentStatus; title: string }> = [
   { status: "ongoing", title: "Ongoing" },

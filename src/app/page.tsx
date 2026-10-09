@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 
@@ -21,6 +22,8 @@ import { hideScoresFromCookie } from "@/lib/spoiler-server";
 import { getAccessToken } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function HomePage() {
   const [token, hideScores] = await Promise.all([

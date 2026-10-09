@@ -9,6 +9,7 @@ import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { SPOILER_HEAD_SCRIPT } from "@/lib/spoiler-store";
 
 import "./globals.css";
@@ -36,10 +37,13 @@ const shantellSans = Shantell_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "THUMBZ",
-  description:
-    "Premium Mobile Legends esports streaming and content platform — live matches, tournaments, teams, players and statistics.",
-  applicationName: "THUMBZ",
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${SITE_NAME} — Mobile Legends esports`, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { type: "website", siteName: SITE_NAME, locale: "en_US" },
+  twitter: { card: "summary_large_image" },
+  // No canonical here: it would be inherited by every page without its own.
   // iOS home-screen web app (installed PWA) chrome.
   appleWebApp: { capable: true, title: "THUMBZ", statusBarStyle: "default" },
   formatDetection: { telephone: false },

@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { MatchRow } from "@/components/match/MatchRow";
 import { StandingsTable } from "@/components/tournaments/StandingsTable";
@@ -29,7 +31,8 @@ const TAB_ITEMS = [
 
 type TabValue = "schedule" | "standings" | "teams" | "results";
 
-async function fetchTournament(id: string): Promise<TournamentDetail> {
+// cache(): generateMetadata and the page share one request per render.
+const fetchTournament = cache(async function fetchTournament(id: string): Promise<TournamentDetail> {
   try {
     const response = await apiFetch<ApiEnvelope<TournamentDetail>>(
       `/tournaments/${id}`,
@@ -40,6 +43,17 @@ async function fetchTournament(id: string): Promise<TournamentDetail> {
     if (isApiError(error) && error.status === 404) notFound();
     throw error;
   }
+});
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const tournament = await fetchTournament((await params).id);
+  return {
+    title: tournament?.name ?? "Tournament",
+    description: `${tournament?.name ?? "Tournament"} — schedule, standings, teams and results${
+      tournament?.region ? ` (${tournament.region})` : ""
+    }.`,
+    alternates: { canonical: `/tournaments/${tournament?.id}` },
+  };
 }
 
 function MatchList({ matches, emptyTitle }: { matches: MatchSummary[]; emptyTitle: string }) {

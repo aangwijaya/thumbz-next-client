@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { MatchChatProvider } from "@/components/chat/MatchChatProvider";
 import { FollowProvider } from "@/components/home/FollowProvider";
@@ -18,6 +20,7 @@ import { apiFetch } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
 import { getFollowedTeams } from "@/lib/api/favorites";
 import type { ApiEnvelope, MatchDetail, MatchSummary } from "@/lib/api/types";
+import { SITE_URL } from "@/lib/site";
 import { getAccessToken } from "@/lib/supabase/server";
 import { hideScoresFromCookie } from "@/lib/spoiler-server";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
@@ -31,7 +34,8 @@ import { formatStage } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
-async function fetchMatch(id: string): Promise<MatchDetail> {
+// cache(): generateMetadata and the page share one request per render.
+const fetchMatch = cache(async function fetchMatch(id: string): Promise<MatchDetail> {
   try {
     // Short shared cache: viewers of a busy live match share one fetch;
     // live changes then arrive over the realtime channel.
@@ -46,6 +50,53 @@ async function fetchMatch(id: string): Promise<MatchDetail> {
     if (isApiError(error) && error.status === 404) notFound();
     throw error;
   }
+});
+
+type Props = { params: Promise<{ id: string }> };
+
+const matchTitle = (match: MatchDetail | undefined) =>
+  `${match?.team_a?.name ?? "TBD"} vs ${match?.team_b?.name ?? "TBD"}`;
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const match = await fetchMatch((await params).id);
+  const title = matchTitle(match);
+  const when = match?.scheduled_at ? new Date(match.scheduled_at).toUTCString().slice(0, 16) : null;
+  // Deliberately no score: shared links must not spoil results.
+  const description = [
+    match?.status === "live" ? "Live now" : match?.status === "completed" ? "Full match" : when,
+    match?.tournament?.name,
+    match?.stage ? formatStage(match.stage) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return {
+    title: match?.status === "live" ? `Live: ${title}` : title,
+    description: `${title} — ${description}. Watch, chat and follow live stats on THUMBZ.`,
+    alternates: { canonical: `/matches/${match?.id}` },
+    openGraph: { type: "video.other", title },
+  };
+}
+
+/** schema.org SportsEvent for search engines (no score, same as the share card). */
+function matchJsonLd(match: MatchDetail | undefined) {
+  const team = (side: MatchDetail["team_a"] | undefined) =>
+    side ? { "@type": "SportsTeam", name: side?.name, url: `${SITE_URL}/teams/${side?.id}` } : undefined;
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: matchTitle(match),
+    sport: "Mobile Legends: Bang Bang",
+    startDate: match?.scheduled_at,
+    endDate: match?.ended_at ?? undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    location: { "@type": "VirtualLocation", url: `${SITE_URL}/matches/${match?.id}` },
+    competitor: [team(match?.team_a), team(match?.team_b)].filter(Boolean),
+    superEvent: match?.tournament
+      ? { "@type": "SportsEvent", name: match.tournament.name, url: `${SITE_URL}/tournaments/${match.tournament.id}` }
+      : undefined,
+    organizer: { "@type": "Organization", name: "THUMBZ", url: SITE_URL },
+  };
 }
 
 // Side lists only decorate the page, so a failure leaves them empty.
@@ -60,11 +111,7 @@ async function fetchList(path: string): Promise<MatchSummary[]> {
   }
 }
 
-export default async function MatchPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function MatchPage({ params }: Props) {
   const { id } = await params;
   const [token, hideScores] = await Promise.all([
     getAccessToken(),
@@ -80,7 +127,7 @@ export default async function MatchPage({
 
   const isLive = match?.status === "live";
   const broadcasts = orDummy(match?.broadcasts, () => dummyBroadcasts(match));
-  const title = `${match?.team_a?.name ?? "TBD"} vs ${match?.team_b?.name ?? "TBD"}`;
+  const title = matchTitle(match);
   const game =
     match?.game_number ?? (match?.score_a ?? 0) + (match?.score_b ?? 0) + 1;
   const backHref = isLive ? "/#live-now" : "/#schedule";
@@ -88,6 +135,11 @@ export default async function MatchPage({
   return (
     <SpoilerProvider initialHidden={hideScores}>
       <div className="flex-1 bg-paper text-ink">
+        <script
+          type="application/ld+json"
+          // "<" is escaped so API text can never close the script tag.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(matchJsonLd(match)).replace(/</g, "\\u003c") }}
+        />
         <h1 className="sr-only">
           {isLive ? "Live: " : ""}
           {title}
