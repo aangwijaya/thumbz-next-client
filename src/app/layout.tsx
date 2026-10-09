@@ -5,6 +5,7 @@ import { Inter, Manrope, Shantell_Sans } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
+import { WebVitals } from "@/components/layout/WebVitals";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
@@ -94,6 +95,7 @@ export default function RootLayout({
               <Footer />
             </SpoilerProvider>
             <ServiceWorkerRegister />
+            <WebVitals />
           </ToastProvider>
         </QueryProvider>
       </body>
