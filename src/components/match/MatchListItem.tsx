@@ -84,7 +84,7 @@ export function MatchListItem({ match }: { match: MatchSummary }) {
                 {score}
               </Spoiler>
             ) : (
-              <span className="text-caption font-semibold uppercase tracking-wider text-graphite">
+              <span className="text-caption font-semibold uppercase tracking-wider text-pencil">
                 vs
               </span>
             )}

@@ -54,10 +54,11 @@ export function VideoFeed({ initial, type }: VideoFeedProps) {
   return (
     <div className="flex flex-col gap-10">
       <ul className="grid gap-x-6 gap-y-10 min-[641px]:grid-cols-2 min-[901px]:grid-cols-3">
-        {videos.map((video) => (
+        {videos.map((video, index) => (
           // content-visibility skips layout/paint for off-screen cards in long feeds.
           <li key={video?.id} className="[contain-intrinsic-size:auto_360px] [content-visibility:auto]">
-            <ReplayCard video={video} />
+            {/* First row (up to 3 columns) is above the fold: load it eagerly. */}
+            <ReplayCard video={video} priority={index < 3} headingLevel={2} />
           </li>
         ))}
         {isFetchingNextPage

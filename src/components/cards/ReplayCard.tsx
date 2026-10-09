@@ -26,7 +26,18 @@ export const typeLabels: Record<
   },
 };
 
-export function ReplayCard({ video }: { video: VideoSummary }) {
+/** `priority` for cards in the first row: one of them is usually the LCP image. */
+export function ReplayCard({
+  video,
+  priority = false,
+  headingLevel = 3,
+}: {
+  video: VideoSummary;
+  priority?: boolean;
+  /** Keeps the outline valid: h3 under a section h2, h2 directly under the page h1. */
+  headingLevel?: 2 | 3;
+}) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const type = video?.type ? typeLabels[video.type] : undefined;
   // Protected replays play on their own page; others open the match or the source.
   const internal = Boolean(video?.media) || Boolean(video?.match_id);
@@ -50,6 +61,7 @@ export function ReplayCard({ video }: { video: VideoSummary }) {
         colors={type?.colors}
         sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
         className="rounded-image"
+        priority={priority}
       >
         {duration ? (
           <Badge tone="dark" className="absolute bottom-2.5 right-2.5">
@@ -63,10 +75,10 @@ export function ReplayCard({ video }: { video: VideoSummary }) {
         {video?.media ? <Badge tone="dark">Protected</Badge> : null}
         {published ? <span>{published}</span> : null}
       </div>
-      <h3 className="text-pretty font-graphik text-[17px] font-bold leading-[1.35] text-ink transition-colors group-hover:text-deep-ember">
+      <Heading className="text-pretty font-graphik text-[17px] font-bold leading-[1.35] text-ink transition-colors group-hover:text-deep-ember">
         {video?.title ?? "Untitled video"}
         {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
-      </h3>
+      </Heading>
     </Link>
   );
 }

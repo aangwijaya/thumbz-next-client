@@ -29,11 +29,13 @@ const manrope = Manrope({
   display: "swap",
 });
 
+// Decorative (banner link only): "optional" never swaps late, so the
+// above-the-fold banner text doesn't repaint, and become the LCP, seconds in.
 const shantellSans = Shantell_Sans({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-shantell-sans",
-  display: "swap",
+  display: "optional",
   preload: false,
 });
 
@@ -70,6 +72,8 @@ export default function RootLayout({
       className={`${inter.variable} ${manrope.variable} ${shantellSans.variable}`}
     >
       <head>
+        {/* Every remote image goes through this CDN: start DNS + TLS before the first <img>. */}
+        <link rel="preconnect" href="https://wsrv.nl" />
         {/* Before first paint: spoiler preference from the cookie onto <html>. */}
         <script dangerouslySetInnerHTML={{ __html: SPOILER_HEAD_SCRIPT }} />
       </head>

@@ -55,6 +55,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   poweredByHeader: false,
+  // Metadata in <head> for every client, not streamed after the content: link
+  // previews, SEO tools and crawlers then always see title/description/OG.
+  // The pages already fetch the same data (deduplicated), so it costs little.
+  htmlLimitedBots: /.*/,
   images: {
     // All remote images go through the wsrv.nl CDN (see image-loader.ts), so
     // the built-in optimizer is never used as an open proxy for arbitrary hosts.

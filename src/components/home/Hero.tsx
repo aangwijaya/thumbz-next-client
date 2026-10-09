@@ -257,12 +257,12 @@ export function Hero({
         className="grid grid-cols-[minmax(0,1fr)] [--off:56px] max-[1080px]:[--off:40px] min-[901px]:grid-cols-[minmax(0,40fr)_minmax(0,60fr)] min-[901px]:grid-rows-[auto_1fr] min-[901px]:gap-x-[clamp(32px,3.6vw,56px)]"
       >
         <div className="col-start-1 row-start-1 flex flex-col items-start gap-3 pb-[22px] min-[901px]:pb-7">
-          <p className="text-caption font-semibold text-deep-ember motion-safe:animate-rise">
+          <p className="text-caption font-semibold text-deep-ember motion-safe:animate-lift">
             Mobile Legends esports, live
           </p>
           <h1
             id="hero-title"
-            className="text-balance font-graphik text-[clamp(38px,calc(3.4vw+8px),56px)] font-bold leading-[1.03] tracking-[-0.01em] text-ink motion-safe:animate-rise motion-safe:[animation-delay:60ms]"
+            className="text-balance font-graphik text-[clamp(38px,calc(3.4vw+8px),56px)] font-bold leading-[1.03] tracking-[-0.01em] text-ink motion-safe:animate-lift motion-safe:[animation-delay:60ms]"
           >
             Watch every match as it happens.
           </h1>
@@ -276,7 +276,7 @@ export function Hero({
         </div>
 
         <div className="contents min-[901px]:col-start-1 min-[901px]:row-start-2 min-[901px]:block min-[901px]:pb-[clamp(40px,5vw,80px)]">
-          <p className="col-start-1 row-start-2 max-w-[38ch] font-graphik text-[clamp(17px,calc(0.45vw+13.5px),20px)] font-semibold leading-normal text-pencil motion-safe:animate-rise motion-safe:[animation-delay:120ms]">
+          <p className="col-start-1 row-start-2 max-w-[38ch] font-graphik text-[clamp(17px,calc(0.45vw+13.5px),20px)] font-semibold leading-normal text-pencil motion-safe:animate-lift motion-safe:[animation-delay:120ms]">
             Live streams, series scores and replays for Indonesia, the Philippines,
             Malaysia and the world stage.
           </p>
