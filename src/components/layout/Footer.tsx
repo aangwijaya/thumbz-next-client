@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { InstallApp } from "@/components/pwa/InstallApp";
 import { Container } from "@/components/ui/Container";
 
 // Sections that only exist on the home page link to it, so the footer works on
@@ -56,6 +57,7 @@ export function Footer() {
             <p className="mt-3.5 max-w-[32ch] text-body-sm text-pencil">
               Live Mobile Legends tournaments, replays and stats in one place.
             </p>
+            <InstallApp />
           </div>
 
           {columns.map((column) => (
