@@ -5,29 +5,30 @@ import { InstallApp } from "@/components/pwa/InstallApp";
 import { Container } from "@/components/ui/Container";
 
 // Sections that only exist on the home page link to it, so the footer works on
-// every page. The Account links go through login until those pages exist.
+// every page. Account pages send signed-out visitors through login.
 const columns = [
   {
     title: "Watch",
     links: [
-      { href: "/#live-now", label: "Live" },
-      { href: "/#schedule", label: "Schedule" },
-      { href: "/#replays", label: "Replays" },
+      { href: "/live", label: "Live" },
+      { href: "/matches", label: "Schedule" },
+      { href: "/videos", label: "Replays" },
     ],
   },
   {
     title: "Explore",
     links: [
       { href: "/tournaments", label: "Tournaments" },
-      { href: "/#teams", label: "Teams" },
-      { href: "/#teams", label: "Players" },
+      { href: "/teams", label: "Teams" },
+      { href: "/players", label: "Players" },
     ],
   },
   {
     title: "Account",
     links: [
-      { href: "/login", label: "Log in" },
-      { href: "/login", label: "Favorites" },
+      { href: "/profile", label: "Profile" },
+      { href: "/favorites", label: "Favorites" },
+      { href: "/history", label: "History" },
       { href: "/me/tickets", label: "Tickets" },
       { href: "/me/orders", label: "Orders" },
     ],

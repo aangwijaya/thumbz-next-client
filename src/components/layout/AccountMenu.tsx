@@ -68,6 +68,9 @@ export function AccountMenu({ initial }: { initial: string }) {
           className="absolute right-0 top-full z-10 mt-2 min-w-36 rounded-lg border border-stone bg-paper p-1 shadow-subtle"
         >
           {[
+            { href: "/profile", label: "Profile" },
+            { href: "/favorites", label: "Favorites" },
+            { href: "/history", label: "Watch history" },
             { href: "/me/tickets", label: "Your tickets" },
             { href: "/me/orders", label: "Orders" },
           ].map((item) => (

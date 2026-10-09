@@ -7,6 +7,7 @@ import type {
   ApiEnvelope,
   CommentsEnvelope,
   CursorEnvelope,
+  Favorite,
   FavoriteEntityType,
   GoldSnapshot,
   HomePayload,
@@ -42,6 +43,8 @@ import type {
   TournamentSummary,
   VideoType,
   VideoSummary,
+  UserProfile,
+  WatchHistoryItem,
 } from "./types";
 
 export type SortOrder = "asc" | "desc";
@@ -144,6 +147,9 @@ export const queryKeys = {
   order: (id: string) => ["me", "orders", id] as const,
   myOrders: (page: number) => ["me", "orders", "list", page] as const,
   myTickets: (page: number) => ["me", "tickets", page] as const,
+  me: () => ["me", "profile"] as const,
+  myFavorites: () => ["me", "favorites"] as const,
+  myHistory: () => ["me", "history"] as const,
   tournaments: (params: TournamentListParams = {}) => ["tournaments", params] as const,
   tournament: (id: string) => ["tournaments", id] as const,
   tournamentSchedule: (id: string, params: ScheduleParams = {}) =>
@@ -550,6 +556,31 @@ export function endPlaybackSession(sessionId: string, token: string): void {
     headers: { Authorization: `Bearer ${token}` },
     keepalive: true,
   }).catch(() => undefined);
+}
+
+export async function fetchMe(token: string): Promise<UserProfile> {
+  return (await apiFetch<ApiEnvelope<UserProfile>>("/me", { token, cache: "no-store" })).data;
+}
+
+export async function fetchMyFavorites(token: string): Promise<Favorite[]> {
+  return (await apiFetch<ApiEnvelope<Favorite[]>>("/me/favorites", { token, cache: "no-store" }))?.data ?? [];
+}
+
+/** One offset page of the watch history, newest first (contract §4.1, §6.8: no cursor here). */
+export function fetchMyHistoryPage(
+  token: string,
+  page: number,
+  signal?: AbortSignal,
+): Promise<ApiEnvelope<WatchHistoryItem[]>> {
+  return apiFetch<ApiEnvelope<WatchHistoryItem[]>>(withQuery("/me/history", { page, pageSize: 20 }), {
+    token,
+    cache: "no-store",
+    signal,
+  });
+}
+
+export async function deleteHistoryItem(matchId: string, token: string): Promise<void> {
+  await apiFetch<undefined>(`/me/history/${matchId}`, { method: "DELETE", token });
 }
 
 /** Sandbox gateway only: completes a demo payment. */

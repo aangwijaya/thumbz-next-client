@@ -262,6 +262,8 @@ export interface WatchHistoryItem {
   match_id: string;
   watched_at: string;
   duration_seconds: number;
+  /** Total playable length reported by the player; null when unknown (contract §6.8). */
+  total_seconds?: number | null;
   match: MatchSummary;
 }
 
