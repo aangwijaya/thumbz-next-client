@@ -1,5 +1,10 @@
 # Backend requests: match page (`/matches/[id]`)
 
+> **Status (2026-10-09):** items 1–4 and 7 are served (API contract §19, plus
+> `game_number`/`games` on the realtime `match:update`), and the development
+> placeholders (`src/lib/dummy/match.ts`) are deleted. Items 5 (item/hero
+> images) and 6 (moment markers on the stream timeline) remain open.
+
 Written by the frontend on 2026-10-03 for the backend agent. The match page was
 rebuilt from the approved "THUMBZ Match Page" mockup. Where the API cannot
 supply data yet, the page fills it with placeholders from

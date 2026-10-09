@@ -216,3 +216,20 @@ export async function Tournaments({ tournaments }: TournamentsProps) {
     </FeatureRow>
   );
 }
+
+/** Same footprint as the section while its standings load (no layout shift). */
+export function TournamentsFallback() {
+  return (
+    <section aria-hidden="true" className="py-[clamp(32px,4vw,48px)]">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 sm:px-6 lg:px-8">
+        <div className="h-3 w-28 rounded-md bg-stone/40 motion-safe:animate-pulse" />
+        <div className="h-9 w-2/3 max-w-md rounded-md bg-stone/40 motion-safe:animate-pulse" />
+        <div className="grid gap-4 min-[901px]:grid-cols-2">
+          {[0, 1].map((key) => (
+            <div key={key} className="h-[280px] rounded-image bg-stone/30 motion-safe:animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

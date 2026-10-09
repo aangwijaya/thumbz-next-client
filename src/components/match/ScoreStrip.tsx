@@ -14,13 +14,14 @@ import {
   formatViewerCount,
   shortTeamName,
 } from "@/lib/utils/format";
+import { seriesWinners } from "@/lib/utils/games";
 import { seriesInfo } from "@/lib/utils/series";
+import { useLiveMatch } from "@/components/match/LiveMatchProvider";
 
 interface ScoreStripProps {
   match: MatchDetail;
   broadcasts: BroadcastSummary[];
   /** Winner of each finished game, in order ("a", "b", or null when unknown). */
-  winners: Array<"a" | "b" | null>;
 }
 
 function Team({ team, side }: { team?: TeamSummary | null; side: "a" | "b" }) {
@@ -49,7 +50,10 @@ function Team({ team, side }: { team?: TeamSummary | null; side: "a" | "b" }) {
   );
 }
 
-export function ScoreStrip({ match, broadcasts, winners }: ScoreStripProps) {
+export function ScoreStrip({ match: initial, broadcasts }: ScoreStripProps) {
+  const match = useLiveMatch(initial);
+  // From the live match, so the markers update the moment a game ends.
+  const winners = seriesWinners(match);
   const toast = useToast();
   const { isVisible } = useSpoilers();
   const { language, setLanguage } = useMatchLanguage();

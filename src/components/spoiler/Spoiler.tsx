@@ -11,8 +11,20 @@ interface SpoilerProps {
 }
 
 // Shows its children, or `safe` while scores are hidden for this match.
+// On pages without a cookie-aware provider it briefly renders both inside
+// <span>s, so keep it out of table rows there (only phrasing content).
 export function Spoiler({ matchId, safe = null, children }: SpoilerProps) {
-  const { isVisible } = useSpoilers();
+  const { isVisible, known } = useSpoilers();
+  if (!known) {
+    // Static page before hydration: the preference is only on <html>, so
+    // render both and let CSS show the right one (no flash either way).
+    return (
+      <>
+        <span className="spoiler-shown">{children}</span>
+        <span className="spoiler-safe">{safe}</span>
+      </>
+    );
+  }
   return <>{isVisible(matchId) ? children : safe}</>;
 }
 

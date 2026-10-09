@@ -1,8 +1,14 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-type Tab = "chat" | "moments" | "stats" | "more";
+const TABS = ["chat", "moments", "stats", "more"] as const;
+type Tab = (typeof TABS)[number];
+
+function isTab(value: string | null): value is Tab {
+  return (TABS as readonly string[]).includes(value ?? "");
+}
 
 interface WatchLayoutProps {
   stage: React.ReactNode;
@@ -18,7 +24,40 @@ const tabClass =
 // Desktop: the player with chat and moments beside it, stats and more below.
 // Phones: the player, then tabs that switch between all four.
 export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutProps) {
-  const [tab, setTab] = useState<Tab>("chat");
+  const searchParams = useSearchParams();
+  const initial = searchParams.get("tab");
+  const [tab, setTabState] = useState<Tab>(isTab(initial) ? initial : "chat");
+
+  // Deep-linkable (?tab=stats) without a server round trip: the native
+  // History API updates the URL and Next keeps useSearchParams in sync.
+  function setTab(next: Tab) {
+    setTabState(next);
+    const params = new URLSearchParams(window.location.search);
+    if (next === "chat") params.delete("tab");
+    else params.set("tab", next);
+    const query = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+  }
+  // WAI-ARIA tabs: one tab stop per list; arrows/Home/End move and select.
+  function onTabKeys(event: React.KeyboardEvent<HTMLButtonElement>, ids: Tab[], active: Tab) {
+    const index = ids.indexOf(active);
+    const next =
+      event.key === "ArrowRight"
+        ? ids[(index + 1) % ids.length]
+        : event.key === "ArrowLeft"
+          ? ids[(index - 1 + ids.length) % ids.length]
+          : event.key === "Home"
+            ? ids[0]
+            : event.key === "End"
+              ? ids[ids.length - 1]
+              : null;
+    if (!next) return;
+    event.preventDefault();
+    setTab(next);
+    const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]");
+    buttons?.[ids.indexOf(next)]?.focus();
+  }
+
   // The side panel only has Chat and Moments; Stats and More are on the page.
   const side = tab === "moments" ? "moments" : "chat";
   const onPhoneOnly = (shown: boolean) => (shown ? "" : "max-[900px]:hidden");
@@ -31,8 +70,11 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
   ];
 
   return (
-    <>
-      <div className="mx-auto grid w-full max-w-[1376px] min-[901px]:grid-cols-[minmax(0,1fr)_320px] min-[901px]:gap-4 min-[901px]:px-6 lg:px-8 min-[1181px]:grid-cols-[minmax(0,1fr)_360px]">
+    // Phones: the grid dissolves (display: contents) so the sticky tab bar's
+    // containing block is this wrapper, which also holds Stats and More;
+    // otherwise the bar scrolls away as soon as those panels are open.
+    <div>
+      <div className="mx-auto grid w-full max-w-[1376px] max-[900px]:contents min-[901px]:grid-cols-[minmax(0,1fr)_320px] min-[901px]:gap-4 min-[901px]:px-6 lg:px-8 min-[1181px]:grid-cols-[minmax(0,1fr)_360px]">
         <section aria-label="Stream" className="min-w-0">
           {stage}
         </section>
@@ -40,7 +82,7 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
         <div
           role="tablist"
           aria-label="Match"
-          className="sticky top-0 z-30 mt-3.5 flex border-b border-stone/50 bg-paper px-2.5 min-[901px]:hidden"
+          className="sticky top-(--header-h) z-30 mt-3.5 flex border-b border-stone/50 bg-paper px-2.5 min-[901px]:hidden"
         >
           {tabs.map((item) => (
             <button
@@ -49,7 +91,9 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
               role="tab"
               aria-selected={tab === item.id}
               aria-controls={item.panel}
+              tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
+              onKeyDown={(event) => onTabKeys(event, TABS.slice(), tab)}
               className={`${tabClass} flex-1 px-1.5 text-sm`}
             >
               {item.label}
@@ -75,7 +119,9 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
                 role="tab"
                 aria-selected={side === item.id}
                 aria-controls={item.panel}
+                tabIndex={side === item.id ? 0 : -1}
                 onClick={() => setTab(item.id)}
+                onKeyDown={(event) => onTabKeys(event, ["chat", "moments"], side)}
                 className={tabClass}
               >
                 {item.label}
@@ -109,6 +155,6 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
       <div id="watch-more" className={onPhoneOnly(tab === "more")}>
         {more}
       </div>
-    </>
+    </div>
   );
 }

@@ -2,14 +2,15 @@ import type { MatchStatus, TournamentStatus } from "@/lib/api/types";
 
 type BadgeStatus = MatchStatus | TournamentStatus;
 
+// design.md status colours on paper (all >= 4.5:1 for 12px text).
 const statusStyles: Record<BadgeStatus, string> = {
-  live: "border-live/40 text-live",
-  ongoing: "border-live/40 text-live",
-  completed: "border-success/40 text-success",
-  scheduled: "border-warning/40 text-warning",
-  upcoming: "border-warning/40 text-warning",
-  cancelled: "border-border text-text-secondary",
-  postponed: "border-border text-text-secondary",
+  live: "border-deep-ember/40 text-deep-ember",
+  ongoing: "border-deep-ember/40 text-deep-ember",
+  completed: "border-forest/40 text-forest",
+  scheduled: "border-cobalt-link/40 text-cobalt-link",
+  upcoming: "border-cobalt-link/40 text-cobalt-link",
+  cancelled: "border-stone text-pencil",
+  postponed: "border-stone text-pencil",
 };
 
 export function StatusBadge({ status }: { status: BadgeStatus }) {

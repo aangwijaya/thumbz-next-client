@@ -1,28 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 
-import { createClient } from "@/lib/supabase/client";
 
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
 
 export function LogoutButton({ className = "" }: { className?: string }) {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function handleLogout() {
     setPending(true);
     try {
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.signOut();
     } catch {
       // session already gone or env unavailable — fall through
     }
-    router.push("/");
-    router.refresh();
-    setPending(false);
+    // Full navigation: pages prefetched while signed in must not linger in
+    // the client Router Cache after sign-out.
+    window.location.assign("/");
   }
 
   return (
@@ -37,8 +36,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
   );
 }
 
-// Avatar with a small menu. The design has no account page yet, so the menu
-// only holds Log out.
+// Avatar with a small account menu.
 export function AccountMenu({ initial }: { initial: string }) {
   const [open, setOpen] = useState(false);
 
@@ -67,6 +65,22 @@ export function AccountMenu({ initial }: { initial: string }) {
           id="account-menu"
           className="absolute right-0 top-full z-10 mt-2 min-w-36 rounded-lg border border-stone bg-paper p-1 shadow-subtle"
         >
+          {[
+            { href: "/profile", label: "Profile" },
+            { href: "/favorites", label: "Favorites" },
+            { href: "/history", label: "Watch history" },
+            { href: "/me/tickets", label: "Your tickets" },
+            { href: "/me/orders", label: "Orders" },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className={`block rounded-lg px-3 py-2 text-body-sm font-medium text-ink transition-colors hover:bg-cream ${focusRing}`}
+            >
+              {item.label}
+            </Link>
+          ))}
           <LogoutButton
             className={`w-full rounded-lg px-3 py-2 text-left text-body-sm font-medium text-ink transition-colors hover:bg-cream ${focusRing}`}
           />

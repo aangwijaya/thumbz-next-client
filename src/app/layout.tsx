@@ -1,39 +1,23 @@
-import type { Metadata } from "next";
-import {
-  IBM_Plex_Mono,
-  Inter,
-  Manrope,
-  Shantell_Sans,
-  Source_Serif_4,
-} from "next/font/google";
-import { cookies } from "next/headers";
+import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
+import { Inter, Manrope, Shantell_Sans } from "next/font/google";
 
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { NavigationProgress } from "@/components/layout/NavigationProgress";
+import { WebVitals } from "@/components/layout/WebVitals";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
 import { ToastProvider } from "@/components/ui/Toast";
-import { SPOILER_COOKIE } from "@/lib/spoiler";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SPOILER_HEAD_SCRIPT } from "@/lib/spoiler-store";
 
 import "./globals.css";
-
-const sourceSerif4 = Source_Serif_4({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-source-serif-4",
-  display: "swap",
-});
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["400", "500"],
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
   display: "swap",
 });
 
@@ -45,42 +29,79 @@ const manrope = Manrope({
   display: "swap",
 });
 
+// Decorative (banner link only): "optional" never swaps late, so the
+// above-the-fold banner text doesn't repaint, and become the LCP, seconds in.
 const shantellSans = Shantell_Sans({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-shantell-sans",
-  display: "swap",
+  display: "optional",
   preload: false,
 });
 
 export const metadata: Metadata = {
-  title: "THUMBZ",
-  description:
-    "Premium Mobile Legends esports streaming and content platform — live matches, tournaments, teams, players and statistics.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${SITE_NAME} — Mobile Legends esports`, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { type: "website", siteName: SITE_NAME, locale: "en_US" },
+  twitter: { card: "summary_large_image" },
+  // No canonical here: it would be inherited by every page without its own.
+  // iOS home-screen web app (installed PWA) chrome.
+  appleWebApp: { capable: true, title: "THUMBZ", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
 };
 
-export default async function RootLayout({
+export const viewport: Viewport = {
+  // viewport-fit=cover exposes the iOS safe-area insets used by the header/footer.
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#fefdfc",
+};
+
+export default function RootLayout({
   children,
   banner,
 }: Readonly<{ children: React.ReactNode; banner: React.ReactNode }>) {
-  const hideScores = (await cookies()).get(SPOILER_COOKIE)?.value === "1";
-
   return (
     <html
       lang="en"
-      className={`${sourceSerif4.variable} ${inter.variable} ${ibmPlexMono.variable} ${manrope.variable} ${shantellSans.variable}`}
+      // The head script may add data-hide-scores before React hydrates.
+      suppressHydrationWarning
+      className={`${inter.variable} ${manrope.variable} ${shantellSans.variable}`}
     >
-      <body className="flex min-h-screen flex-col">
-        <ToastProvider>
-          <SpoilerProvider initialHidden={hideScores}>
-            {banner}
-            <Header />
-            <main className="flex flex-1 flex-col">
-              <QueryProvider>{children}</QueryProvider>
-            </main>
-            <Footer />
-          </SpoilerProvider>
-        </ToastProvider>
+      <head>
+        {/* Every remote image goes through this CDN: start DNS + TLS before the first <img>. */}
+        <link rel="preconnect" href="https://wsrv.nl" />
+        {/* Before first paint: spoiler preference from the cookie onto <html>. */}
+        <script dangerouslySetInnerHTML={{ __html: SPOILER_HEAD_SCRIPT }} />
+      </head>
+      <body className="flex flex-col">
+        <a
+          href="#main"
+          className="sr-only z-[70] rounded-lg bg-ink text-body-sm font-semibold text-paper focus:not-sr-only focus:fixed focus:px-4 focus:py-2.5 focus:left-4 focus:top-[calc(0.75rem+env(safe-area-inset-top))]"
+        >
+          Skip to content
+        </a>
+        {/* Suspense: useSearchParams must not opt static pages out of prerendering. */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
+        <QueryProvider>
+          <ToastProvider>
+            <SpoilerProvider>
+              {banner}
+              <Header />
+              <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+                {children}
+              </main>
+              <Footer />
+            </SpoilerProvider>
+            <ServiceWorkerRegister />
+            <WebVitals />
+          </ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );

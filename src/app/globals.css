@@ -66,6 +66,16 @@
     }
   }
 
+  /* rise without the fade, for above-the-fold text: an element starting at
+     opacity 0 is not "painted" for LCP until the animation runs, after JS. */
+  --animate-lift: lift 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes lift {
+    from {
+      transform: translateY(10px);
+    }
+  }
+
   --animate-msg: msg 350ms ease-out both;
 
   @keyframes msg {
@@ -86,13 +96,16 @@
     }
   }
 
-  /* Legacy palette — pages not yet migrated to design/design.md still use it. */
-  --color-background: #0a0a0a;
-  --color-surface: #111111;
-  --color-surface-elevated: #181818;
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #a1a1aa;
-  --color-border: #27272a;
+  /*
+   * Legacy token names, now mapped onto the paper palette so every page reads
+   * as one product. New code should use the design tokens above directly.
+   */
+  --color-background: var(--color-paper);
+  --color-surface: var(--color-cream);
+  --color-surface-elevated: var(--color-paper);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-pencil);
+  --color-border: var(--color-stone);
 
   --color-live: #e5484d;
   --color-success: #30a46c;
@@ -104,9 +117,9 @@
   --color-page-light-text-secondary: #6b6660;
   --color-page-light-border: #ddd7d3;
 
-  --color-page-dark: #131110;
-  --color-page-dark-surface: #1c1916;
-  --color-page-dark-border: #2b2723;
+  --color-page-dark: var(--color-paper);
+  --color-page-dark-surface: var(--color-cream);
+  --color-page-dark-border: var(--color-stone);
 
   --color-paper-white: #ffffff;
   --color-ink-black: #17191c;
@@ -143,15 +156,87 @@
     }
   }
 
-  --font-display: var(--font-source-serif-4), ui-serif, Georgia, serif;
+  /* Two families per design.md: Graphik (Manrope) for headings, Inter for UI.
+     Numbers that need fixed width use the system monospace (no download). */
+  --font-display: var(--font-graphik);
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --default-font-family: var(--font-body);
 }
 
 @layer base {
+  :root {
+    /* Sticky header height; sticky sub-bars sit right under it. */
+    --header-h: calc(68px + env(safe-area-inset-top));
+  }
+  html {
+    /* iOS would otherwise inflate text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-background font-body text-text-primary antialiased;
+    /* dvh follows the iOS/Android toolbars; vh is the fallback. */
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* viewport-fit=cover: keep content clear of the notch in landscape. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-tap-highlight-color: transparent;
   }
+  /* iOS Safari zooms into any focused field under 16px; touch devices get 16px. */
+  @media (pointer: coarse) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
+  }
+}
+
+/* Spoiler mode before hydration on static pages (see Spoiler.tsx and the
+   head script that sets data-hide-scores from the cookie). */
+.spoiler-shown {
+  display: contents;
+}
+.spoiler-safe {
+  display: none;
+}
+:root[data-hide-scores] .spoiler-shown {
+  display: none;
+}
+:root[data-hide-scores] .spoiler-safe {
+  display: contents;
+}
+
+/* Player seek bar: the painted track sits behind a transparent range input. */
+.player-seek::-webkit-slider-runnable-track {
+  height: 1.25rem;
+  background: transparent;
+}
+.player-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: 0.3125rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: var(--color-paper);
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.25);
+}
+.player-seek::-moz-range-track {
+  background: transparent;
+}
+.player-seek::-moz-range-thumb {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--color-paper);
+}
+.player-seek:focus-visible {
+  outline: 2px solid var(--color-paper);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
 }

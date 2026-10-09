@@ -1,75 +1,13 @@
-import Link from "next/link";
 
 import { SpoilerToggle } from "@/components/spoiler/SpoilerToggle";
 import { ArrowLink } from "@/components/ui/ArrowLink";
-import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Rail } from "@/components/ui/Rail";
-import { Thumbnail } from "@/components/ui/Thumbnail";
-import type { VideoSummary, VideoType } from "@/lib/api/types";
-import { formatAge, formatDuration } from "@/lib/utils/format";
+import { ReplayCard } from "@/components/cards/ReplayCard";
+import type { VideoSummary } from "@/lib/api/types";
 
 interface ReplaysProps {
   videos: VideoSummary[];
-}
-
-const typeLabels: Record<
-  VideoType,
-  { label: string; tone: "ember" | "neutral" | "blue"; colors: string[] }
-> = {
-  highlight: {
-    label: "Highlight",
-    tone: "ember",
-    colors: ["var(--color-ember-red)", "var(--color-charcoal)"],
-  },
-  replay: {
-    label: "Full replay",
-    tone: "neutral",
-    colors: ["var(--color-teal-dusk)", "var(--color-charcoal)"],
-  },
-  vod: {
-    label: "VOD",
-    tone: "blue",
-    colors: ["var(--color-cobalt-link)", "var(--color-charcoal)"],
-  },
-};
-
-function ReplayCard({ video }: { video: VideoSummary }) {
-  const type = video?.type ? typeLabels[video.type] : undefined;
-  const external = !video?.match_id;
-  const href = video?.match_id ? `/matches/${video.match_id}` : (video?.url ?? "#");
-  const duration = formatDuration(video?.duration_seconds ?? 0);
-  const published = formatAge(video?.published_at ?? "");
-
-  return (
-    <Link
-      href={href}
-      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-      className="group flex flex-col gap-3 rounded-image max-[640px]:w-[280px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-deep-ember"
-    >
-      <Thumbnail
-        src={video?.thumbnail_url}
-        colors={type?.colors}
-        sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
-        className="rounded-image"
-      >
-        {duration ? (
-          <Badge tone="dark" className="absolute bottom-2.5 right-2.5">
-            {duration}
-          </Badge>
-        ) : null}
-      </Thumbnail>
-
-      <div className="flex flex-wrap items-center gap-2 text-[13px] text-pencil">
-        {type ? <Badge tone={type.tone}>{type.label}</Badge> : null}
-        {published ? <span>{published}</span> : null}
-      </div>
-      <h3 className="text-pretty font-graphik text-[17px] font-bold leading-[1.35] text-ink transition-colors group-hover:text-deep-ember">
-        {video?.title ?? "Untitled video"}
-        {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
-      </h3>
-    </Link>
-  );
 }
 
 export function Replays({ videos }: ReplaysProps) {
