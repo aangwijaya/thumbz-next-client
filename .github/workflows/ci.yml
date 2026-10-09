@@ -36,7 +36,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:cov
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .build/cache
           key: next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
