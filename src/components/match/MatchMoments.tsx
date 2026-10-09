@@ -7,7 +7,6 @@ import { RevealButton } from "@/components/spoiler/Spoiler";
 import { useSpoilers } from "@/components/spoiler/SpoilerProvider";
 import { useMatchEconomy, useMatchEvents } from "@/lib/api/endpoints";
 import type { MatchEvent, MatchSummary } from "@/lib/api/types";
-import { dummyEconomy, dummyEvents, orDummy } from "@/lib/dummy/match";
 import { shortTeamName } from "@/lib/utils/format";
 import { teamColors, tint } from "@/lib/utils/team-colors";
 import { useLiveMatch } from "@/components/match/LiveMatchProvider";
@@ -54,10 +53,10 @@ export function MatchMoments({ match: initial }: { match: MatchSummary }) {
 
   // While live, nothing newer than the stream delay is shown.
   const cutoff = live ? now - holdBackMs(match) : Number.POSITIVE_INFINITY;
-  const snapshots = orDummy(economy.data, () => dummyEconomy(match)).filter(
+  const snapshots = (economy.data ?? []).filter(
     (snapshot) => Date.parse(snapshot?.recorded_at ?? "") <= cutoff,
   );
-  const moments = orDummy(events.data, () => dummyEvents(match)).filter(
+  const moments = (events.data ?? []).filter(
     (event) => Date.parse(event?.occurred_at ?? "") <= cutoff,
   );
   const times = [...snapshots.map((s) => s.recorded_at), ...moments.map((e) => e.occurred_at)]

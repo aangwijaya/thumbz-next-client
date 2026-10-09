@@ -153,8 +153,20 @@ export interface MatchSummary {
   stream_delay_seconds?: number;
 }
 
+/** One game of a series (contract §19). */
+export interface MatchGame {
+  game_number: number;
+  status: "live" | "completed";
+  winner_team_id: string | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  duration_seconds?: number | null;
+}
+
 export interface MatchDetail extends MatchSummary {
   stream_url: string | null;
+  /** Games of the series so far, by game_number (contract §19). */
+  games?: MatchGame[];
   tournament: { id: string; name: string; slug: string; status: TournamentStatus; region: string };
   team_a: TeamSummary & { region: string };
   team_b: TeamSummary & { region: string };
@@ -344,6 +356,7 @@ export interface Favorite {
 export interface GoldSnapshot {
   team_id: string;
   gold: number;
+  game_number?: number;
   recorded_at: string;
 }
 
@@ -357,6 +370,10 @@ export interface PlayerSnapshot {
   damage: number;
   damage_taken: number;
   level: number;
+  /** Hero picked for this game; null before the draft is known (§19). */
+  hero?: string | null;
+  player?: { id: string; nickname: string; role: PlayerRole | null } | null;
+  game_number?: number;
   recorded_at: string;
 }
 
@@ -367,6 +384,7 @@ export interface ItemPurchase {
   item_name: string;
   phase: "phase2" | "phase3";
   slot: number | null;
+  game_number?: number;
   purchased_at: string;
 }
 
@@ -377,6 +395,7 @@ export interface MatchEvent {
   event_type: string;
   title: string;
   details: Record<string, unknown>;
+  game_number?: number;
   occurred_at: string;
 }
 

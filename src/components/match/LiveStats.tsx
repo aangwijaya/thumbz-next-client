@@ -14,13 +14,6 @@ import {
   useMatchStatistics,
 } from "@/lib/api/endpoints";
 import type { MatchSummary, PlayerRole, PlayerSnapshot, TeamSummary } from "@/lib/api/types";
-import {
-  dummyEquipment,
-  dummyEvents,
-  dummySnapshots,
-  dummyStatistics,
-  orDummy,
-} from "@/lib/dummy/match";
 import { formatViewerCount, initialsOf, shortTeamName } from "@/lib/utils/format";
 import { ROLE_ORDER } from "@/lib/utils/live";
 import { teamColors, tint } from "@/lib/utils/team-colors";
@@ -161,14 +154,41 @@ export function LiveStats({ match: initial }: { match: MatchSummary }) {
   const cutoff = live ? now - holdBackMs(match) : Number.POSITIVE_INFINITY;
   const shown = (iso: string) => Date.parse(iso) <= cutoff;
 
-  const players = orDummy(statistics.data?.players, () => dummyStatistics(match).players);
-  const allSnapshots = orDummy(snapshots.data, () => dummySnapshots(match)).filter((s) => shown(s.recorded_at));
-  const purchases = orDummy(equipment.data, () => dummyEquipment(match)).filter((p) => shown(p.purchased_at));
-  const moments = orDummy(events.data, () => dummyEvents(match)).filter((e) => shown(e.occurred_at));
+  const allSnapshots = (snapshots.data ?? []).filter((s) => shown(s.recorded_at));
+  const purchases = (equipment.data ?? []).filter((p) => shown(p.purchased_at));
+  const moments = (events.data ?? []).filter((e) => shown(e.occurred_at));
 
   // Latest snapshot per player (the endpoint is an ordered series).
   const latest = new Map<string, PlayerSnapshot>();
   for (const snapshot of allSnapshots) latest.set(snapshot.player_id, snapshot);
+
+  // Post-match statistics when they exist; during a live game the snapshots
+  // carry the player and hero themselves (contract §19).
+  const statisticsPlayers = statistics.data?.players ?? [];
+  const players =
+    statisticsPlayers.length > 0
+      ? statisticsPlayers.map((row) => ({
+          player_id: row.player_id,
+          team_id: row.team_id,
+          nickname: row.player?.nickname,
+          role: row.player?.role ?? null,
+          hero: row.hero_picked || null,
+          kills: row.kills,
+          deaths: row.deaths,
+          assists: row.assists,
+          gold: row.gold,
+        }))
+      : [...latest.values()].map((snap) => ({
+          player_id: snap.player_id,
+          team_id: snap.team_id,
+          nickname: snap.player?.nickname,
+          role: snap.player?.role ?? null,
+          hero: snap.hero ?? null,
+          kills: snap.kills,
+          deaths: snap.deaths,
+          assists: snap.assists,
+          gold: snap.gold,
+        }));
   const lastAt = allSnapshots.length > 0 ? allSnapshots[allSnapshots.length - 1].recorded_at : null;
   const firstEvent = moments.length > 0 ? Math.min(...moments.map((e) => Date.parse(e.occurred_at))) : null;
 
@@ -179,9 +199,10 @@ export function LiveStats({ match: initial }: { match: MatchSummary }) {
         const snap = latest.get(row.player_id);
         return {
           id: row.player_id,
-          nickname: row.player?.nickname ?? "Player",
-          role: row.player?.role ?? null,
-          hero: row.hero_picked || null,
+          nickname: row.nickname ?? "Player",
+          role: row.role,
+          // The hero of the game being shown beats the post-match pick.
+          hero: snap?.hero || row.hero,
           kills: snap?.kills ?? row.kills ?? 0,
           deaths: snap?.deaths ?? row.deaths ?? 0,
           assists: snap?.assists ?? row.assists ?? 0,

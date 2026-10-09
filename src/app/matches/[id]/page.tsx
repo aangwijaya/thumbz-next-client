@@ -24,12 +24,6 @@ import { SITE_URL } from "@/lib/site";
 import { getAccessToken } from "@/lib/supabase/server";
 import { hideScoresFromCookie } from "@/lib/spoiler-server";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
-import {
-  dummyBroadcasts,
-  dummyHistory,
-  gameWinners,
-  orDummy,
-} from "@/lib/dummy/match";
 import { formatStage } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
@@ -126,7 +120,7 @@ export default async function MatchPage({ params }: Props) {
   ]);
 
   const isLive = match?.status === "live";
-  const broadcasts = orDummy(match?.broadcasts, () => dummyBroadcasts(match));
+  const broadcasts = match?.broadcasts ?? [];
   const title = matchTitle(match);
   const game =
     match?.game_number ?? (match?.score_a ?? 0) + (match?.score_b ?? 0) + 1;
@@ -217,11 +211,7 @@ export default async function MatchPage({ params }: Props) {
                       }
                       className="min-[901px]:rounded-xl"
                     />
-                    <ScoreStrip
-                      match={match}
-                      broadcasts={broadcasts}
-                      winners={gameWinners(match)}
-                    />
+                    <ScoreStrip match={match} broadcasts={broadcasts} />
                     {isLive ? (
                       <div className="px-5 pb-3 min-[641px]:px-6 min-[901px]:hidden">
                         <LiveStatusLine />
@@ -235,7 +225,7 @@ export default async function MatchPage({ params }: Props) {
                 more={
                   <MatchMore
                     match={match}
-                    history={orDummy(history, () => dummyHistory(match))}
+                    history={history}
                     live={live.filter((row) => row?.id !== match?.id)}
                     next={upcoming.find((row) => row?.id !== match?.id) ?? null}
                   />

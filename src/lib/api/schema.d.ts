@@ -969,6 +969,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/matches/{id}/games/{gameNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["Admin_upsertGame"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/matches/{id}/live": {
         parameters: {
             query?: never;
@@ -1325,6 +1341,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/push/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** VAPID public key for PushManager.subscribe (contract §18). */
+        get: operations["Push_config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/push-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["Push_subscribe"];
+        post?: never;
+        delete: operations["Push_unsubscribe"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/push-subscriptions/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Push_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/jobs": {
         parameters: {
             query?: never;
@@ -1441,12 +1506,15 @@ export interface components {
             team_id?: string | null;
             /** Format: uuid */
             player_id?: string | null;
-            event_type: string;
+            /** @enum {string} */
+            event_type: "first_blood" | "kill" | "tower" | "turtle" | "lord" | "other";
             title: string;
             details?: {
                 [key: string]: unknown;
             };
             occurred_at?: string;
+            /** @description Game of the series (contract §19); default: the match's current game. */
+            game_number?: number;
         };
         UpsertEventsDto: {
             events: components["schemas"]["MatchEventDto"][];
@@ -1462,6 +1530,8 @@ export interface components {
             phase: "phase2" | "phase3";
             slot?: number | null;
             purchased_at?: string;
+            /** @description Game of the series (contract §19); default: the match's current game. */
+            game_number?: number;
         };
         UpsertEquipmentDto: {
             purchases: components["schemas"]["ItemPurchaseDto"][];
@@ -1479,6 +1549,10 @@ export interface components {
             damage_taken?: number;
             level?: number | null;
             recorded_at?: string;
+            /** @description Game of the series (contract §19); default: the match's current game. */
+            game_number?: number;
+            /** @description Hero picked for this game (§19). */
+            hero?: string | null;
         };
         UpsertLiveStatsDto: {
             snapshots: components["schemas"]["PlayerSnapshotDto"][];
@@ -1492,6 +1566,14 @@ export interface components {
         };
         UpsertBroadcastsDto: {
             broadcasts: components["schemas"]["BroadcastDto"][];
+        };
+        UpsertGameDto: {
+            /** @enum {string} */
+            status: "live" | "completed";
+            /** Format: uuid */
+            winner_team_id?: string;
+            started_at?: string;
+            ended_at?: string;
         };
         LiveMatchDto: {
             /** @enum {string} */
@@ -1544,6 +1626,8 @@ export interface components {
             team_id: string;
             gold: number;
             recorded_at?: string;
+            /** @description Game of the series (contract §19); default: the match's current game. */
+            game_number?: number;
         };
         UpsertEconomyDto: {
             snapshots: components["schemas"]["GoldSnapshotDto"][];
@@ -1663,6 +1747,18 @@ export interface components {
         };
         CreateSessionDto: Record<string, never>;
         TokenQuery: Record<string, never>;
+        PushKeysDto: {
+            /** @description Client public key (P-256, 65 bytes → 87 base64url chars). */
+            p256dh: string;
+            /** @description Client auth secret (16 bytes). */
+            auth: string;
+        };
+        PushSubscriptionDto: {
+            endpoint: string;
+            keys: components["schemas"]["PushKeysDto"];
+            /** @description Sent by browsers (usually null); not stored. */
+            expirationTime?: number | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -2537,6 +2633,8 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                /** @description Game of the series (contract §19); default: the current or last game. */
+                game_number?: number;
             };
             header?: never;
             path: {
@@ -2556,7 +2654,9 @@ export interface operations {
     };
     Matches_equipment: {
         parameters: {
-            query?: never;
+            query?: {
+                game_number?: number;
+            };
             header?: never;
             path: {
                 id: string;
@@ -2578,6 +2678,8 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                /** @description Game of the series (contract §19); default: the current or last game. */
+                game_number?: number;
             };
             header?: never;
             path: {
@@ -2600,6 +2702,8 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                /** @description Game of the series (contract §19); default: the current or last game. */
+                game_number?: number;
             };
             header?: never;
             path: {
@@ -3186,6 +3290,30 @@ export interface operations {
             };
         };
     };
+    Admin_upsertGame: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                gameNumber: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertGameDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     Admin_setLive: {
         parameters: {
             query?: never;
@@ -3734,6 +3862,80 @@ export interface operations {
         };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Push_config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Push_subscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushSubscriptionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Push_unsubscribe: {
+        parameters: {
+            query: {
+                endpoint: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Push_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

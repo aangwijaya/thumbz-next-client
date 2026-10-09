@@ -6,11 +6,12 @@ import { createContext, useContext, useState } from "react";
 
 import { LiveDot } from "@/components/ui/LiveDot";
 import { queryKeys } from "@/lib/api/endpoints";
-import type { MatchSummary } from "@/lib/api/types";
+import type { MatchDetail, MatchSummary } from "@/lib/api/types";
 import { useRealtimeRoom, useRealtimeStatus } from "@/lib/realtime/hooks";
 
 type MatchPatch = Partial<
-  Pick<MatchSummary, "status" | "score_a" | "score_b" | "winner_team_id" | "viewer_count" | "started_at" | "ended_at">
+  Pick<MatchSummary, "status" | "score_a" | "score_b" | "winner_team_id" | "viewer_count" | "started_at" | "ended_at"> &
+    Pick<MatchDetail, "games" | "game_number">
 > & { id: string };
 
 interface LiveMatchValue {
@@ -48,6 +49,10 @@ export function LiveMatchProvider({ matchId, children }: { matchId: string; chil
         setPatch((previous) => {
           // A status change (e.g. live → completed) reshapes the page.
           if (previous?.status && next.status && previous.status !== next.status) router.refresh();
+          // A new game starts: live data is per game, so fetch the new game's.
+          if (next.game_number != null && previous?.game_number != null && next.game_number !== previous.game_number) {
+            for (const key of Object.values(LIVE_KINDS)) void queryClient.invalidateQueries({ queryKey: key(matchId) });
+          }
           return { ...previous, ...next };
         });
       },
