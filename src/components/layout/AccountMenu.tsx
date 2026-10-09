@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 
@@ -9,7 +8,6 @@ const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
 
 export function LogoutButton({ className = "" }: { className?: string }) {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function handleLogout() {
@@ -21,9 +19,9 @@ export function LogoutButton({ className = "" }: { className?: string }) {
     } catch {
       // session already gone or env unavailable — fall through
     }
-    router.push("/");
-    router.refresh();
-    setPending(false);
+    // Full navigation: pages prefetched while signed in must not linger in
+    // the client Router Cache after sign-out.
+    window.location.assign("/");
   }
 
   return (
