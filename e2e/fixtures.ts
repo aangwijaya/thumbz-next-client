@@ -40,20 +40,22 @@ async function signUpFreshUser(page: Page): Promise<void> {
   await expect(page.getByText("Member since")).toBeVisible();
 }
 
+// Fixture callbacks name their setter `provide` (Playwright calls it `use`),
+// which would trip the React hooks lint rule.
 export const test = base.extend<{ signedIn: Page; freshUser: Page }>({
   /** A page signed in as a new, empty account. */
-  freshUser: async ({ browser, contextOptions }, use) => {
+  freshUser: async ({ browser, contextOptions }, provide) => {
     const context = await browser.newContext(contextOptions);
     const page = await context.newPage();
     await signUpFreshUser(page);
-    await use(page);
+    await provide(page);
     await context.close();
   },
   /** A page whose context carries the demo user's session. */
-  signedIn: async ({ browser, contextOptions }, use) => {
+  signedIn: async ({ browser, contextOptions }, provide) => {
     const context = await browser.newContext({ ...contextOptions, storageState: AUTH_STATE });
     const page = await context.newPage();
-    await use(page);
+    await provide(page);
     await context.close();
   },
 });
