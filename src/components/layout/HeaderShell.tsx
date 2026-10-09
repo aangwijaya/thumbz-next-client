@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Container } from "@/components/ui/Container";
 
@@ -17,6 +17,7 @@ interface HeaderShellProps {
 export function HeaderShell({ logo, nav, actions, drawer }: HeaderShellProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -31,7 +32,10 @@ export function HeaderShell({ logo, nav, actions, drawer }: HeaderShellProps) {
         scrolled ? "border-stone" : "border-transparent"
       }`}
       onKeyDown={(event) => {
-        if (event.key === "Escape") setMenuOpen(false);
+        if (event.key === "Escape" && menuOpen) {
+          setMenuOpen(false);
+          menuButton.current?.focus(); // don't strand focus inside the closed menu
+        }
       }}
     >
       <Container size="page" className="flex h-[68px] items-center gap-6">
@@ -40,6 +44,7 @@ export function HeaderShell({ logo, nav, actions, drawer }: HeaderShellProps) {
         <div className="flex items-center gap-1 max-[900px]:ml-auto">
           {actions}
           <button
+            ref={menuButton}
             type="button"
             aria-label="Menu"
             aria-expanded={menuOpen}

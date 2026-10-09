@@ -89,6 +89,12 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: SPOILER_HEAD_SCRIPT }} />
       </head>
       <body className="flex flex-col">
+        <a
+          href="#main"
+          className="sr-only z-[70] rounded-lg bg-ink text-body-sm font-semibold text-paper focus:not-sr-only focus:fixed focus:px-4 focus:py-2.5 focus:left-4 focus:top-[calc(0.75rem+env(safe-area-inset-top))]"
+        >
+          Skip to content
+        </a>
         {/* Suspense: useSearchParams must not opt static pages out of prerendering. */}
         <Suspense fallback={null}>
           <NavigationProgress />
@@ -98,7 +104,9 @@ export default function RootLayout({
             <SpoilerProvider>
               {banner}
               <Header />
-              <main className="flex flex-1 flex-col">{children}</main>
+              <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+                {children}
+              </main>
               <Footer />
             </SpoilerProvider>
             <ServiceWorkerRegister />

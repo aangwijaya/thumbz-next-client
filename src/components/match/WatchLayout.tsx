@@ -38,6 +38,26 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
     const query = params.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }
+  // WAI-ARIA tabs: one tab stop per list; arrows/Home/End move and select.
+  function onTabKeys(event: React.KeyboardEvent<HTMLButtonElement>, ids: Tab[], active: Tab) {
+    const index = ids.indexOf(active);
+    const next =
+      event.key === "ArrowRight"
+        ? ids[(index + 1) % ids.length]
+        : event.key === "ArrowLeft"
+          ? ids[(index - 1 + ids.length) % ids.length]
+          : event.key === "Home"
+            ? ids[0]
+            : event.key === "End"
+              ? ids[ids.length - 1]
+              : null;
+    if (!next) return;
+    event.preventDefault();
+    setTab(next);
+    const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]");
+    buttons?.[ids.indexOf(next)]?.focus();
+  }
+
   // The side panel only has Chat and Moments; Stats and More are on the page.
   const side = tab === "moments" ? "moments" : "chat";
   const onPhoneOnly = (shown: boolean) => (shown ? "" : "max-[900px]:hidden");
@@ -68,7 +88,9 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
               role="tab"
               aria-selected={tab === item.id}
               aria-controls={item.panel}
+              tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
+              onKeyDown={(event) => onTabKeys(event, TABS.slice(), tab)}
               className={`${tabClass} flex-1 px-1.5 text-sm`}
             >
               {item.label}
@@ -94,7 +116,9 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
                 role="tab"
                 aria-selected={side === item.id}
                 aria-controls={item.panel}
+                tabIndex={side === item.id ? 0 : -1}
                 onClick={() => setTab(item.id)}
+                onKeyDown={(event) => onTabKeys(event, ["chat", "moments"], side)}
                 className={tabClass}
               >
                 {item.label}
