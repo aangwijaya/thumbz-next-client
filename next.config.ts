@@ -61,7 +61,17 @@ const nextConfig: NextConfig = {
     loaderFile: "./src/lib/image-loader.ts",
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        // The browser must always revalidate the worker script, or updates stall.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
+    ];
   },
 };
 

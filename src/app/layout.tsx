@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import {
   IBM_Plex_Mono,
@@ -11,6 +11,7 @@ import {
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -58,6 +59,18 @@ export const metadata: Metadata = {
   title: "THUMBZ",
   description:
     "Premium Mobile Legends esports streaming and content platform — live matches, tournaments, teams, players and statistics.",
+  applicationName: "THUMBZ",
+  // iOS home-screen web app (installed PWA) chrome.
+  appleWebApp: { capable: true, title: "THUMBZ", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  // viewport-fit=cover exposes the iOS safe-area insets used by the header/footer.
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#fefdfc",
 };
 
 export default function RootLayout({
@@ -88,6 +101,7 @@ export default function RootLayout({
               <main className="flex flex-1 flex-col">{children}</main>
               <Footer />
             </SpoilerProvider>
+            <ServiceWorkerRegister />
           </ToastProvider>
         </QueryProvider>
       </body>
