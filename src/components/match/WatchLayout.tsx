@@ -70,8 +70,11 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
   ];
 
   return (
-    <>
-      <div className="mx-auto grid w-full max-w-[1376px] min-[901px]:grid-cols-[minmax(0,1fr)_320px] min-[901px]:gap-4 min-[901px]:px-6 lg:px-8 min-[1181px]:grid-cols-[minmax(0,1fr)_360px]">
+    // Phones: the grid dissolves (display: contents) so the sticky tab bar's
+    // containing block is this wrapper, which also holds Stats and More;
+    // otherwise the bar scrolls away as soon as those panels are open.
+    <div>
+      <div className="mx-auto grid w-full max-w-[1376px] max-[900px]:contents min-[901px]:grid-cols-[minmax(0,1fr)_320px] min-[901px]:gap-4 min-[901px]:px-6 lg:px-8 min-[1181px]:grid-cols-[minmax(0,1fr)_360px]">
         <section aria-label="Stream" className="min-w-0">
           {stage}
         </section>
@@ -152,6 +155,6 @@ export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutPr
       <div id="watch-more" className={onPhoneOnly(tab === "more")}>
         {more}
       </div>
-    </>
+    </div>
   );
 }
