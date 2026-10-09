@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:api": "openapi-typescript \"${OPENAPI_SOURCE:-../thumbz-server/openapi.json}\" -o src/lib/api/schema.d.ts"
+    "gen:api": "openapi-typescript \"${OPENAPI_SOURCE:-../thumbz-server/openapi.json}\" -o src/lib/api/schema.d.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
