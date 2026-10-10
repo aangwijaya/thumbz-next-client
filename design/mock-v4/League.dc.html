@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ league page v4</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{appCls}}">
+<div class="{{siteCls}}">
+
+<header class="hdr">
+<div class="wrap hdr-in">
+<a class="logo-link" href="#top" aria-label="THUMBZ home"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"></a>
+<nav class="nav" aria-label="Primary">
+<a href="#top"><span class="dot" aria-hidden="true"></span>Live<span class="count">6</span></a>
+<a href="Matches.dc.html">Matches</a>
+<a href="Tournaments.dc.html" aria-current="page">Tournaments</a>
+<a href="#top">Teams</a>
+<a href="#top">Replays</a>
+</nav>
+<div class="hdr-actions">
+<button class="icon-btn" type="button" aria-pressed="{{hiddenPressed}}" aria-label="Hide scores and results" title="Hide scores and results" onClick="{{toggleHidden}}"><svg class="ic eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="ic eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.2A10.3 10.3 0 0 1 12 5c6.5 0 10 7 10 7a17.3 17.3 0 0 1-3.1 4.1"></path><path d="M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.5-1.1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button>
+<a class="icon-btn" href="#top" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></a>
+<a class="ghost desk" href="#top">Log in</a>
+<a class="btn btn-outline btn-sm desk" href="#top">Sign up</a>
+<button class="icon-btn menu-btn" type="button" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></button>
+</div>
+</div>
+</header>
+
+<main id="top">
+<section class="lhead" aria-labelledby="lg-title">
+<div class="waves" aria-hidden="true"><svg viewBox="0 0 1440 400" preserveAspectRatio="none"><path class="w1" d="M0 300C240 240 420 360 720 290S1180 200 1440 260"></path><path class="w3" d="M0 340C300 290 460 390 740 330S1160 250 1440 300"></path><path class="w4" d="M0 370C280 330 520 400 800 360S1220 310 1440 350"></path></svg></div>
+<div class="wrap lhead-in">
+<div>
+<p class="crumbs" style="padding-top: 0"><a href="Tournaments.dc.html">Tournaments</a><span aria-hidden="true">/</span><span>{{lg.short}}</span></p>
+<div class="lhead-who">
+<span class="mark xl {{lg.mcls}}" aria-hidden="true">{{lg.mark}}</span>
+<div><h1 class="h1-page" id="lg-title">{{lg.name}} Season 18</h1><p class="small" style="margin-top: 4px">{{lg.region}} · {{lg.dates}} · Best of 3, double round robin</p></div>
+</div>
+<ul class="lhead-facts">
+<li><span class="badge b-live"><span class="dot" aria-hidden="true"></span>3 live now</span></li>
+<li><b>8</b> teams</li>
+<li><b>{{lg.prize}}</b> prize pool</li>
+<li><b>2</b> matches tomorrow</li>
+</ul>
+</div>
+<div class="stages" role="list" aria-label="Season progress">
+<div class="stage done" role="listitem"><b>Regular season</b>Weeks 1–7</div>
+<div class="stage now" role="listitem"><span class="stage-fill" style="width: 50%"></span><b>Week 8 of 9</b>On now</div>
+<div class="stage" role="listitem"><b>Playoffs</b>{{lg.playoffs}}</div>
+</div>
+</div>
+</section>
+
+<div class="wrap">
+<nav class="ltabs-pg" aria-label="League sections">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4"><a href="#top" aria-current="{{t.current}}" onClick="{{t.pick}}">{{t.label}}</a></sc-for>
+</nav>
+
+<sc-if value="{{showStandings}}" hint-placeholder-val="{{ true }}">
+<div class="lcols">
+<section aria-labelledby="std-title">
+<h2 id="std-title">Standings</h2>
+<div class="panel race sp {{stdRev}}">
+<p class="race-cap"><span>Top six go to the playoffs</span><button class="reveal" type="button" onClick="{{stdReveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show standings</button></p>
+<div class="lad-h" aria-hidden="true"><span>#</span><span>Team</span><span style="text-align: right">W–L</span><span class="c-bar">Win rate</span><span style="text-align: right">Last 5</span></div>
+<ol class="lad-body">
+<sc-for list="{{ladder}}" as="r" hint-placeholder-count="8">
+<li class="{{r.rowCls}}">
+<span class="lad-rank">{{r.rank}}</span>
+<span class="lad-team"><span class="mark sm {{r.t.cls}}" aria-hidden="true">{{r.t.s}}</span><span>{{r.t.n}}</span></span>
+<span class="lad-wl">{{r.wl}}</span>
+<span class="lad-bar {{r.t.cls}}" aria-hidden="true"><i style="width: {{r.bar}}"></i></span>
+<span class="form" role="img" aria-label="{{r.formLabel}}"><sc-for list="{{r.form}}" as="f" hint-placeholder-count="5"><i class="{{f.cls}}">{{f.r}}</i></sc-for></span>
+<sc-if value="{{r.cut}}" hint-placeholder-val="{{ false }}"><span class="cut-lbl">Playoff line</span></sc-if>
+</li>
+</sc-for>
+</ol>
+</div>
+</section>
+<section aria-labelledby="wk-title">
+<h2 id="wk-title">Week 8</h2>
+<div class="panel" style="padding: 4px 20px">
+<ul class="res">
+<sc-for list="{{week}}" as="m" hint-placeholder-count="5">
+<li class="sp {{m.rev}}">
+<a class="stretch" href="Matches.dc.html"><span class="sr">{{m.a.n}} vs {{m.b.n}}</span></a>
+<div class="sr-teams">
+<div class="tm"><span class="mark sm {{m.a.cls}}" aria-hidden="true">{{m.a.s}}</span><span class="n">{{m.a.n}}</span><span class="s"><span class="full">{{m.sa}}</span></span></div>
+<div class="tm"><span class="mark sm {{m.b.cls}}" aria-hidden="true">{{m.b.s}}</span><span class="n">{{m.b.n}}</span><span class="s"><span class="full">{{m.sb}}</span></span></div>
+</div>
+<span class="{{m.bcls}}"><sc-if value="{{m.live}}" hint-placeholder-val="{{ false }}"><span class="dot" aria-hidden="true"></span></sc-if>{{m.badge}}</span>
+<span class="pips full-b"><sc-for list="{{m.pips}}" as="p" hint-placeholder-count="3"><i class="{{p.cls}}"></i></sc-for></span>
+</li>
+</sc-for>
+</ul>
+</div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{showTeams}}" hint-placeholder-val="{{ false }}">
+<div style="padding-block: 32px 64px">
+<div class="wall">
+<sc-for list="{{ladder}}" as="r" hint-placeholder-count="8">
+<article class="wt {{r.t.cls}}">
+<div class="wt-top"><span class="mark md {{r.t.cls}}" aria-hidden="true">{{r.t.s}}</span><span class="wt-rank">#{{r.rank}}</span></div>
+<p class="wt-big" aria-hidden="true">{{r.t.s}}</p>
+<div><h3><a href="#top">{{r.t.n}}</a></h3><p class="wt-rec">{{r.wl}} · {{r.bar}} wins</p></div>
+<button class="chip-btn" type="button" aria-pressed="false">Follow</button>
+</article>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showOther}}" hint-placeholder-val="{{ false }}">
+<div style="padding-block: 48px 72px; text-align: center">
+<p class="body" style="margin-inline: auto">Schedule and Results use the same series rows as the Matches page, filtered to this league.</p>
+<p style="margin-top: 12px"><a class="link" href="Matches.dc.html">Open the Matches artboard →</a></p>
+</div>
+</sc-if>
+</div>
+</main>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"league":{"editor":"enum","options":["MPL PH","MPL ID"],"default":"MPL ID","section":"Preview"},"hideScores":{"editor":"boolean","default":false,"section":"Preview"},"phone":{"editor":null,"default":"no"},"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const phone = this.props.phone === 'yes';
+    const hidden = s.hidden ?? (this.props.hideScores ?? false);
+    const key = (this.props.league ?? 'MPL ID') === 'MPL PH' ? 'ph' : 'id';
+    const tab = s.tab || 'standings';
+    const revealed = s.revealed || [];
+    const rev = (id) => (revealed.indexOf(id) >= 0 ? 'revealed' : '');
+
+    const T = {
+      APBR: ['AP BREN', 'APBR'], FLCN: ['Team Falcons', 'FLCN'], OMG: ['Smart Omega', 'OMG'], ONICPH: ['ONIC PH', 'ONIC'],
+      RORA: ['Aurora Gaming', 'RORA'], TLPH: ['Team Liquid PH', 'TLPH'], TNC: ['TNC Pro Team', 'TNC'], TWIS: ['Twisted Minds PH', 'TWIS'],
+      ONIC: ['ONIC Esports', 'ONIC'], RRQ: ['RRQ Hoshi', 'RRQ'], EVOS: ['EVOS Legends', 'EVOS'], BTR: ['Bigetron by Vitality', 'BTR'],
+      TLID: ['Team Liquid ID', 'TLID'], AE: ['Alter Ego', 'AE'], DEWA: ['Dewa United', 'DEWA'], GEEK: ['Geek Fam ID', 'GEEK']
+    };
+    const MAP = { APBR: 'RRQ', FLCN: 'EVOS', OMG: 'BTR', ONICPH: 'ONIC', RORA: 'AE', TLPH: 'TLID', TNC: 'DEWA', TWIS: 'GEEK' };
+    const team = (c) => {
+      const code = key === 'id' ? MAP[c] : c;
+      const low = code.toLowerCase();
+      return { n: T[code][0], s: T[code][1], cls: 'c-' + low };
+    };
+    const LG = {
+      ph: { name: 'MPL Philippines', short: 'MPL PH', mark: 'PH', mcls: 'c-lph', region: 'Philippines', dates: 'Aug 19 – Nov 17', prize: 'TBA', playoffs: 'From Nov 6' },
+      id: { name: 'MPL Indonesia', short: 'MPL ID', mark: 'ID', mcls: 'c-lid', region: 'Indonesia', dates: 'Aug 12 – Nov 10', prize: '$500K', playoffs: 'From Oct 30' }
+    };
+
+    const STD = [['APBR', 11, 3, 'WWLWW'], ['TLPH', 10, 4, 'WLWWL'], ['FLCN', 9, 5, 'LWWWL'], ['ONICPH', 8, 6, 'WLLWW'], ['TWIS', 7, 7, 'LWLWW'], ['RORA', 6, 8, 'WLLLW'], ['TNC', 3, 11, 'LLWLL'], ['OMG', 2, 12, 'LLLWL']];
+    const ladder = STD.map((r, i) => ({
+      rank: i + 1, t: team(r[0]), wl: r[1] + '–' + r[2], bar: Math.round((r[1] / (r[1] + r[2])) * 100) + '%',
+      form: r[3].split('').map((f) => ({ r: f, cls: f === 'W' ? 'w' : 'l' })), formLabel: 'Last five: ' + r[3].split('').join(' '),
+      rowCls: i === 5 ? 'lad-row cut' : 'lad-row', cut: i === 5
+    }));
+
+    const W = [
+      { id: 'l1', a: 'APBR', b: 'FLCN', sa: 1, sb: 0, badge: 'Live · Game 2', live: true, pips: ['a', 'live', 'next'] },
+      { id: 'l2', a: 'TLPH', b: 'RORA', sa: 1, sb: 1, badge: 'Live · Game 3', live: true, pips: ['a', 'b', 'live'] },
+      { id: 'l3', a: 'ONICPH', b: 'TWIS', sa: 0, sb: 0, badge: 'Live · Game 1', live: true, pips: ['live', 'next', 'next'] },
+      { id: 'd1', a: 'APBR', b: 'TNC', sa: 2, sb: 1, badge: 'Final', live: false, pips: ['a', 'b', 'a'] },
+      { id: 'd2', a: 'OMG', b: 'TLPH', sa: 0, sb: 2, badge: 'Final', live: false, pips: ['b', 'b', 'next'] }
+    ];
+    const week = W.map((m) => {
+      const a = team(m.a);
+      const b = team(m.b);
+      return {
+        a: a, b: b, sa: m.sa, sb: m.sb, badge: m.badge, live: m.live, bcls: m.live ? 'badge b-live' : 'badge b-plain', rev: rev(m.id),
+        pips: m.pips.map((p) => ({ cls: p === 'a' ? 'pip ' + a.cls : p === 'b' ? 'pip ' + b.cls : 'pip ' + p }))
+      };
+    });
+
+    const tabs = [['standings', 'Standings'], ['schedule', 'Schedule'], ['teams', 'Teams'], ['results', 'Results']].map((t) => ({
+      label: t[1], current: tab === t[0] ? 'page' : 'false', pick: () => this.setState({ tab: t[0] })
+    }));
+
+    return {
+      appCls: phone ? 'app app--phone' : 'app',
+      siteCls: 'site is-guest' + (hidden ? ' nospoil' : ''),
+      lg: LG[key],
+      tabs: tabs,
+      showStandings: tab === 'standings',
+      showTeams: tab === 'teams',
+      showOther: tab === 'schedule' || tab === 'results',
+      ladder: ladder,
+      week: week,
+      stdRev: rev('std'),
+      stdReveal: () => this.setState({ revealed: revealed.concat(['std']) }),
+      hiddenPressed: hidden ? 'true' : 'false',
+      toggleHidden: () => this.setState({ hidden: !hidden, revealed: [] })
+    };
+  }
+}
+</script>
+</body>
+</html>

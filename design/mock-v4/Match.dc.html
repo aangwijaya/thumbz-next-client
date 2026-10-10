@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ match page v4</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{appCls}}">
+<div class="{{siteCls}}">
+
+<header class="hdr">
+<div class="wrap wide hdr-in">
+<a class="logo-link" href="#top" aria-label="THUMBZ home"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"></a>
+<nav class="nav" aria-label="Primary">
+<a href="#top"><span class="dot" aria-hidden="true"></span>Live<span class="count">6</span></a>
+<a href="Matches.dc.html" aria-current="page">Matches</a>
+<a href="Tournaments.dc.html">Tournaments</a>
+<a href="#top">Teams</a>
+<a href="#top">Replays</a>
+</nav>
+<div class="hdr-actions">
+<button class="icon-btn" type="button" aria-pressed="{{hiddenPressed}}" aria-label="Hide scores and results" title="Hide scores and results" onClick="{{toggleHidden}}"><svg class="ic eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="ic eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.2A10.3 10.3 0 0 1 12 5c6.5 0 10 7 10 7a17.3 17.3 0 0 1-3.1 4.1"></path><path d="M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.5-1.1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button>
+<a class="icon-btn hide-xs" href="#top" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></a>
+<a class="avatar" href="#top" aria-label="Your account">A</a>
+<button class="icon-btn menu-btn" type="button" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></button>
+</div>
+</div>
+</header>
+
+<main id="top" class="wrap wide sp {{rev}}" style="padding-bottom: 72px">
+<p class="crumbs"><a href="Matches.dc.html">← Live</a><span aria-hidden="true">/</span><a href="League.dc.html">{{lgName}}</a><span aria-hidden="true">/</span><span>Regular season, week 8</span></p>
+
+<div class="watch">
+<div class="thumb {{a.ta}} {{b.tb}}">
+<span class="v-tl"><span class="chip"><span class="dot" aria-hidden="true"></span>Live</span><span class="chip chip-dark">Game 2 · Bo3</span></span>
+<span class="pbar" aria-hidden="true"><span class="line"></span><svg class="icf" viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z"></path></svg><span>{{viewers}} watching</span><span class="grow"></span><span class="live-tag"><span class="dot"></span>LIVE</span></span>
+</div>
+<aside class="panel aside" aria-label="Chat and moments">
+<nav class="atabs" aria-label="Side panel"><a href="#top" aria-current="page">Chat</a><a href="#top">Moments</a></nav>
+<ul class="alist full-b">
+<sc-for list="{{chat}}" as="c" hint-placeholder-count="6"><li><b>{{c.who}}</b>{{c.msg}}</li></sc-for>
+</ul>
+<div class="mc-cover safe-b" style="flex: 1; margin: 16px"><b>Chat is hidden</b><span>It can mention the score.</span></div>
+</aside>
+</div>
+<nav class="ptabs" aria-label="Match sections"><a href="#top">Chat</a><a href="#top">Moments</a><a href="#stats" aria-current="page">Stats</a><a href="#top">More</a></nav>
+
+<section class="panel strip" aria-labelledby="series-title">
+<div class="strip-top">
+<div class="st-team"><span class="mark lg {{a.cls}}" aria-hidden="true">{{a.s}}</span><div>{{a.n}}<small>{{region}}</small></div></div>
+<div class="st-mid">
+<p class="st-score" id="series-title"><span class="full">1<i aria-hidden="true">–</i>0</span><span class="safe"><span class="blur" aria-hidden="true">0–0</span><span class="sr">Score hidden</span></span></p>
+<span class="badge b-live"><span class="full">Match point · {{a.s}}</span><span class="safe">Best of 3</span></span>
+<button class="reveal" type="button" onClick="{{doReveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show score</button>
+</div>
+<div class="st-team r"><span class="mark lg {{b.cls}}" aria-hidden="true">{{b.s}}</span><div>{{b.n}}<small>{{region}}</small></div></div>
+</div>
+<div class="series" role="group" aria-label="Games in this series">
+<sc-for list="{{games}}" as="g" hint-placeholder-count="3">
+<button class="{{g.cls}}" type="button" aria-pressed="{{g.pressed}}" onClick="{{g.pick}}">
+<span class="gcell-top"><b>Game {{g.n}}</b><span>{{g.state}}</span></span>
+<span class="gcell-win full-b"><sc-if value="{{g.hasWinner}}" hint-placeholder-val="{{ false }}"><span class="mark xs {{g.wcls}}" aria-hidden="true">{{g.ws}}</span></sc-if>{{g.result}}</span>
+<span class="gcell-win safe-b">{{g.safe}}</span>
+<sc-if value="{{g.hasSpark}}" hint-placeholder-val="{{ true }}">
+<svg class="spark full-b" viewBox="0 0 200 46" preserveAspectRatio="none" role="img" aria-label="{{g.sparkLabel}}"><path class="g-zero" d="M0 23H200"></path><path class="g-neg" d="{{g.neg}}"></path><path class="g-pos" d="{{g.pos}}"></path><path class="g-line" d="{{g.line}}"></path></svg>
+</sc-if>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section class="ls" id="stats" aria-labelledby="ls-title">
+<div class="ls-head">
+<div><p class="eyebrow">{{lsEyebrow}}</p><h2 id="ls-title">{{lsTitle}}</h2></div>
+<p class="small">{{lsNote}}</p>
+</div>
+<div class="ls-cover"><b>Live stats are hidden</b><span>Gold, kills and builds would give away how the game is going.</span><button class="reveal" type="button" onClick="{{doReveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show for this match</button></div>
+<div class="full-b" style="flex-direction: column">
+
+<div class="panel sb" role="list" aria-label="Team totals">
+<sc-for list="{{board}}" as="x" hint-placeholder-count="5">
+<div class="sb-cell" role="listitem" aria-label="{{x.label}}: {{a.s}} {{x.a}}, {{b.s}} {{x.b}}">
+<span class="sb-lbl"><span>{{x.label}}</span><sc-if value="{{x.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="badge b-live">{{x.badge}}</span></sc-if></span>
+<span class="sb-nums" aria-hidden="true"><span class="{{x.aCls}}">{{x.a}}</span><span class="{{x.bCls}}">{{x.b}}</span></span>
+<span class="split" aria-hidden="true"><i class="{{a.cls}}" style="flex: {{x.fa}}"></i><i class="{{b.cls}}" style="flex: {{x.fb}}"></i></span>
+</div>
+</sc-for>
+</div>
+
+<div class="panel lanes">
+<div class="lanes-h"><span><span class="mark sm {{a.cls}}" aria-hidden="true">{{a.s}}</span>{{a.n}}</span><span class="m">Lane by lane · gold difference</span><span class="r">{{b.n}}<span class="mark sm {{b.cls}}" aria-hidden="true">{{b.s}}</span></span></div>
+<ul>
+<sc-for list="{{lanes}}" as="l" hint-placeholder-count="5">
+<li class="lane">
+<div class="lp {{a.cls}}">
+<span class="hico" aria-hidden="true">{{l.pa.ini}}<small>{{l.pa.lv}}</small></span>
+<span class="lp-name"><b>{{l.pa.who}}<sc-if value="{{l.pa.mvp}}" hint-placeholder-val="{{ false }}"><span class="mvp">MVP</span></sc-if></b><span>{{l.pa.hero}} · {{l.pa.dmg}}</span></span>
+<span class="kda" aria-label="{{l.pa.kdaLabel}}">{{l.pa.kda}}<small>KDA {{l.pa.ratio}}</small></span>
+<span class="lgold">{{l.pa.goldTxt}}</span>
+<span class="slots" role="img" aria-label="{{l.pa.itemsLabel}}"><sc-for list="{{l.pa.slots}}" as="it" hint-placeholder-count="6"><i class="{{it.cls}}" title="{{it.name}}">{{it.ab}}</i></sc-for></span>
+</div>
+<div class="lmid {{l.lead.cls}}">
+<span class="role">{{l.role}}</span>
+<span class="gbar" aria-hidden="true"><i class="{{l.barCls}}" style="left: {{l.barL}}; width: {{l.barW}}"></i></span>
+<span class="gdiff">{{l.diffTxt}}</span>
+</div>
+<div class="lp r {{b.cls}}">
+<span class="lgold">{{l.pb.goldTxt}}</span>
+<span class="kda" aria-label="{{l.pb.kdaLabel}}">{{l.pb.kda}}<small>KDA {{l.pb.ratio}}</small></span>
+<span class="lp-name"><b><sc-if value="{{l.pb.mvp}}" hint-placeholder-val="{{ false }}"><span class="mvp">MVP</span></sc-if>{{l.pb.who}}</b><span>{{l.pb.hero}} · {{l.pb.dmg}}</span></span>
+<span class="hico" aria-hidden="true">{{l.pb.ini}}<small>{{l.pb.lv}}</small></span>
+<span class="slots" role="img" aria-label="{{l.pb.itemsLabel}}"><sc-for list="{{l.pb.slots}}" as="it" hint-placeholder-count="6"><i class="{{it.cls}}" title="{{it.name}}">{{it.ab}}</i></sc-for></span>
+</div>
+</li>
+</sc-for>
+</ul>
+</div>
+
+<section class="panel ps" aria-labelledby="ps-title">
+<div class="ps-head">
+<div><h3 id="ps-title">Item sequence</h3><p>When each player finished their core items, lane against lane, with the objectives around them. Pick a player for their full build order.</p></div>
+<div class="ps-key" aria-hidden="true"><span><i class="k-f"></i>Finished item</span><span><i class="k-c"></i>Component</span><span><i class="k-e"></i>Objective</span></div>
+</div>
+
+<div class="ps-board">
+<div class="ps-row" aria-hidden="true">
+<span class="small" style="font-weight: 600">Lane</span>
+<div class="ps-axis">
+<sc-for list="{{evs}}" as="e" hint-placeholder-count="5"><span class="ps-ev {{e.cls}}" style="left: {{e.left}}"><b>{{e.label}}</b><i></i></span></sc-for>
+</div>
+<span class="small" style="font-weight: 600">First core item</span>
+</div>
+<sc-for list="{{pairs}}" as="p" hint-placeholder-count="5">
+<div class="{{p.rowCls}}">
+<div class="ps-row">
+<div class="pair-who">
+<button class="who-btn {{a.cls}}" type="button" aria-pressed="{{p.a.pressed}}" onClick="{{p.a.pick}}"><span class="hico" aria-hidden="true">{{p.a.ini}}</span>{{p.a.who}}<span>{{p.role}}</span></button>
+<button class="who-btn {{b.cls}}" type="button" aria-pressed="{{p.b.pressed}}" onClick="{{p.b.pick}}"><span class="hico" aria-hidden="true">{{p.b.ini}}</span>{{p.b.who}}<span>{{p.role}}</span></button>
+</div>
+<div class="tracks">
+<sc-for list="{{p.tracks}}" as="t" hint-placeholder-count="2">
+<ol class="track {{t.cls}}" aria-label="{{t.label}}">
+<sc-for list="{{evs}}" as="e" hint-placeholder-count="5"><li class="evl" aria-hidden="true" style="left: {{e.left}}"></li></sc-for>
+<sc-for list="{{t.items}}" as="it" hint-placeholder-count="6"><li class="{{it.cls}}" style="left: {{it.left}}" title="{{it.title}}"><span class="sr">{{it.title}}</span><span aria-hidden="true">{{it.ab}}</span></li></sc-for>
+</ol>
+</sc-for>
+</div>
+<p class="pair-cmp {{p.lead.cls}}"><b>{{p.cmpHead}}</b>{{p.cmpSub}}</p>
+</div>
+</div>
+</sc-for>
+<div class="ps-row" aria-hidden="true">
+<span></span>
+<div class="ps-ticks"><sc-for list="{{ticks}}" as="k" hint-placeholder-count="8"><span style="left: {{k.left}}">{{k.label}}</span></sc-for></div>
+<span></span>
+</div>
+</div>
+
+<div class="race-m">
+<div class="pchips" role="group" aria-label="Lane">
+<sc-for list="{{pairs}}" as="p" hint-placeholder-count="5"><button type="button" aria-pressed="{{p.chipPressed}}" onClick="{{p.pickPair}}">{{p.role}}</button></sc-for>
+</div>
+<div class="rl-h"><span>{{race.a}}</span><span></span><span>{{race.b}}</span></div>
+<ol class="rl" aria-label="{{race.label}}">
+<sc-for list="{{race.rows}}" as="r" hint-placeholder-count="10">
+<li>
+<sc-if value="{{r.isEv}}" hint-placeholder-val="{{ false }}"><span class="ev {{r.cls}}">{{r.time}} · {{r.text}}</span></sc-if>
+<sc-if value="{{r.isA}}" hint-placeholder-val="{{ true }}"><span class="{{r.sideCls}}">{{r.name}}<sc-if value="{{r.f}}" hint-placeholder-val="{{ true }}"><i class="it-ico {{a.cls}}" aria-hidden="true">{{r.ab}}</i></sc-if></span></sc-if>
+<sc-if value="{{r.isItem}}" hint-placeholder-val="{{ true }}"><time>{{r.time}}</time></sc-if>
+<sc-if value="{{r.isB}}" hint-placeholder-val="{{ false }}"><span class="{{r.sideCls}}"><sc-if value="{{r.f}}" hint-placeholder-val="{{ true }}"><i class="it-ico {{b.cls}}" aria-hidden="true">{{r.ab}}</i></sc-if>{{r.name}}</span></sc-if>
+</li>
+</sc-for>
+</ol>
+</div>
+
+<div class="bo {{sel.cls}}">
+<div class="bo-h"><span class="hico" aria-hidden="true" style="width: 32px; height: 32px; font-size: 10px">{{sel.ini}}</span><h4>{{sel.who}}, {{sel.hero}}</h4><span>Build order so far · {{sel.count}} purchases</span></div>
+<ol aria-label="{{sel.who}} build order">
+<sc-for list="{{sel.steps}}" as="st" hint-placeholder-count="7">
+<li><span class="{{st.cls}}"><sc-if value="{{st.f}}" hint-placeholder-val="{{ true }}"><i class="it-ico" aria-hidden="true">{{st.ab}}</i></sc-if><span><b>{{st.name}}</b><span>{{st.time}}</span></span></span></li>
+</sc-for>
+</ol>
+</div>
+</section>
+</div>
+</section>
+</main>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"league":{"editor":"enum","options":["MPL PH","MPL ID"],"default":"MPL PH","section":"Preview"},"hideScores":{"editor":"boolean","default":false,"section":"Preview"},"phone":{"editor":null,"default":"no"},"$preview":{"width":1440,"height":2900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const phone = this.props.phone === 'yes';
+    const hidden = s.hidden ?? (this.props.hideScores ?? false);
+    const id = (this.props.league ?? 'MPL PH') === 'MPL ID';
+    const g = s.game || 2;
+    const live = g === 2;
+    const a = id ? { n: 'RRQ Hoshi', s: 'RRQ', cls: 'c-rrq', ta: 'ta-rrq' } : { n: 'AP BREN', s: 'APBR', cls: 'c-apbr', ta: 'ta-apbr' };
+    const b = id ? { n: 'EVOS Legends', s: 'EVOS', cls: 'c-evos', tb: 'tb-evos' } : { n: 'Team Falcons', s: 'FLCN', cls: 'c-flcn', tb: 'tb-flcn' };
+    const pad = (n) => String(n).padStart(2, '0');
+    const clock = (sec) => Math.floor(sec / 60) + ':' + pad(Math.round(sec % 60));
+    const k = (v) => (v / 1000).toFixed(1) + 'K';
+    const abbr = (name) => {
+      const words = name.replace(/'s/g, '').split(' ').filter((w) => w !== 'of' && w !== 'the');
+      return words.length === 1 ? words[0].slice(0, 2).toUpperCase() : words.map((w) => w[0]).join('').slice(0, 3).toUpperCase();
+    };
+
+    // Lanes in the order the broadcast shows them. Players and heroes per game.
+    const ROLES = [['exp', 'EXP lane'], ['jgl', 'Jungle'], ['mid', 'Mid lane'], ['gold', 'Gold lane'], ['roam', 'Roam']];
+    const who = id
+      ? { a: { exp: 'Clayyy', jgl: 'Alberttt', mid: 'Sanz', gold: 'Skylar', roam: 'R7' }, b: { exp: 'AriZ', jgl: 'Branz', mid: 'Kzy', gold: 'Ferxiic', roam: 'Dreams' } }
+      : { a: { exp: 'FlapTzy', jgl: 'KyleTzy', mid: 'Pheww', gold: 'Super Marco', roam: 'Ben' }, b: { exp: 'Cadell', jgl: 'Kelra', mid: 'Owgwen', gold: 'Hadess', roam: 'Coco' } };
+    const HEROES = {
+      1: { a: { exp: 'Yu Zhong', jgl: 'Fredrinn', mid: 'Valentina', gold: 'Claude', roam: 'Chou' }, b: { exp: 'Terizla', jgl: 'Baxia', mid: 'Pharsa', gold: 'Brody', roam: 'Tigreal' } },
+      2: { a: { exp: 'Paquito', jgl: 'Ling', mid: 'Kagura', gold: 'Beatrix', roam: 'Mathilda' }, b: { exp: 'Esmeralda', jgl: 'Lancelot', mid: 'Lunox', gold: 'Moskov', roam: 'Khufra' } }
+    };
+    // [kills, deaths, assists, gold, level, damage] at 14:32 of game 2.
+    const STATS = {
+      a: { exp: [3, 1, 4, 6800, 12, 31200], jgl: [5, 1, 6, 8400, 13, 42800], mid: [2, 2, 7, 6500, 12, 38900], gold: [3, 0, 5, 7400, 12, 40100], roam: [0, 2, 11, 3300, 10, 9800] },
+      b: { exp: [1, 2, 3, 6100, 11, 27400], jgl: [2, 3, 2, 7000, 12, 30500], mid: [3, 1, 4, 6800, 12, 41700], gold: [1, 2, 2, 6300, 11, 29800], roam: [0, 3, 5, 3000, 9, 8700] }
+    };
+    // Purchases: [second, item, f = finished | c = component].
+    const BUY = {
+      a: {
+        exp: [[35, 'Dagger', 'c'], [170, 'Warrior Boots', 'f'], [250, 'Legion Sword', 'c'], [400, 'Hunter Strike', 'f'], [485, 'Vampire Mallet', 'c'], [655, 'War Axe', 'f'], [750, 'Ares Belt', 'c']],
+        jgl: [[115, 'Legion Sword', 'c'], [210, 'Tough Boots', 'f'], [372, 'Blade of the Heptaseas', 'f'], [500, 'Ogre Tomahawk', 'c'], [665, 'Malefic Roar', 'f'], [820, 'Fury Hammer', 'c']],
+        mid: [[50, 'Magic Necklace', 'c'], [160, 'Magic Shoes', 'f'], [270, 'Mystery Codex', 'c'], [418, 'Lightning Truncheon', 'f'], [550, 'Book of Sages', 'c'], [700, 'Genius Wand', 'f'], [830, 'Magic Wand', 'c']],
+        gold: [[45, 'Dagger', 'c'], [200, 'Swift Boots', 'f'], [300, 'Knife', 'c'], [445, 'Windtalker', 'f'], [570, 'Iron Hunting Bow', 'c'], [740, "Berserker's Fury", 'f']],
+        roam: [[90, 'Tough Boots', 'f'], [240, 'Vitality Crystal', 'c'], [410, 'Fleeting Time', 'f'], [540, 'Leather Jerkin', 'c'], [760, "Athena's Shield", 'f']]
+      },
+      b: {
+        exp: [[40, 'Magic Wand', 'c'], [190, 'Tough Boots', 'f'], [290, 'Power Crystal', 'c'], [455, 'Feather of Heaven', 'f'], [580, 'Leather Jerkin', 'c'], [730, 'Dominance Ice', 'f']],
+        jgl: [[130, 'Legion Sword', 'c'], [235, 'Tough Boots', 'f'], [437, 'Hunter Strike', 'f'], [570, 'Knife', 'c'], [768, 'Malefic Roar', 'f']],
+        mid: [[70, 'Mystery Codex', 'c'], [185, 'Arcane Boots', 'f'], [300, 'Book of Sages', 'c'], [390, 'Clock of Destiny', 'f'], [615, 'Magic Necklace', 'c'], [785, 'Holy Crystal', 'f']],
+        gold: [[60, 'Knife', 'c'], [225, 'Swift Boots', 'f'], [340, 'Iron Hunting Bow', 'c'], [515, 'Demon Hunter Sword', 'f'], [660, 'Dagger', 'c'], [835, 'Corrosion Scythe', 'f']],
+        roam: [[100, 'Tough Boots', 'f'], [260, 'Leather Jerkin', 'c'], [490, 'Antique Cuirass', 'f'], [640, 'Vitality Crystal', 'c'], [850, 'Immortality', 'f']]
+      }
+    };
+    // Game 1 is finished: same shapes stretched to its 17:42, final numbers.
+    const axis = live ? 872 : 1062;
+    const stretch = axis / 872;
+    const grow = live ? 1 : 1.25;
+    const EVENTS = [[108, 'First blood', 'a'], [250, 'Turtle', 'a'], [675, 'Tower', 'a'], [760, 'Turtle', 'b'], [842, 'Lord', 'a']];
+    const pct = (sec) => ((sec / axis) * 100).toFixed(2) + '%';
+    const evs = EVENTS.map((e) => ({ left: pct(e[0] * stretch), label: e[1] === 'First blood' ? 'FB' : e[1], cls: e[2] === 'a' ? a.cls : b.cls, t: e[0] * stretch, text: e[1] + ' · ' + (e[2] === 'a' ? a.s : b.s) }));
+    const ticks = [];
+    for (let m = 0; m * 60 <= axis; m += 2) ticks.push({ left: pct(m * 60), label: m + ':00' });
+
+    const isBoots = (n) => /Boots|Shoes/.test(n);
+    const buys = (side, role) => BUY[side][role].map((x) => ({ t: x[0] * stretch, name: x[1], f: x[2] === 'f' }));
+    const selKey = s.player || 'a-jgl';
+    const player = (side, role) => {
+      const st = STATS[side][role];
+      const list = buys(side, role);
+      const fin = list.filter((x) => x.f);
+      const parts = list.filter((x) => !x.f).slice(-Math.max(0, 6 - fin.length));
+      const owned = fin.concat(parts).slice(0, 6);
+      const slots = [];
+      for (let i = 0; i < 6; i++) {
+        const it = owned[i];
+        slots.push(it ? { cls: 'slot', ab: abbr(it.name), name: it.name } : { cls: 'slot e', ab: '', name: 'Empty slot' });
+      }
+      const kk = Math.round(st[0] * grow);
+      const dd = Math.round(st[1] * grow);
+      const aa = Math.round(st[2] * grow);
+      const hero = HEROES[g][side][role];
+      const keyId = side + '-' + role;
+      return {
+        who: who[side][role], hero: hero, ini: hero.slice(0, 2).toUpperCase(), lv: live ? st[4] : 15,
+        kda: kk + '/' + dd + '/' + aa, ratio: ((kk + aa) / Math.max(1, dd)).toFixed(1),
+        kdaLabel: kk + ' kills, ' + dd + ' deaths, ' + aa + ' assists',
+        gold: st[3] * grow, goldTxt: k(st[3] * grow), dmg: k(st[5] * grow) + ' dmg',
+        mvp: !live && side === 'a' && role === 'jgl',
+        slots: slots, itemsLabel: 'Items: ' + owned.map((x) => x.name).join(', '),
+        list: list, core: fin.filter((x) => !isBoots(x.name))[0],
+        pressed: selKey === keyId ? 'true' : 'false',
+        pick: () => this.setState({ player: keyId })
+      };
+    };
+
+    const lanes = ROLES.map((r) => {
+      const pa = player('a', r[0]);
+      const pb = player('b', r[0]);
+      const diff = pa.gold - pb.gold;
+      const w = Math.min(50, (Math.abs(diff) / 2000) * 50);
+      const lead = diff >= 0 ? a : b;
+      return {
+        role: r[1], pa: pa, pb: pb, lead: lead,
+        barCls: diff >= 0 ? a.cls + ' toa' : b.cls, barL: diff >= 0 ? (50 - w).toFixed(1) + '%' : '50%', barW: w.toFixed(1) + '%',
+        diffTxt: lead.s + ' +' + Math.abs(Math.round(diff / 100) * 100).toLocaleString('en-US')
+      };
+    });
+
+    const sum = (side, i) => ROLES.reduce((t, r) => t + STATS[side][r[0]][i], 0) * (i === 3 ? grow : 1);
+    const ga = sum('a', 3);
+    const gb = sum('b', 3);
+    const kills = (side) => Math.round(ROLES.reduce((t, r) => t + STATS[side][r[0]][0], 0) * grow);
+    const obj = (side, type) => EVENTS.filter((e) => e[1] === type && e[2] === side).length + (type === 'Tower' ? (side === 'a' ? 4 : 2) : 0);
+    const cell = (label, va, vb, fmt, badge) => ({
+      label: label, a: fmt(va), b: fmt(vb), fa: va || 0.0001, fb: vb || 0.0001,
+      aCls: va < vb ? 'lo' : '', bCls: vb < va ? 'lo' : '', hasBadge: !!badge, badge: badge || ''
+    });
+    const board = [
+      cell('Gold', ga, gb, k, (ga >= gb ? a.s : b.s) + ' +' + k(Math.abs(ga - gb))),
+      cell('Kills', kills('a'), kills('b'), String),
+      cell('Towers', obj('a', 'Tower'), obj('b', 'Tower'), String),
+      cell('Turtles', obj('a', 'Turtle'), obj('b', 'Turtle'), String),
+      cell('Lords', obj('a', 'Lord'), obj('b', 'Lord'), String)
+    ];
+
+    const pairKey = s.pair || 'jgl';
+    const pairs = lanes.map((l, i) => {
+      const role = ROLES[i][0];
+      const ca = l.pa.core;
+      const cb = l.pb.core;
+      const first = ca && cb ? (ca.t <= cb.t ? 'a' : 'b') : null;
+      const gap = ca && cb ? Math.abs(ca.t - cb.t) : 0;
+      const track = (side, p) => ({
+        cls: side === 'a' ? a.cls : b.cls,
+        label: p.who + ' purchases in order',
+        items: p.list.map((x) => ({ cls: x.f ? 'it f' : 'it c', left: pct(x.t), ab: x.f ? abbr(x.name) : '', title: x.name + ', ' + clock(x.t) }))
+      });
+      const sel = selKey.slice(2) === role;
+      return {
+        role: ROLES[i][1], a: l.pa, b: l.pb, rowCls: sel ? 'pair sel' : 'pair',
+        tracks: [track('a', l.pa), track('b', l.pb)],
+        lead: first === 'b' ? b : a,
+        cmpHead: first ? (first === 'a' ? l.pa.who : l.pb.who) + ' by ' + clock(gap) : '—',
+        cmpSub: ca && cb ? ca.name + ' ' + clock(ca.t) + ' · ' + cb.name + ' ' + clock(cb.t) : '',
+        chipPressed: pairKey === role ? 'true' : 'false',
+        pickPair: () => this.setState({ pair: role, player: 'a-' + role })
+      };
+    });
+
+    const pi = ROLES.findIndex((r) => r[0] === pairKey);
+    const pl = lanes[pi];
+    const rows = []
+      .concat(pl.pa.list.map((x) => ({ t: x.t, side: 'a', x: x })))
+      .concat(pl.pb.list.map((x) => ({ t: x.t, side: 'b', x: x })))
+      .concat(evs.filter((e) => e.label === 'Lord' || e.label === 'Turtle').map((e) => ({ t: e.t, side: 'ev', e: e })))
+      .sort((p, q) => p.t - q.t)
+      .map((r) => r.side === 'ev'
+        ? { isEv: true, isA: false, isB: false, isItem: false, cls: r.e.cls, time: clock(r.t), text: r.e.text }
+        : { isEv: false, isA: r.side === 'a', isB: r.side === 'b', isItem: true, f: r.x.f, time: clock(r.t), name: r.x.name, ab: abbr(r.x.name), sideCls: (r.side === 'a' ? 'ra' : 'rb') + (r.x.f ? '' : ' c') });
+
+    const sp = player(selKey[0], selKey.slice(2));
+    const selSteps = sp.list.map((x) => ({ cls: x.f ? 'step' : 'step c', f: x.f, ab: abbr(x.name), name: x.name, time: clock(x.t) + (x.f ? ' · finished' : '') }));
+
+    const games = [
+      { n: 1, state: '17:42', result: a.s + ' won', safe: 'Finished', hasWinner: true, wcls: a.cls, ws: a.s, hasSpark: true, cls: 'gcell',
+        neg: 'M0 23L20 27L40 30L55 23Z', pos: 'M55 23L80 17L110 12L140 14L170 7L200 4L200 23Z', line: 'M0 23L20 27L40 30L55 23L80 17L110 12L140 14L170 7L200 4',
+        sparkLabel: 'Game 1 gold lead: ' + b.s + ' early, then ' + a.s + ' to the end' },
+      { n: 2, state: 'Live · 14:32', result: a.s + ' +3.2K gold', safe: 'In progress', hasWinner: false, hasSpark: true, cls: 'gcell lv',
+        neg: 'M0 23L14 26L28 29L42 27L52 23Z', pos: 'M52 23L69 19L83 21L97 17L110 14L124 16L138 12L152 9L152 23Z', line: 'M0 23L14 26L28 29L42 27L52 23L69 19L83 21L97 17L110 14L124 16L138 12L152 9',
+        sparkLabel: 'Game 2 gold lead so far, held back to the stream delay' },
+      { n: 3, state: 'If needed', result: 'Not played yet', safe: 'Not played yet', hasWinner: false, hasSpark: false, cls: 'gcell next', neg: '', pos: '', line: '', sparkLabel: '' }
+    ].map((x) => ({ ...x, pressed: x.n === g ? 'true' : 'false', pick: () => (x.n < 3 ? this.setState({ game: x.n }) : null) }));
+    const chat = id
+      ? [['Raka', 'setup-nya bagus banget'], ['Fajar', 'rotasinya rapi'], ['Dimas', 'Lord fight incoming'], ['Bayu', 'gold lead makin gede'], ['Tika', 'gg kalau Lord diambil'], ['Rizky', 'ayo RRQ']]
+      : [['mika.ph', 'that rotation was clean'], ['paolo', 'APBR macro is different'], ['kat.mnl', 'that Lord steal was insane'], ['dex', 'turtle fight now'], ['ange', 'gold lead getting bigger'], ['marco', 'gg if they take Lord']];
+
+    return {
+      appCls: phone ? 'app app--phone' : 'app',
+      siteCls: 'site is-user' + (hidden ? ' nospoil' : ''),
+      lgName: id ? 'MPL Indonesia' : 'MPL Philippines',
+      region: id ? 'Indonesia' : 'Philippines',
+      viewers: id ? '24.6K' : '48.2K',
+      a: a,
+      b: b,
+      games: games,
+      chat: chat.map((c) => ({ who: c[0], msg: c[1] })),
+      lsEyebrow: live ? 'Live stats' : 'Stats',
+      lsTitle: live ? 'Game 2, at 14:32' : 'Game 1, 17:42 · final',
+      lsNote: live ? 'Held back 30 seconds to match the stream' : 'Final builds from the game statistics',
+      board: board,
+      lanes: lanes,
+      evs: evs,
+      ticks: ticks,
+      pairs: pairs,
+      race: { a: a.s + ' · ' + pl.pa.who, b: pl.pb.who + ' · ' + b.s, rows: rows, label: ROLES[pi][1] + ' purchases and objectives in order' },
+      sel: { cls: selKey[0] === 'a' ? a.cls : b.cls, who: sp.who, hero: sp.hero, ini: sp.ini, count: sp.list.length, steps: selSteps },
+      rev: s.revealed ? 'revealed' : '',
+      doReveal: () => this.setState({ revealed: true }),
+      hiddenPressed: hidden ? 'true' : 'false',
+      toggleHidden: () => this.setState({ hidden: !hidden, revealed: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

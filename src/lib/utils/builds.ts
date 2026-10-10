@@ -28,51 +28,6 @@ export function inventoryOf(purchases: ItemPurchase[]): OwnedItem[] {
   return [...finished, ...parts].slice(0, SLOTS);
 }
 
-export interface TimelineMark {
-  key: string;
-  name: string;
-  icon_url: string | null;
-  tier: number | null;
-  /** Seconds after the game started. */
-  second: number;
-  /** Position along the axis, 0–100. */
-  left: number;
-  /** Row inside the track, so close purchases do not overlap. */
-  lane: number;
-}
-
-/**
- * Places each purchase on a time axis of `axisSeconds`; purchases closer than
- * `minGap` percent go to the next lane (at most `maxLanes`).
- */
-export function timelineOf(
-  purchases: ItemPurchase[],
-  startedAt: number,
-  axisSeconds: number,
-  minGap = 3.2,
-  maxLanes = 3,
-): TimelineMark[] {
-  const laneEnds: number[] = [];
-  return [...purchases]
-    .sort((a, b) => Date.parse(a.purchased_at) - Date.parse(b.purchased_at))
-    .map((purchase, index) => {
-      const second = Math.max(0, Math.round((Date.parse(purchase.purchased_at) - startedAt) / 1000));
-      const left = axisSeconds > 0 ? Math.min(100, (second / axisSeconds) * 100) : 0;
-      let lane = laneEnds.findIndex((end) => left - end >= minGap);
-      if (lane === -1) lane = laneEnds.length < maxLanes ? laneEnds.length : laneEnds.indexOf(Math.min(...laneEnds));
-      laneEnds[lane] = left;
-      return {
-        key: `${purchase.item_id}-${purchase.purchased_at}-${index}`,
-        name: purchase.item_name,
-        icon_url: purchase.icon_url ?? null,
-        tier: purchase.tier ?? null,
-        second,
-        left,
-        lane,
-      };
-    });
-}
-
 /** Minute marks for an axis: every 2 minutes (every 5 past 25 minutes). */
 export function minuteTicks(axisSeconds: number): number[] {
   const step = axisSeconds > 25 * 60 ? 5 : 2;

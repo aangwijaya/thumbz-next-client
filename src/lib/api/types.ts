@@ -83,6 +83,8 @@ export interface TournamentSummary {
   prize_pool: string | null;
   logo_url: string | null;
   featured: boolean;
+  /** Computed by the API from the tournament's matches. */
+  current_stage?: MatchStage | null;
 }
 
 export interface TournamentDetail extends TournamentSummary {
@@ -259,6 +261,8 @@ export interface VideoSummary {
   published_at: string;
   /** Present when the video is served as a protected (DRM) asset — play it via a playback session. */
   media?: { id: string; protection: MediaProtection } | null;
+  /** The game the video covers and who won it (contract §6.5); null for highlights. Spoiler-gated. */
+  result?: { game_number: number; winner_team: TeamSummary } | null;
 }
 
 export type MediaProtection = "none" | "clearkey_aes" | "multidrm";

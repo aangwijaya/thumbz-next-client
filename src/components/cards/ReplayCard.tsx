@@ -26,6 +26,13 @@ export const typeLabels: Record<
   },
 };
 
+/** Protected replays play on their own page; others open the match or the source. */
+export function replayHref(video: VideoSummary | null | undefined): { href: string; external: boolean } {
+  if (video?.media) return { href: `/videos/${video.id}`, external: false };
+  if (video?.match_id) return { href: `/matches/${video.match_id}`, external: false };
+  return { href: video?.url ?? "#", external: true };
+}
+
 /** `priority` for cards in the first row: one of them is usually the LCP image. */
 export function ReplayCard({
   video,
@@ -39,14 +46,7 @@ export function ReplayCard({
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const type = video?.type ? typeLabels[video.type] : undefined;
-  // Protected replays play on their own page; others open the match or the source.
-  const internal = Boolean(video?.media) || Boolean(video?.match_id);
-  const external = !internal;
-  const href = video?.media
-    ? `/videos/${video.id}`
-    : video?.match_id
-      ? `/matches/${video.match_id}`
-      : (video?.url ?? "#");
+  const { href, external } = replayHref(video);
   const duration = formatDuration(video?.duration_seconds ?? 0);
   const published = formatAge(video?.published_at ?? "");
 

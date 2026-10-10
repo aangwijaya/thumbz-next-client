@@ -2888,7 +2888,9 @@ export interface operations {
     };
     Home_getHome: {
         parameters: {
-            query?: never;
+            query?: {
+                tournament_id?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

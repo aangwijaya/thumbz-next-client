@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ v4 data notes</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="width: 1000px; min-height: 1900px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #25221e">
+<div class="notes">
+<h1>Data notes</h1>
+<p>Where each new element gets its data. Available: the API already returns it. Derived: computed on the client from one extra call. Needs backend: an additive API change, proposed separately before that element is built. Approved changes (MPL ID seed, <code>tournament_id</code> on <code>/home</code>) are marked B3/B4.</p>
+<table class="ntable">
+<thead><tr><th style="width: 190px">Element</th><th>Source</th><th style="width: 150px">Status</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="3">League switcher</td></tr>
+<tr><td>League bar tabs</td><td><code>GET /tournaments?sort=start_date&amp;order=desc</code>. One 44px row of text tabs that scrolls sideways when there are many (M8 Tournament and EWC 2027 are placeholders in the mock). No names in code. URL <code>?tournament=&lt;uuid&gt;</code>; default is the first featured ongoing league.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Short tab label</td><td>"MPL PH" instead of "MPL Philippines Season 18" needs a short label. Proposal: <code>short_name</code> on the tournament (teams already have one); without it the tab shows the full <code>name</code>.</td><td><span class="badge b-live">Needs backend</span></td></tr>
+<tr><td>Live count per league</td><td>Length of <code>live_now</code> from <code>/home?tournament_id=</code> for the selected league. The other tab's count needs one more call or is dropped.</td><td><span class="badge b-info">B4</span></td></tr>
+<tr><td>MPL ID data</td><td>Seed copies MPL PH week 8 with ONIC Esports, RRQ Hoshi, EVOS Legends, Bigetron, Team Liquid ID, Alter Ego, Dewa United and Geek Fam ID. Times shift 60 min; broadcasts Bahasa Indonesia + English.</td><td><span class="badge b-info">B3</span></td></tr>
+<tr class="grp"><td colspan="3">Home</td></tr>
+<tr><td>Hero, Match center</td><td>Unchanged components; <code>featured_live_match</code> of the selected league.</td><td><span class="badge b-info">B4</span></td></tr>
+<tr><td>Multiview tiles</td><td><code>live_now</code> with <code>broadcasts</code> (per-language viewers) and <code>thumbnail_url</code>.</td><td><span class="badge b-info">B4</span></td></tr>
+<tr><td>Series pips</td><td>Winner of each finished game. <code>MatchSummary</code> has only <code>score_a/score_b</code> and <code>game_number</code>, so pips can show order only by assuming nothing. Proposal: add <code>games: [{game_number, winner_team_id, status}]</code> to list payloads.</td><td><span class="badge b-live">Needs backend</span></td></tr>
+<tr><td>Rundown</td><td><code>upcoming</code> (with <code>ticket</code>) plus <code>live_now</code>; each day window = first start − 1h to last end + 1h, days drawn equal width.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Stage tracker</td><td><code>GET /tournaments/:id/stages</code> + <code>current_stage</code>. "Week 8 of 9" needs the total number of rounds, which no field gives; without it the tracker shows stages only.</td><td><span class="badge b-live">Needs backend</span></td></tr>
+<tr><td>Race ladder</td><td><code>GET /tournaments/:id/standings</code> (W, L, win rate). In the seed only the copied week-8 results exist, so locally the ladder shows about one game per team.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Last five</td><td><code>GET /tournaments/:id/results?pageSize=50</code>, grouped per team.</td><td><span class="badge b-plain">Derived</span></td></tr>
+<tr><td>Playoff line</td><td>No field says how many teams advance. Either a per-league constant in the frontend or a new <code>playoff_spots</code> on the tournament.</td><td><span class="badge b-live">Needs decision</span></td></tr>
+<tr><td>Team wall</td><td><code>popular_teams</code> for the tiles; rank and record from the standings call above.</td><td><span class="badge b-plain">Derived</span></td></tr>
+<tr><td>Replay shelf</td><td><code>latest_videos</code> scoped to the league; winner from <code>VideoSummary.result</code> (spoiler-gated). Game chips: <code>GET /videos?match_id=</code> for the featured replay.</td><td><span class="badge b-info">B4</span></td></tr>
+<tr class="grp"><td colspan="3">Matches</td></tr>
+<tr><td>Week strip</td><td><code>GET /matches?tournament_id&amp;from&amp;to&amp;pageSize=50</code> for the visible week, counted per local day.</td><td><span class="badge b-plain">Derived</span></td></tr>
+<tr><td>Status counts</td><td><code>meta.total</code> of the same list per status (3 small calls), or drop the numbers.</td><td><span class="badge b-plain">Derived</span></td></tr>
+<tr><td>Game pips and lengths</td><td>Same gap as series pips: needs <code>games</code> (with <code>duration_seconds</code>) on <code>MatchSummary</code>.</td><td><span class="badge b-live">Needs backend</span></td></tr>
+<tr><td>Reminder bell</td><td>Existing Web Push reminders (<code>MatchReminders</code>).</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr class="grp"><td colspan="3">Tournaments and league page</td></tr>
+<tr><td>League cards</td><td><code>/tournaments</code>, <code>/stages</code> (match and live counts), top 3 from <code>/standings</code>. <code>prize_pool</code> is null for MPL PH.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Teams tab</td><td><code>GET /teams?tournament_id=</code>, because <code>/tournaments/:id/teams</code> is documented but not implemented.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr class="grp"><td colspan="3">Match page</td></tr>
+<tr><td>Series strip</td><td><code>MatchDetail.games</code> (winner, duration, status).</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Gold per game</td><td><code>GET /matches/:id/economy?game_number=</code>, one call per finished game (at most 3), drawn with the existing <code>GoldLeadChart</code>.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Scoreboard band</td><td>Gold and kills summed from player rows; towers, turtles and lords counted from <code>/events</code> (same as today's <code>LiveStats</code>).</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Lane by lane</td><td>Players paired by <code>player.role</code>; level from <code>live-stats</code>, damage, MVP, emblem and final items from <code>/statistics</code>; live inventory from <code>inventoryOf()</code>. Hero and item icons come from <code>icon_url</code> (the mock uses initials).</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr><td>Item sequence</td><td><code>/equipment</code> rows (<code>tier</code> 3 = finished, ordered by <code>purchased_at</code>) on the game clock, plus <code>/events</code> as objective lines. "First core item" = first finished item that is not boots. Phone: a lane-vs-lane race list instead of the wide board.</td><td><span class="badge b-ok">Available</span></td></tr>
+<tr class="grp"><td colspan="3">Install the app</td></tr>
+<tr><td>Phone install</td><td>Today <code>InstallApp</code> renders only in the footer, so phones never see it near the top. v4: header "Install" pill, bottom card (dismiss remembered on the device) and a drawer row. Android Chrome: the saved <code>beforeinstallprompt</code> (production builds with the service worker only). iPhone: Share → Add to Home Screen steps, for Safari and Chrome on iOS.</td><td><span class="badge b-ok">Frontend only</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

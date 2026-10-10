@@ -2,21 +2,24 @@
 
 import { useEffect, useState } from "react";
 
-import { clock, holdBackMs } from "@/components/match/GoldLead";
+import { clock, holdBackMs, leadPoints } from "@/components/match/GoldLead";
 import { GameIcon } from "@/components/match/GameIcon";
-import { ItemTimeline } from "@/components/match/ItemTimeline";
+import { GoldSpark } from "@/components/match/GoldSpark";
+import { ItemSequence, type SequencePlayer } from "@/components/match/ItemSequence";
+import { Badge } from "@/components/ui/Badge";
 import { RevealButton } from "@/components/spoiler/Spoiler";
 import { useSpoilers } from "@/components/spoiler/SpoilerProvider";
 import { Container } from "@/components/ui/Container";
 import { LiveDot } from "@/components/ui/LiveDot";
 import { LogoMark } from "@/components/ui/LogoMark";
 import {
+  useMatchEconomy,
   useMatchEquipment,
   useMatchEvents,
   useMatchLiveStats,
   useMatchStatistics,
 } from "@/lib/api/endpoints";
-import type { GameAsset, MatchDetail, PlayerRole, PlayerSnapshot, TeamSummary } from "@/lib/api/types";
+import type { GameAsset, MatchDetail, MatchGame, PlayerRole, PlayerSnapshot, TeamSummary } from "@/lib/api/types";
 import { inventoryOf, SLOTS, type OwnedItem } from "@/lib/utils/builds";
 import { formatViewerCount, shortTeamName } from "@/lib/utils/format";
 import { ROLE_ORDER } from "@/lib/utils/live";
@@ -53,175 +56,305 @@ interface Line {
   mvp: boolean;
 }
 
-function Objective({
-  label,
-  a,
-  b,
-  format = String,
-}: {
+const LANE_NAMES: Partial<Record<PlayerRole, string>> = {
+  exp: "EXP lane",
+  jungle: "Jungle",
+  mid: "Mid lane",
+  gold: "Gold lane",
+  roam: "Roam",
+};
+
+interface TeamTotal {
   label: string;
   a: number;
   b: number;
   format?: (value: number) => string;
-}) {
-  return (
-    <div className="border-b border-stone/50 py-2.5 last:border-b-0 min-[641px]:max-[1180px]:border-b-0">
-      <div className="grid grid-cols-[52px_minmax(0,1fr)_52px] items-center gap-2.5 font-graphik text-base font-extrabold">
-        <span>{format(a)}</span>
-        <span className="flex h-1.5 gap-[3px]" aria-hidden="true">
-          <i className="rounded-full bg-[var(--a)]" style={{ flex: a || 0.0001 }} />
-          <i className="rounded-full bg-[var(--b)]" style={{ flex: b || 0.0001 }} />
-        </span>
-        <span className="text-right">{format(b)}</span>
-      </div>
-      <p className="text-center text-caption font-medium text-pencil">{label}</p>
-    </div>
-  );
+  /** "APBR +3.2K" on the gold cell. */
+  badge?: string;
 }
 
-function Roster({ team, lines, color }: { team?: TeamSummary | null; lines: Line[]; color: string }) {
-  const totalGold = lines.reduce((sum, line) => sum + line.gold, 0);
+// The broadcast scoreboard: team totals side by side, each with a split bar in team colours.
+function Scoreboard({ totals }: { totals: TeamTotal[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-stone bg-paper shadow-subtle">
-      <div className="flex items-center gap-2.5 border-b border-stone/50 px-4 py-3.5">
-        <LogoMark source={team} size="sm" />
-        <b className="font-graphik text-[15px]">{team?.name ?? "TBD"}</b>
-        <span className="ml-auto text-[13px] text-pencil">{formatViewerCount(totalGold)} gold</span>
-      </div>
-      {lines.length === 0 ? (
-        <p className="px-4 py-6 text-center text-sm text-pencil">No player stats yet.</p>
-      ) : (
-        <ul>
-          {lines.map((line) => (
-            <li
-              key={line.id}
-              className="grid grid-cols-[36px_minmax(0,1fr)_58px_46px] items-center gap-x-2.5 gap-y-1.5 border-b border-stone/50 px-3.5 py-2.5 text-sm last:border-b-0 min-[641px]:grid-cols-[44px_36px_minmax(0,1fr)_64px_50px] min-[641px]:px-4"
+    <ul
+      aria-label="Team totals"
+      className="grid overflow-hidden rounded-xl border border-stone bg-paper shadow-subtle max-[640px]:grid-cols-2 min-[641px]:grid-cols-[1.25fr_repeat(4,minmax(0,1fr))]"
+    >
+      {totals.map((total, index) => {
+        const format = total.format ?? String;
+        return (
+          <li
+            key={total.label}
+            aria-label={`${total.label}: ${format(total.a)} to ${format(total.b)}`}
+            className={`flex flex-col justify-center gap-[9px] px-[18px] py-4 max-[640px]:px-3.5 max-[640px]:py-3 ${
+              index === 0 ? "bg-[#fffaf6] max-[640px]:col-span-full" : "border-[#eeecea] min-[641px]:border-l max-[640px]:border-t max-[640px]:even:border-r"
+            }`}
+          >
+            <span className="flex items-center justify-between gap-2 text-caption font-semibold text-pencil">
+              {total.label}
+              {total.badge ? (
+                <Badge tone="ember" size="xs">
+                  {total.badge}
+                </Badge>
+              ) : null}
+            </span>
+            <span
+              aria-hidden="true"
+              className={`flex items-baseline justify-between font-graphik font-extrabold leading-none tracking-[-0.01em] tabular-nums ${
+                index === 0 ? "text-[28px] max-[640px]:text-2xl" : "text-2xl max-[640px]:text-xl"
+              }`}
             >
-              <span className="text-[11px] font-bold tracking-[0.04em] text-pencil max-[640px]:hidden">
-                {line.role ? ROLE_LABELS[line.role] : ""}
-              </span>
-              <span className="relative">
-                <GameIcon src={line.heroIcon} name={line.hero ?? "?"} size={36} className="rounded-lg" tint={tint(color, 22)} />
-                {line.emblem ? (
-                  <GameIcon
-                    src={line.emblem.icon_url}
-                    name={line.emblem.name}
-                    size={16}
-                    className="absolute -right-1 -bottom-1 rounded-full border border-paper"
-                  />
-                ) : null}
-              </span>
-              <p className="min-w-0">
-                <b className="flex items-center gap-1.5 truncate font-semibold">
-                  {line.nickname}
-                  {line.mvp ? (
-                    <span className="rounded bg-deep-ember px-1 text-[10px] font-bold text-white">MVP</span>
-                  ) : null}
-                </b>
-                <small className="block truncate text-caption text-pencil">
-                  {[
-                    line.hero,
-                    line.level != null ? `Lv ${line.level}` : null,
-                    line.damage != null ? `${formatViewerCount(line.damage)} dmg` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </small>
-              </p>
-              <span className="text-right font-semibold tabular-nums" aria-label={`${line.kills} kills, ${line.deaths} deaths, ${line.assists} assists`}>
-                {line.kills}/{line.deaths}/{line.assists}
-              </span>
-              <span className="text-right tabular-nums text-charcoal">{formatViewerCount(line.gold)}</span>
-              <span className="col-start-2 col-end-[-1] flex flex-wrap items-center gap-[3px] min-[641px]:col-start-3">
-                <span
-                  className="flex gap-[3px]"
-                  role="img"
-                  aria-label={line.items.length > 0 ? `Items: ${line.items.map((item) => item.name).join(", ")}` : "No items yet"}
-                >
-                  {Array.from({ length: SLOTS }, (_, index) => {
-                    const item = line.items[index];
-                    return item ? (
-                      <GameIcon key={index} src={item.icon_url} name={item.name} size={20} className="rounded" tint={tint(color, 30)} />
-                    ) : (
-                      <i key={index} aria-hidden="true" className="size-5 rounded border border-dashed border-stone" />
-                    );
-                  })}
-                </span>
-                {line.talents.length > 0 ? (
-                  <span
-                    className="ml-1.5 flex gap-[3px]"
-                    role="img"
-                    aria-label={`Emblem: ${line.emblem?.name ?? "unknown"}; talents: ${line.talents.map((t) => t.name).join(", ")}`}
-                  >
-                    {line.talents.map((talent) => (
-                      <GameIcon key={talent.id} src={talent.icon_url} name={talent.name} size={16} className="rounded-full" />
-                    ))}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+              <span className={total.a < total.b ? "text-graphite" : "text-ink"}>{format(total.a)}</span>
+              <span className={total.b < total.a ? "text-graphite" : "text-ink"}>{format(total.b)}</span>
+            </span>
+            <span aria-hidden="true" className="flex h-1.5 gap-[3px]">
+              <i className="min-w-[3px] rounded-full bg-(--a)" style={{ flex: total.a || 0.0001 }} />
+              <i className="min-w-[3px] rounded-full bg-(--b)" style={{ flex: total.b || 0.0001 }} />
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// One player's side of a lane: hero with level, name, KDA, gold and the build so far.
+function LanePlayer({ line, color, side }: { line?: Line; color: string; side: "a" | "b" }) {
+  if (!line) return <div />;
+  const ratio = ((line.kills + line.assists) / Math.max(1, line.deaths)).toFixed(1);
+  const right = side === "b";
+  const detail = [line.hero, line.damage != null ? `${formatViewerCount(line.damage)} dmg` : null].filter(Boolean).join(" · ");
+  return (
+    <div
+      className={`grid min-w-0 items-center gap-x-3 gap-y-1.5 max-[640px]:gap-x-2 ${
+        right
+          ? "grid-cols-[minmax(0,1fr)_32px] text-right min-[641px]:grid-cols-[52px_64px_minmax(0,1fr)_40px]"
+          : "grid-cols-[32px_minmax(0,1fr)] min-[641px]:grid-cols-[40px_minmax(0,1fr)_64px_52px]"
+      }`}
+    >
+      <span className={`relative row-span-2 min-[641px]:row-span-1 ${right ? "col-start-2 min-[641px]:col-start-4" : ""}`}>
+        <GameIcon src={line.heroIcon} name={line.hero ?? "?"} size={40} className="size-8 rounded-[10px] min-[641px]:size-10" tint={tint(color, 22)} />
+        {line.level != null ? (
+          <small className="absolute -bottom-1.5 -right-1.5 min-w-[19px] rounded-[10px] border-2 border-paper bg-ink px-1 text-center text-[10px] font-bold leading-[15px] text-paper">
+            {line.level}
+          </small>
+        ) : null}
+      </span>
+      <span className={`min-w-0 ${right ? "col-start-1 row-start-1 min-[641px]:col-start-3" : ""}`}>
+        <b className={`flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-ink ${right ? "justify-end" : ""}`}>
+          {line.mvp && right ? <span className="rounded bg-deep-ember px-1 text-[10px] font-bold text-white">MVP</span> : null}
+          <span className="truncate">{line.nickname}</span>
+          {line.mvp && !right ? <span className="rounded bg-deep-ember px-1 text-[10px] font-bold text-white">MVP</span> : null}
+        </b>
+        <span className="block truncate text-caption text-pencil">{detail}</span>
+      </span>
+      <span
+        aria-label={`${line.kills} kills, ${line.deaths} deaths, ${line.assists} assists`}
+        className={`whitespace-nowrap font-graphik text-[13px] font-bold tabular-nums text-ink min-[641px]:text-center min-[641px]:text-[15px] ${
+          right ? "col-start-1 row-start-2 min-[641px]:col-start-2 min-[641px]:row-start-1" : "col-start-2 row-start-2 min-[641px]:col-start-3 min-[641px]:row-start-1"
+        }`}
+      >
+        {line.kills}/{line.deaths}/{line.assists}
+        <small className="block font-body text-[11px] font-medium text-pencil max-[640px]:hidden">KDA {ratio}</small>
+      </span>
+      <span className={`text-sm font-semibold tabular-nums max-[640px]:hidden ${right ? "col-start-1 row-start-1 text-left" : "col-start-4 text-right"}`}>
+        {formatViewerCount(line.gold)}
+      </span>
+      <span
+        role="img"
+        aria-label={line.items.length > 0 ? `Items: ${line.items.map((item) => item.name).join(", ")}` : "No items yet"}
+        className={`col-span-full flex gap-[3px] ${right ? "justify-end min-[641px]:col-start-1 min-[641px]:col-end-4" : "min-[641px]:col-start-2 min-[641px]:col-end-5"}`}
+      >
+        {Array.from({ length: SLOTS }, (_, index) => {
+          const item = line.items[index];
+          return item ? (
+            <GameIcon key={index} src={item.icon_url} name={item.name} size={24} className="size-[18px] rounded min-[641px]:size-6" tint={tint(color, 30)} />
+          ) : (
+            <i key={index} aria-hidden="true" className="size-[18px] rounded border border-dashed border-stone min-[641px]:size-6" />
+          );
+        })}
+      </span>
     </div>
   );
 }
 
-/** Game 1 · Game 2 · …: one tab per game of the series (WAI-ARIA tabs). */
-function GameTabs({
+// Lane by lane: each role's two players face each other across the gold difference.
+function Lanes({
+  linesA,
+  linesB,
+  teams,
+  colors,
+}: {
+  linesA: Line[];
+  linesB: Line[];
+  teams: [TeamSummary | null | undefined, TeamSummary | null | undefined];
+  colors: [string, string];
+}) {
+  const count = Math.max(linesA.length, linesB.length);
+  if (count === 0) {
+    return <p className="rounded-xl border border-stone bg-paper px-4 py-6 text-center text-sm text-pencil">No player stats yet.</p>;
+  }
+  return (
+    <section aria-label="Lane by lane" className="overflow-hidden rounded-xl border border-stone bg-paper shadow-subtle">
+      <div className="grid grid-cols-2 items-center gap-4 border-b border-stone px-[18px] py-3 font-graphik text-[15px] font-bold text-ink max-[640px]:px-3.5 min-[641px]:grid-cols-[minmax(0,1fr)_200px_minmax(0,1fr)]">
+        <span className="flex min-w-0 items-center gap-2">
+          <LogoMark source={teams[0]} size="sm" />
+          <span className="truncate">{teams[0]?.name ?? "TBD"}</span>
+        </span>
+        <span className="text-center font-body text-caption font-semibold text-pencil max-[640px]:hidden">Lane by lane · gold difference</span>
+        <span className="flex min-w-0 items-center justify-end gap-2">
+          <span className="truncate">{teams[1]?.name ?? "TBD"}</span>
+          <LogoMark source={teams[1]} size="sm" />
+        </span>
+      </div>
+      <ul>
+        {Array.from({ length: count }, (_, index) => {
+          const a = linesA[index];
+          const b = linesB[index];
+          const diff = (a?.gold ?? 0) - (b?.gold ?? 0);
+          const width = Math.min(50, (Math.abs(diff) / 2000) * 50);
+          const leader = diff >= 0 ? 0 : 1;
+          const role = a?.role ?? b?.role ?? null;
+          return (
+            <li
+              key={a?.id ?? b?.id ?? index}
+              className="grid grid-cols-2 items-center gap-x-3 gap-y-2.5 border-b border-[#eeecea] px-[18px] py-3 transition-colors last:border-b-0 hover:bg-[#fdfaf7] max-[640px]:px-3.5 min-[641px]:grid-cols-[minmax(0,1fr)_200px_minmax(0,1fr)] min-[641px]:gap-x-4"
+            >
+              <div className="col-span-full flex items-center gap-2.5 min-[641px]:col-span-1 min-[641px]:col-start-2 min-[641px]:row-start-1 min-[641px]:flex-col min-[641px]:gap-1.5">
+                <span className="text-[11px] font-bold tracking-[0.06em] text-pencil">
+                  {(role ? (LANE_NAMES[role] ?? ROLE_LABELS[role]) : `Lane ${index + 1}`).toUpperCase()}
+                </span>
+                <span aria-hidden="true" className="relative h-2 flex-1 rounded bg-[#f4f2ef] before:absolute before:-inset-y-[3px] before:left-1/2 before:w-px before:bg-stone min-[641px]:w-full min-[641px]:flex-none">
+                  <i
+                    className={`absolute inset-y-0 rounded motion-safe:animate-grow ${leader === 0 ? "origin-right" : "origin-left"}`}
+                    style={{ left: leader === 0 ? `${50 - width}%` : "50%", width: `${width}%`, background: colors[leader] }}
+                  />
+                </span>
+                <span className="text-caption font-semibold" style={{ color: `color-mix(in oklab, ${colors[leader]} 60%, var(--color-ink))` }}>
+                  {diff === 0 ? "Even" : `${shortTeamName(teams[leader])} +${formatViewerCount(Math.abs(diff))}`}
+                </span>
+              </div>
+              <LanePlayer line={a} color={colors[0]} side="a" />
+              <LanePlayer line={b} color={colors[1]} side="b" />
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+// One cell per game of the series (WAI-ARIA tabs): who won, how long, and a small gold-lead line.
+function GameCells({
+  match,
   games,
   selected,
   liveGame,
   onSelect,
 }: {
-  games: number[];
+  match: MatchDetail;
+  games: MatchGame[];
   selected: number;
   liveGame: number | null;
   onSelect: (game: number) => void;
 }) {
+  const numbers = games.map((game) => game.game_number);
   function onKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
-    const index = games.indexOf(selected);
+    const index = numbers.indexOf(selected);
     const next =
       event.key === "ArrowRight"
-        ? games[(index + 1) % games.length]
+        ? numbers[(index + 1) % numbers.length]
         : event.key === "ArrowLeft"
-          ? games[(index - 1 + games.length) % games.length]
+          ? numbers[(index - 1 + numbers.length) % numbers.length]
           : event.key === "Home"
-            ? games[0]
+            ? numbers[0]
             : event.key === "End"
-              ? games[games.length - 1]
+              ? numbers[numbers.length - 1]
               : null;
     if (next == null) return;
     event.preventDefault();
     onSelect(next);
-    event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[games.indexOf(next)]?.focus();
+    event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]")[numbers.indexOf(next)]?.focus();
   }
+  const bestOf = match?.best_of ?? 1;
+  const notPlayed = Array.from({ length: Math.max(0, bestOf - games.length) }, (_, index) => games.length + index + 1);
   return (
-    <div role="tablist" aria-label="Games" className="mb-4 flex gap-1.5">
-      {games.map((game) => (
-        <button
-          key={game}
-          type="button"
-          role="tab"
-          id={`game-tab-${game}`}
-          aria-selected={game === selected}
-          aria-controls="game-panel"
-          tabIndex={game === selected ? 0 : -1}
-          onClick={() => onSelect(game)}
-          onKeyDown={onKeyDown}
-          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone px-4 font-graphik text-sm font-bold text-pencil transition-colors hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
+    <div className="mb-4 grid grid-cols-3 gap-3 max-[640px]:gap-2" style={{ gridTemplateColumns: `repeat(${bestOf}, minmax(0, 1fr))` }}>
+      <div role="tablist" aria-label="Games" className="contents">
+        {games.map((game) => {
+          const live = game.game_number === liveGame;
+          const winner = game.winner_team_id === match?.team_a?.id ? match?.team_a : game.winner_team_id === match?.team_b?.id ? match?.team_b : null;
+          return (
+            <button
+              key={game.game_number}
+              type="button"
+              role="tab"
+              id={`game-tab-${game.game_number}`}
+              aria-selected={game.game_number === selected}
+              aria-controls="game-panel"
+              tabIndex={game.game_number === selected ? 0 : -1}
+              onClick={() => onSelect(game.game_number)}
+              onKeyDown={onKeyDown}
+              className={`flex flex-col gap-2.5 rounded-[10px] border p-3.5 text-left transition-[border-color,box-shadow] hover:border-charcoal aria-selected:border-ink aria-selected:shadow-[inset_0_0_0_1px_var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember max-[640px]:p-2.5 ${
+                live ? "border-[#f0c4b8] bg-cream" : "border-stone bg-paper"
+              }`}
+            >
+              <span className="flex items-center justify-between gap-2 text-[13px] text-pencil max-[640px]:flex-col max-[640px]:items-start max-[640px]:gap-0.5">
+                <b className="font-graphik text-[15px] font-bold text-ink">Game {game.game_number}</b>
+                {live ? (
+                  <span className="inline-flex items-center gap-1.5 text-deep-ember">
+                    <LiveDot />
+                    Live
+                  </span>
+                ) : game.duration_seconds ? (
+                  clock(game.duration_seconds)
+                ) : null}
+              </span>
+              <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink max-[640px]:text-caption">
+                {winner ? (
+                  <>
+                    <LogoMark source={winner} size="xs" />
+                    <span className="truncate">{shortTeamName(winner)} won</span>
+                  </>
+                ) : (
+                  <span className="text-pencil">{live ? "In progress" : "—"}</span>
+                )}
+              </span>
+              <GameSpark match={match} game={game.game_number} live={live} />
+            </button>
+          );
+        })}
+      </div>
+      {notPlayed.map((number) => (
+        <div
+          key={number}
+          aria-hidden="true"
+          className="flex flex-col gap-2.5 rounded-[10px] border border-dashed border-stone p-3.5 text-[13px] text-pencil max-[640px]:p-2.5"
         >
-          Game {game}
-          {game === liveGame ? (
-            <>
-              <LiveDot />
-              <span className="sr-only">(live)</span>
-            </>
-          ) : null}
-        </button>
+          <b className="font-graphik text-[15px] font-bold text-charcoal">Game {number}</b>
+          If needed
+        </div>
       ))}
     </div>
   );
+}
+
+function GameSpark({ match, game, live }: { match: MatchDetail; game: number; live: boolean }) {
+  const economy = useMatchEconomy(match?.id ?? "", live, game);
+  const snapshots = (economy.data ?? []).filter((snapshot) => snapshot?.game_number == null || snapshot.game_number === game);
+  const first = snapshots.length ? Math.min(...snapshots.map((snapshot) => Date.parse(snapshot.recorded_at))) : 0;
+  const points = leadPoints(snapshots, match?.team_a?.id, match?.team_b?.id, first);
+  return <GoldSpark points={points} label={`Game ${game} gold lead`} className="max-[640px]:h-8" />;
+}
+
+function toSequencePlayer(line: Line): SequencePlayer {
+  return {
+    id: line.id,
+    nickname: line.nickname,
+    hero: line.hero,
+    heroIcon: line.heroIcon,
+    lane: line.role ? (LANE_NAMES[line.role] ?? ROLE_LABELS[line.role]) : "Lane",
+  };
 }
 
 export function LiveStats({ match: initial }: { match: MatchDetail }) {
@@ -344,7 +477,8 @@ export function LiveStats({ match: initial }: { match: MatchDetail }) {
         <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <div>
             <p className="text-caption font-semibold text-deep-ember">{playing ? "Live stats" : "Stats"}</p>
-            <h2 id="live-stats-title" className="font-graphik text-[21px] font-bold leading-[1.3] text-ink">
+            {/* The game clock ticks from the visitor's clock, a second apart from the server's. */}
+            <h2 id="live-stats-title" suppressHydrationWarning className="font-graphik text-[21px] font-bold leading-[1.3] text-ink">
               {match?.status !== "scheduled" && !isVisible(id) ? "This game" : heading}
             </h2>
           </div>
@@ -359,63 +493,50 @@ export function LiveStats({ match: initial }: { match: MatchDetail }) {
           </div>
         ) : (
           <>
-            {games.length > 1 && selected != null ? (
-              <GameTabs games={games.map((row) => row.game_number)} selected={selected} liveGame={liveGame} onSelect={setPicked} />
+            {games.length > 0 && selected != null ? (
+              <GameCells match={match} games={games} selected={selected} liveGame={liveGame} onSelect={setPicked} />
             ) : null}
             <div
               id="game-panel"
-              {...(games.length > 1 && selected != null
+              {...(games.length > 0 && selected != null
                 ? { role: "tabpanel", "aria-labelledby": `game-tab-${selected}` }
                 : {})}
               className="flex flex-col gap-4"
             >
-              <div
-                className="grid gap-4 min-[641px]:grid-cols-2 min-[1181px]:grid-cols-[300px_minmax(0,1fr)_minmax(0,1fr)]"
-                style={{ ["--a" as string]: colorA, ["--b" as string]: colorB }}
-              >
-                <div className="rounded-xl border border-stone bg-paper px-5 py-4 shadow-subtle min-[641px]:max-[1180px]:col-span-2">
-                  <div className="mb-1.5 flex items-center justify-between font-graphik text-sm font-bold">
-                    <span className="flex items-center gap-2">
-                      <LogoMark source={match?.team_a} size="xs" />
-                      {nameA}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      {nameB}
-                      <LogoMark source={match?.team_b} size="xs" />
-                    </span>
-                  </div>
-                  <div className="min-[641px]:max-[1180px]:grid min-[641px]:max-[1180px]:grid-cols-5 min-[641px]:max-[1180px]:gap-x-5">
-                    <Objective label="Gold" a={sum(linesA, "gold")} b={sum(linesB, "gold")} format={formatViewerCount} />
-                    <Objective label="Kills" a={sum(linesA, "kills")} b={sum(linesB, "kills")} />
-                    <Objective label="Towers" a={count(match?.team_a?.id, "tower")} b={count(match?.team_b?.id, "tower")} />
-                    <Objective label="Turtles" a={count(match?.team_a?.id, "turtle")} b={count(match?.team_b?.id, "turtle")} />
-                    <Objective label="Lords" a={count(match?.team_a?.id, "lord")} b={count(match?.team_b?.id, "lord")} />
-                  </div>
-                </div>
-                <Roster team={match?.team_a} lines={linesA} color={colorA} />
-                <Roster team={match?.team_b} lines={linesB} color={colorB} />
+              <div className="flex flex-col gap-4" style={{ ["--a" as string]: colorA, ["--b" as string]: colorB }}>
+                <Scoreboard
+                  totals={[
+                    {
+                      label: "Gold",
+                      a: sum(linesA, "gold"),
+                      b: sum(linesB, "gold"),
+                      format: formatViewerCount,
+                      badge:
+                        sum(linesA, "gold") === sum(linesB, "gold")
+                          ? undefined
+                          : `${sum(linesA, "gold") > sum(linesB, "gold") ? nameA : nameB} +${formatViewerCount(Math.abs(sum(linesA, "gold") - sum(linesB, "gold")))}`,
+                    },
+                    { label: "Kills", a: sum(linesA, "kills"), b: sum(linesB, "kills") },
+                    { label: "Towers", a: count(match?.team_a?.id, "tower"), b: count(match?.team_b?.id, "tower") },
+                    { label: "Turtles", a: count(match?.team_a?.id, "turtle"), b: count(match?.team_b?.id, "turtle") },
+                    { label: "Lords", a: count(match?.team_a?.id, "lord"), b: count(match?.team_b?.id, "lord") },
+                  ]}
+                />
+                <Lanes linesA={linesA} linesB={linesB} teams={[match?.team_a, match?.team_b]} colors={[colorA, colorB]} />
               </div>
 
               {startedAt != null && purchases.length > 0 ? (
-                <section aria-labelledby="item-sequence-title">
-                  <h3 id="item-sequence-title" className="mb-2.5 font-graphik text-base font-bold text-ink">
-                    Item sequence
-                  </h3>
-                  <ItemTimeline
-                    players={[...linesA.map((line) => ({ line, color: colorA })), ...linesB.map((line) => ({ line, color: colorB }))].map(
-                      ({ line, color }) => ({
-                        id: line.id,
-                        nickname: line.nickname,
-                        hero: line.hero,
-                        heroIcon: line.heroIcon,
-                        color: tint(color, 22),
-                      }),
-                    )}
-                    purchases={purchases}
-                    startedAt={startedAt}
-                    axisSeconds={axisSeconds}
-                  />
-                </section>
+                <ItemSequence
+                  playersA={linesA.map(toSequencePlayer)}
+                  playersB={linesB.map(toSequencePlayer)}
+                  purchases={purchases}
+                  events={moments}
+                  startedAt={startedAt}
+                  axisSeconds={axisSeconds}
+                  colors={[colorA, colorB]}
+                  teamIds={[match?.team_a?.id, match?.team_b?.id]}
+                  names={[nameA, nameB]}
+                />
               ) : null}
             </div>
           </>
