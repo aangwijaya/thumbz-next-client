@@ -1,71 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { isIosSafari, isStandalone } from "@/lib/platform";
-
-/** Chromium's install prompt event (not in the DOM typings). */
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-type Mode = { kind: "hidden" } | { kind: "prompt"; event: BeforeInstallPromptEvent } | { kind: "ios" };
+import { startInstall, useInstall } from "@/components/pwa/install-store";
 
 const buttonClass =
   "inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone bg-paper px-4 text-body-sm font-semibold text-ink transition-colors hover:border-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember";
 
-/** "Install app": the native prompt on Chromium, instructions on iOS, nothing once installed. */
+/** "Install the app" in the footer: the native prompt on Chromium, the steps sheet on iPhone. */
 export function InstallApp() {
-  const [mode, setMode] = useState<Mode>({ kind: "hidden" });
-  const [showSteps, setShowSteps] = useState(false);
-
-  useEffect(() => {
-    if (isStandalone()) return;
-    if (isIosSafari()) setMode({ kind: "ios" });
-    const onPrompt = (event: Event) => {
-      event.preventDefault(); // keep it for our button instead of the mini-infobar
-      setMode({ kind: "prompt", event: event as BeforeInstallPromptEvent });
-    };
-    const onInstalled = () => setMode({ kind: "hidden" });
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  if (mode.kind === "hidden") return null;
-
-  if (mode.kind === "prompt") {
-    return (
-      <button
-        type="button"
-        className={`${buttonClass} mt-5`}
-        onClick={async () => {
-          await mode.event.prompt();
-          const choice = await mode.event.userChoice;
-          // A prompt event can be used once; accepted installs also fire appinstalled.
-          if (choice.outcome === "accepted") setMode({ kind: "hidden" });
-        }}
-      >
-        Install the app
-      </button>
-    );
-  }
-
+  const { mode } = useInstall();
+  if (mode === "hidden") return null;
   return (
-    <div className="mt-5">
-      <button type="button" className={buttonClass} aria-expanded={showSteps} onClick={() => setShowSteps((open) => !open)}>
-        Install the app
-      </button>
-      {showSteps ? (
-        <p className="mt-2 max-w-[34ch] text-body-sm text-pencil">
-          Tap <span className="font-semibold text-ink">Share</span>, then{" "}
-          <span className="font-semibold text-ink">Add to Home Screen</span>. Match reminders work once it&apos;s installed.
-        </p>
-      ) : null}
-    </div>
+    <button type="button" className={`${buttonClass} mt-5`} onClick={() => void startInstall()}>
+      Install the app
+    </button>
+  );
+}
+
+/** The header's "Install" pill, on phones and small tablets only. */
+export function InstallPill() {
+  const { mode } = useInstall();
+  if (mode === "hidden") return null;
+  return (
+    <button
+      type="button"
+      onClick={() => void startInstall()}
+      className="mr-0.5 inline-flex min-h-9 items-center gap-1.5 rounded-full border border-stone px-3 text-sm font-semibold text-ink transition-colors hover:border-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember min-[901px]:hidden"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[15px] fill-none stroke-deep-ember stroke-2 [stroke-linecap:round] [stroke-linejoin:round]">
+        <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+      </svg>
+      Install
+    </button>
+  );
+}
+
+/** "Install the app" as a row of the phone menu. */
+export function InstallDrawerRow({ className }: { className: string }) {
+  const { mode } = useInstall();
+  if (mode === "hidden") return null;
+  return (
+    <button type="button" className={`${className} w-full text-left`} onClick={() => void startInstall()}>
+      Install the app
+      <span className="text-body-sm font-medium text-cobalt-link">{mode === "ios" ? "How to" : "Install"}</span>
+    </button>
   );
 }

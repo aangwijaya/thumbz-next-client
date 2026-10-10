@@ -13,6 +13,12 @@ export function isIosSafari(): boolean {
   return ios && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
 }
 
+/** Any iPhone/iPad browser: all of them (Safari, Chrome, Firefox…) install via Share → Add to Home Screen. */
+export function isIos(): boolean {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 /** VAPID public key (base64url) → the BufferSource PushManager.subscribe expects. */
 export function vapidKeyBytes(base64url: string): Uint8Array<ArrayBuffer> {
   const base64 = (base64url + "=".repeat((4 - (base64url.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
