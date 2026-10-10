@@ -112,7 +112,11 @@ export default async function HomePage({
             ) : null}
           </MatchLanguageProvider>
           {otherLive.length > 0 ? (
-            <LiveNow matches={otherLive} more={heroMatch?.status === "live"} />
+            <LiveNow
+              matches={otherLive}
+              more={heroMatch?.status === "live"}
+              leagueLabel={tournament ? tournamentLabel(tournament) : null}
+            />
           ) : null}
           {upcoming.length > 0 ? <Schedule matches={upcoming} tournamentId={tournament?.id ?? null} /> : null}
           {tournaments.length > 0 ? (
