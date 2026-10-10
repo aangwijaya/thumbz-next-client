@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { HomeSectionHead } from "@/components/home/HomeSectionHead";
 import { Scorebug } from "@/components/home/Scorebug";
 import { SeriesPips } from "@/components/match/SeriesPips";
 import { Spoiler } from "@/components/spoiler/Spoiler";
@@ -106,23 +107,17 @@ export function LiveNow({ matches, more, leagueLabel }: LiveNowProps) {
   return (
     <section id="live-now" aria-labelledby="live-now-title" className="scroll-mt-32 py-[clamp(32px,4vw,48px)]">
       <Container size="page">
-        <div className="mb-6 flex flex-col items-start gap-4 min-[641px]:mb-8 min-[641px]:flex-row min-[641px]:flex-wrap min-[641px]:items-end min-[641px]:justify-between">
-          <div className="flex flex-col gap-4">
-            <p className="-mb-2 flex items-center gap-2 text-caption font-semibold text-deep-ember">
+        <HomeSectionHead
+          id="live-now-title"
+          eyebrow={
+            <>
               <LiveDot />
               Live now
-            </p>
-            <h2
-              id="live-now-title"
-              className="text-balance font-graphik text-[clamp(28px,calc(2.2vw+8px),38px)] font-bold leading-[1.2] tracking-[-0.005em] text-ink"
-            >
-              {word} {more ? "more " : ""}
-              {leagueLabel ? `${leagueLabel} ` : ""}
-              {count === 1 ? "match is" : "matches are"} on air
-            </h2>
-          </div>
-          <ArrowLink href="/live">All live matches</ArrowLink>
-        </div>
+            </>
+          }
+          title={`${word} ${more ? "more " : ""}${leagueLabel ? `${leagueLabel} ` : ""}${count === 1 ? "match is" : "matches are"} on air`}
+          actions={<ArrowLink href="/live">All live matches</ArrowLink>}
+        />
         <div className="grid gap-6 max-[640px]:gap-4 min-[901px]:grid-cols-2">
           {matches.map((match, index) => (
             <LiveTile key={match?.id ?? index} match={match} />

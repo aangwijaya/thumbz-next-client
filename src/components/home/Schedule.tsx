@@ -1,36 +1,35 @@
-import { FeatureRow } from "@/components/home/FeatureRow";
-import { SchedulePlanner } from "@/components/home/SchedulePlanner";
-import type { HomePayload, TicketAvailability } from "@/lib/api/types";
-import { formatStartsIn } from "@/lib/utils/format";
+import { ArrowLink } from "@/components/ui/ArrowLink";
+import { Container } from "@/components/ui/Container";
+import { HomeSectionHead } from "@/components/home/HomeSectionHead";
+import { ScheduleRundown } from "@/components/home/ScheduleRundown";
+import type { HomePayload, MatchSummary } from "@/lib/api/types";
 
 interface ScheduleProps {
   matches: HomePayload["upcoming"];
+  /** Live matches sit on the same timeline, across the "now" needle. */
+  live: MatchSummary[];
   tournamentId: string | null;
 }
 
-export function Schedule({ matches, tournamentId }: ScheduleProps) {
-  // Ticket availability arrives embedded in the home payload: only on-sale
-  // tickets get a box, and no request is made per match.
-  const tickets: Record<string, TicketAvailability> = {};
-  for (const match of matches) {
-    if (match?.id && match.ticket?.on_sale) tickets[match.id] = match.ticket;
-  }
-
+export function Schedule({ matches, live, tournamentId }: ScheduleProps) {
   return (
-    <FeatureRow
-      id="schedule"
-      flip
-      eyebrow="Up next"
-      title="Plan your match day"
-      body="Every upcoming match in your local time. Some playoff matches also sell seats at the venue."
-      action={{ href: tournamentId ? `/matches?tournament=${tournamentId}` : "/matches", label: "See full schedule" }}
-    >
-      <SchedulePlanner
-        matches={matches}
-        tickets={tickets}
-        // Only the first match gets a "starts in" hint, and only when it is close.
-        startsIn={formatStartsIn(matches[0]?.scheduled_at ?? "")}
-      />
-    </FeatureRow>
+    <section id="schedule" aria-labelledby="schedule-title" className="scroll-mt-32 py-[clamp(32px,4vw,48px)]">
+      <Container size="page">
+        <HomeSectionHead
+          id="schedule-title"
+          eyebrow="Schedule"
+          title="Plan your match day"
+          actions={
+            <>
+              <span className="text-[13px] text-pencil">Times in your time zone</span>
+              <ArrowLink href={tournamentId ? `/matches?tournament=${tournamentId}` : "/matches"}>
+                See full schedule
+              </ArrowLink>
+            </>
+          }
+        />
+        <ScheduleRundown live={live} upcoming={matches} />
+      </Container>
+    </section>
   );
 }

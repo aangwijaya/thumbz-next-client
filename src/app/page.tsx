@@ -118,7 +118,9 @@ export default async function HomePage({
               leagueLabel={tournament ? tournamentLabel(tournament) : null}
             />
           ) : null}
-          {upcoming.length > 0 ? <Schedule matches={upcoming} tournamentId={tournament?.id ?? null} /> : null}
+          {upcoming.length > 0 || liveMatches.length > 0 ? (
+            <Schedule matches={upcoming} live={liveMatches} tournamentId={tournament?.id ?? null} />
+          ) : null}
           {tournaments.length > 0 ? (
             // Standings per tournament stream in without holding up the page.
             <Suspense fallback={<TournamentsFallback />}>
