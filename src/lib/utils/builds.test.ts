@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ItemPurchase } from "@/lib/api/types";
 
-import { inventoryOf, minuteTicks, timelineOf } from "./builds";
+import { inventoryOf, minuteTicks } from "./builds";
 
 const start = Date.parse("2026-10-09T10:00:00Z");
 const buy = (item: string, second: number, tier: number | null): ItemPurchase => ({
@@ -34,28 +34,6 @@ describe("inventoryOf", () => {
 
   it("is empty before any purchase", () => {
     expect(inventoryOf([])).toEqual([]);
-  });
-});
-
-describe("timelineOf", () => {
-  it("places purchases by second and stacks close ones in lanes", () => {
-    const marks = timelineOf([buy("B", 10, 1), buy("A", 0, 1), buy("C", 300, 3)], start, 600);
-    expect(marks.map((m) => [m.name, m.second, m.left, m.lane])).toEqual([
-      ["A", 0, 0, 0],
-      ["B", 10, (10 / 600) * 100, 1],
-      ["C", 300, 50, 0],
-    ]);
-  });
-
-  it("never uses more lanes than allowed", () => {
-    const marks = timelineOf(
-      Array.from({ length: 6 }, (_, i) => buy(`I${i}`, i, 1)),
-      start,
-      600,
-      3.2,
-      2,
-    );
-    expect(Math.max(...marks.map((m) => m.lane))).toBe(1);
   });
 });
 

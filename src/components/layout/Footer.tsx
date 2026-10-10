@@ -91,7 +91,7 @@ export function Footer() {
             >
               ph-mpl.com
             </a>
-            ), © Moonton. Non-commercial portfolio project.
+            ); MPL Indonesia is demo data built from it. © Moonton. Non-commercial portfolio project.
           </span>
         </div>
       </Container>

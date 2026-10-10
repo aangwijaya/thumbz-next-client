@@ -12,10 +12,13 @@ import { MatchLanguageProvider } from "@/components/home/MatchLanguage";
 import { Replays } from "@/components/home/Replays";
 import { Schedule } from "@/components/home/Schedule";
 import { Teams } from "@/components/home/Teams";
-import { Tournaments, TournamentsFallback } from "@/components/home/Tournaments";
+import { Standings, StandingsFallback } from "@/components/home/Standings";
 import { YourTeams } from "@/components/home/YourTeams";
 import { getFollowedTeams } from "@/lib/api/favorites";
 import { getHome } from "@/lib/api/home";
+import { getLiveCounts, getTournaments, pickTournament } from "@/lib/api/tournaments";
+import { tournamentLabel } from "@/lib/leagues";
+import { LeagueBar } from "@/components/tournaments/LeagueBar";
 import type { MatchSummary } from "@/lib/api/types";
 import { SpoilerProvider } from "@/components/spoiler/SpoilerProvider";
 import { hideScoresFromCookie } from "@/lib/spoiler-server";
@@ -25,20 +28,28 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
-export default async function HomePage() {
-  const [token, hideScores] = await Promise.all([
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tournament?: string | string[] }>;
+}) {
+  const [token, hideScores, params, tournamentList, liveCounts] = await Promise.all([
     getAccessToken(),
     hideScoresFromCookie(),
+    searchParams,
+    getTournaments(),
+    getLiveCounts(),
   ]);
+  const requested = typeof params?.tournament === "string" ? params.tournament : null;
+  const tournament = pickTournament(tournamentList, requested);
   const [home, followedTeams] = await Promise.all([
-    getHome(token),
+    getHome(token, tournament?.id),
     getFollowedTeams(token),
   ]);
 
   const featured = home?.featured_live_match ?? null;
   const liveNow = home?.live_now ?? [];
   const upcoming = home?.upcoming ?? [];
-  const tournaments = home?.featured_tournaments ?? [];
   const teams = home?.popular_teams ?? [];
   const videos = home?.latest_videos ?? [];
   const continueWatching = home?.continue_watching ?? [];
@@ -67,6 +78,17 @@ export default async function HomePage() {
 
   return (
     <SpoilerProvider initialHidden={hideScores}>
+      <LeagueBar
+        allHref="/tournaments"
+        tabs={tournamentList.map((item) => ({
+          key: item?.id ?? "",
+          label: tournamentLabel(item),
+          title: item?.name ?? "Tournament",
+          href: `/?tournament=${item?.id ?? ""}`,
+          active: item?.id === tournament?.id,
+          live: liveCounts[item?.id ?? ""] ?? 0,
+        }))}
+      />
       <div className="flex-1 bg-paper text-ink">
         <FollowProvider signedIn={token !== null} initialTeams={followedTeams}>
           <MatchLanguageProvider
@@ -79,6 +101,7 @@ export default async function HomePage() {
               upcomingCount={upcoming.length}
               todayCount={todayCount}
               host={host}
+              leagueName={tournament?.name ?? null}
             />
             <YourTeams liveMatches={liveMatches} upcoming={upcoming} />
             {continueWatching.length > 0 ? (
@@ -89,23 +112,27 @@ export default async function HomePage() {
             ) : null}
           </MatchLanguageProvider>
           {otherLive.length > 0 ? (
-            <LiveNow matches={otherLive} more={heroMatch?.status === "live"} />
+            <LiveNow
+              matches={otherLive}
+              more={heroMatch?.status === "live"}
+              leagueLabel={tournament ? tournamentLabel(tournament) : null}
+            />
           ) : null}
-          {upcoming.length > 0 ? <Schedule matches={upcoming} /> : null}
-          {tournaments.length > 0 ? (
-            // Standings per tournament stream in without holding up the page.
-            <Suspense fallback={<TournamentsFallback />}>
-              <Tournaments tournaments={tournaments} />
+          {upcoming.length > 0 || liveMatches.length > 0 ? (
+            <Schedule matches={upcoming} live={liveMatches} tournamentId={tournament?.id ?? null} />
+          ) : null}
+          {tournament ? (
+            // The ladder streams in without holding up the page.
+            <Suspense fallback={<StandingsFallback />}>
+              <Standings tournament={tournament} />
             </Suspense>
           ) : null}
           {teams.length > 0 ? (
-            <Teams
-              teams={teams}
-              liveMatches={liveMatches}
-              upcoming={upcoming}
-            />
+            <Suspense fallback={null}>
+              <Teams teams={teams} tournamentId={tournament?.id ?? null} />
+            </Suspense>
           ) : null}
-          {videos.length > 0 ? <Replays videos={videos} /> : null}
+          {videos.length > 0 ? <Replays videos={videos} tournamentId={tournament?.id ?? null} /> : null}
         </FollowProvider>
         {token === null ? <JoinCta /> : null}
       </div>

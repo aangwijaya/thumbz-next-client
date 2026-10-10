@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ home v4, phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=Shantell+Sans&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<dc-import name="Main" phone="yes" league="{{league}}" device="{{device}}" viewer="{{viewer}}" hide-scores="{{hideScores}}" hint-size="100%,7400px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"league":{"editor":"enum","options":["MPL PH","MPL ID"],"default":"MPL ID","section":"Preview"},"device":{"editor":"enum","options":["Android Chrome","iPhone Safari","Installed"],"default":"Android Chrome","section":"Preview"},"viewer":{"editor":"enum","options":["Guest","Signed in"],"default":"Guest","section":"Preview"},"hideScores":{"editor":"boolean","default":false,"section":"Preview"},"$preview":{"width":390,"height":7400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      league: this.props.league ?? 'MPL ID',
+      device: this.props.device ?? 'Android Chrome',
+      viewer: this.props.viewer ?? 'Guest',
+      hideScores: this.props.hideScores ?? false
+    };
+  }
+}
+</script>
+</body>
+</html>

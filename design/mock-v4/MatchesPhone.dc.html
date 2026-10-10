@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ matches v4, phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<dc-import name="Matches" phone="yes" league="{{league}}" viewer="{{viewer}}" hide-scores="{{hideScores}}" hint-size="100%,3600px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"league":{"editor":"enum","options":["All","MPL PH","MPL ID"],"default":"MPL PH","section":"Preview"},"viewer":{"editor":"enum","options":["Guest","Signed in"],"default":"Signed in","section":"Preview"},"hideScores":{"editor":"boolean","default":false,"section":"Preview"},"$preview":{"width":390,"height":3600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      league: this.props.league ?? 'MPL PH',
+      viewer: this.props.viewer ?? 'Signed in',
+      hideScores: this.props.hideScores ?? false
+    };
+  }
+}
+</script>
+</body>
+</html>

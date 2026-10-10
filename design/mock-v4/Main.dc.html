@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ home v4</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=Shantell+Sans&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{appCls}}">
+<div class="{{toastCls}}" role="status" aria-live="polite"><span>{{toastText}}</span></div>
+<div class="{{siteCls}}">
+
+<aside class="{{bannerCls}}" aria-label="Announcement">
+<div class="wrap">
+<div class="banner-in">
+<span class="dot" aria-hidden="true"></span>
+<span class="banner-msg">{{lg.name}} Season 18 is live now.</span>
+<a class="banner-link" href="#live">watch {{h.a.s}} vs {{h.b.s}} →</a>
+<button class="banner-x" type="button" aria-label="Dismiss announcement" onClick="{{closeBanner}}"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+</div>
+</div>
+</aside>
+
+<header class="hdr">
+<div class="wrap hdr-in">
+<a class="logo-link" href="#top" aria-label="THUMBZ home"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"></a>
+<nav class="nav" aria-label="Primary">
+<a href="#live-now"><span class="dot" aria-hidden="true"></span>Live<span class="count">6</span></a>
+<a href="#schedule">Matches</a>
+<a href="#standings">Tournaments</a>
+<a href="#teams">Teams</a>
+<a href="#replays">Replays</a>
+</nav>
+<div class="hdr-actions">
+<button class="icon-btn" type="button" aria-pressed="{{hiddenPressed}}" aria-label="Hide scores and results" title="Hide scores and results" onClick="{{toggleHidden}}"><svg class="ic eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="ic eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.2A10.3 10.3 0 0 1 12 5c6.5 0 10 7 10 7a17.3 17.3 0 0 1-3.1 4.1"></path><path d="M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.5-1.1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button>
+<a class="icon-btn hide-xs" href="#top" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></a>
+<a class="ghost desk only-guest" href="#join">Log in</a>
+<a class="btn btn-outline btn-sm desk only-guest" href="#join">Sign up</a>
+<a class="avatar only-user" href="#top" aria-label="Your account">A</a>
+<sc-if value="{{instCan}}" hint-placeholder-val="{{ true }}"><button class="hdr-inst" type="button" onClick="{{installTap}}"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"></path><path d="M5 20h14"></path></svg>Install</button></sc-if>
+<button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-expanded="{{menuOpen}}" aria-controls="drawer" onClick="{{toggleMenu}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></button>
+</div>
+</div>
+<div class="{{drawerCls}}" id="drawer">
+<div class="wrap">
+<sc-if value="{{instCan}}" hint-placeholder-val="{{ true }}">
+<button class="d-inst" type="button" onClick="{{installTap}}"><img src="/_blob/dba23e58bc27cca0d7b480fbcdd04b02" alt="" width="28" height="28">Install the app<small>{{instAction}}</small></button>
+</sc-if>
+<nav aria-label="Mobile">
+<a href="#live-now" onClick="{{closeMenu}}">Live<span class="badge b-live"><span class="dot" aria-hidden="true"></span>6 on air</span></a>
+<a href="#schedule" onClick="{{closeMenu}}">Matches</a>
+<a href="#standings" onClick="{{closeMenu}}">Tournaments</a>
+<a href="#teams" onClick="{{closeMenu}}">Teams</a>
+<a href="#replays" onClick="{{closeMenu}}">Replays</a>
+</nav>
+<div class="drawer-acts only-guest">
+<a class="btn btn-outline" href="#join" onClick="{{closeMenu}}">Log in</a>
+<a class="btn btn-primary" href="#join" onClick="{{closeMenu}}">Sign up</a>
+</div>
+</div>
+</div>
+</header>
+
+<div class="lbar">
+<div class="wrap lbar-in">
+<nav class="ltabs" aria-label="Tournament">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<a class="ltab" href="#top" aria-current="{{t.current}}" title="{{t.full}}" onClick="{{t.pick}}">{{t.name}}<sc-if value="{{t.isLive}}" hint-placeholder-val="{{ false }}"><span class="lc"><span class="dot" aria-hidden="true"></span>{{t.live}}<span class="sr"> matches live</span></span></sc-if></a>
+</sc-for>
+</nav>
+<a class="lbar-all" href="#standings">All tournaments →</a>
+</div>
+</div>
+
+<main id="top">
+
+<section class="hero" aria-labelledby="hero-title">
+<div class="wrap hero-grid">
+<div class="hero-top">
+<p class="eyebrow">Mobile Legends esports, live</p>
+<h1 class="h1" id="hero-title">Watch every match as it happens.</h1>
+</div>
+<div class="hero-band" aria-hidden="true">
+<div class="waves"><svg viewBox="0 0 1440 400" preserveAspectRatio="none"><path class="w1" d="M0 250C240 170 420 330 720 240S1180 140 1440 220"></path><path class="w2" d="M0 290C260 220 480 360 760 280S1200 190 1440 270"></path><path class="w3" d="M0 200C300 140 460 280 740 200S1160 100 1440 170"></path><path class="w4" d="M0 330C280 280 520 380 800 320S1220 250 1440 310"></path></svg></div>
+</div>
+<div class="hero-bottom">
+<p class="lead">Live streams, series scores and replays from {{lg.name}}, game by game.</p>
+<div class="hero-actions">
+<a class="btn btn-primary" href="#live">Watch {{h.a.s}} vs {{h.b.s}}</a>
+<a class="btn-2" href="#schedule">View schedule<span class="arr" aria-hidden="true">→</span></a>
+</div>
+<ul class="facts">
+<li><b>3</b> matches live</li>
+<li><b>{{watching}}</b> watching</li>
+<li><b>2</b> more tomorrow</li>
+</ul>
+</div>
+<div class="hero-media sp {{h.rev}}" id="live">
+<div class="window">
+<div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="url">thumbz.gg/matches/{{h.slug}}</span></div>
+<div class="thumb screen {{h.a.ta}} {{h.b.tb}}">
+<a class="stretch" href="#live"><span class="sr">Watch live: {{h.a.n}} vs {{h.b.n}}</span></a>
+<span class="v-tl"><span class="chip"><span class="dot" aria-hidden="true"></span>Live</span></span>
+<div class="bug">
+<div class="bug-main">
+<span class="bug-team"><span class="mark xs {{h.a.cls}}" aria-hidden="true">{{h.a.s}}</span>{{h.a.s}}</span>
+<span class="bug-score"><span class="full">{{h.sa}}<i aria-hidden="true">–</i>{{h.sb}}</span><span class="safe"><span class="vs">vs</span></span></span>
+<span class="bug-team">{{h.b.s}}<span class="mark xs {{h.b.cls}}" aria-hidden="true">{{h.b.s}}</span></span>
+</div>
+<span class="chip chip-dark"><span class="full">{{h.note}}</span><span class="safe">Best of 3</span></span>
+<button class="reveal" type="button" onClick="{{h.reveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show score</button>
+</div>
+<span class="pbar" aria-hidden="true">
+<span class="line"></span>
+<svg class="icf" viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z"></path></svg>
+<svg class="ic desk-ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path></svg>
+<span>{{h.viewers}} watching</span>
+<span>{{langLabel}}</span>
+<span class="grow"></span>
+<span class="live-tag"><span class="dot"></span>LIVE</span>
+<svg class="ic desk-ic" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>
+</span>
+</div>
+<div class="ticker">
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"></path></svg>
+<p class="tk-msg"><span class="full"><b>{{lastChat.who}}</b>{{lastChat.msg}}</span><span class="safe">Chat is hidden while scores are hidden</span></p>
+<a class="tk-count" href="#live">213 comments</a>
+</div>
+</div>
+<section class="phone" aria-label="Live chat preview">
+<div class="phone-scr">
+<div class="chat-head"><b>Live chat</b><span>213 comments</span></div>
+<ul class="chat-list full-b">
+<sc-for list="{{chat}}" as="c" hint-placeholder-count="8">
+<li><b>{{c.who}}</b>{{c.msg}}</li>
+</sc-for>
+</ul>
+<div class="chat-cover safe-b"><span>Chat is hidden because it can mention the score.</span><button class="reveal" type="button" onClick="{{h.reveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show chat and score</button></div>
+<div class="chat-foot">
+<a class="chat-login only-guest" href="#join">Log in to chat</a>
+<div class="chat-form only-user"><label class="sr" for="chat-input">Write a comment</label><input id="chat-input" type="text" placeholder="Say something…"><button type="button">Send</button></div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</section>
+
+<section class="section after-band" id="match-center" aria-labelledby="mc-title">
+<div class="wrap feature flip">
+<div class="text">
+<p class="eyebrow">Match center</p>
+<h2 class="h2" id="mc-title">See how the game is going before you tune in</h2>
+<p class="body">Gold lead, key objectives and commentary in your language. Updates are held back to match the stream delay, so nothing here runs ahead of the video.</p>
+<p class="body">Watching later? Hide scores and results across THUMBZ, then reveal only the matches you want.</p>
+<div class="text-actions">
+<button class="chip-btn" type="button" aria-pressed="{{hiddenPressed}}" onClick="{{toggleHidden}}">Hide scores</button>
+<a class="link" href="#live">Open {{h.a.s}} vs {{h.b.s}} →</a>
+</div>
+</div>
+<div class="panel mc sp {{h.rev}}">
+<div class="mc-head">
+<div class="mc-who"><span class="mark sm {{h.a.cls}}" aria-hidden="true">{{h.a.s}}</span>{{h.a.n}}<span class="mc-score"><span class="full">{{h.sa}}–{{h.sb}}</span><span class="safe"><span class="blur" aria-hidden="true">0–0</span><span class="sr">Score hidden</span></span></span>{{h.b.n}}<span class="mark sm {{h.b.cls}}" aria-hidden="true">{{h.b.s}}</span></div>
+<p class="mc-sub"><span class="full">Game {{h.game}} · </span>{{h.clock}} · Synced to stream</p>
+</div>
+<div class="chart full-b">
+<div class="chart-top"><h3>Gold lead, Game {{h.game}}</h3><p class="chart-val">{{h.a.s}} +3.2K<small>at 14:30</small></p></div>
+<div class="chart-box">
+<svg class="gold" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="{{chartLabel}}"><path class="g-grid" d="M0 44H600"></path><path class="g-zero" d="M0 80H600"></path><path class="g-neg" d="M0 80L41.4 87.2L82.8 96.2L124.1 90.8L155.2 80Z"></path><path class="g-pos" d="M155.2 80L165.5 76.4L206.9 65.6L248.3 71L289.7 60.2L331 51.2L372.4 58.4L413.8 44L455.2 33.2L496.6 40.4L537.9 27.8L600 22.4L600 80Z"></path><path class="g-line" d="M0 80L41.4 87.2L82.8 96.2L124.1 90.8L165.5 76.4L206.9 65.6L248.3 71L289.7 60.2L331 51.2L372.4 58.4L413.8 44L455.2 33.2L496.6 40.4L537.9 27.8L600 22.4"></path></svg>
+<span class="lbl up" aria-hidden="true">{{h.a.s}} ahead</span>
+<span class="lbl down" aria-hidden="true">{{h.b.s}} ahead</span>
+</div>
+<div class="axis" aria-hidden="true"><span>0:00</span><span>5:00</span><span>10:00</span><span>14:30</span></div>
+</div>
+<div class="mc-cover safe-b"><b>Scores and events are hidden</b><span>The gold lead and key moments would give away how the game is going.</span><button class="reveal" type="button" onClick="{{h.reveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show for this match</button></div>
+<div class="mc-cols">
+<div class="full-b">
+<h3>Key moments</h3>
+<ol class="events">
+<sc-for list="{{events}}" as="e" hint-placeholder-count="3">
+<li><time>{{e.t}}</time><span>{{e.x}}</span></li>
+</sc-for>
+</ol>
+</div>
+<div>
+<h3>Commentary</h3>
+<div class="langs" role="group" aria-label="Commentary language">
+<sc-for list="{{mcLangs}}" as="l" hint-placeholder-count="2">
+<button class="lang" type="button" aria-pressed="{{l.pressed}}" onClick="{{l.pick}}"><span class="nm">{{l.n}}</span><small>{{l.v}}</small><span class="bar"><i style="width: {{l.w}}"></i></span></button>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="live-now" aria-labelledby="live-title">
+<div class="wrap">
+<div class="sec-head">
+<div class="sec-titles"><p class="eyebrow">Live now</p><h2 class="h2" id="live-title">Two more {{lg.short}} matches are on air</h2></div>
+<a class="link" href="#live-now">All live matches →</a>
+</div>
+<div class="mv">
+<sc-for list="{{mv}}" as="m" hint-placeholder-count="2">
+<article class="mv-tile sp {{m.rev}} rise">
+<div class="thumb {{m.a.ta}} {{m.b.tb}}">
+<a class="stretch" href="#live-now"><span class="sr">Watch live: {{m.a.n}} vs {{m.b.n}}</span></a>
+<span class="v-tl"><span class="chip"><span class="dot" aria-hidden="true"></span>Live</span><span class="chip chip-dark">{{m.viewers}} watching</span></span>
+<div class="bug">
+<div class="bug-main">
+<span class="bug-team"><span class="mark xs {{m.a.cls}}" aria-hidden="true">{{m.a.s}}</span>{{m.a.s}}</span>
+<span class="bug-score"><span class="full">{{m.sa}}<i aria-hidden="true">–</i>{{m.sb}}</span><span class="safe"><span class="vs">vs</span></span></span>
+<span class="bug-team">{{m.b.s}}<span class="mark xs {{m.b.cls}}" aria-hidden="true">{{m.b.s}}</span></span>
+</div>
+<span class="chip chip-dark"><span class="full">{{m.note}}</span><span class="safe">Best of 3</span></span>
+<button class="reveal" type="button" onClick="{{m.reveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show score</button>
+</div>
+<span class="mv-play" aria-hidden="true"><svg class="icf" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"></path></svg></span>
+<span class="mv-bar" aria-hidden="true"><i style="width: {{m.bar}}"></i></span>
+</div>
+<div class="mv-foot">
+<div>
+<h3>{{m.a.n}} vs {{m.b.n}}</h3>
+<p class="mv-meta">Regular season, week 8 · <span class="full">Game {{m.game}} at </span>{{m.clock}}</p>
+</div>
+<span class="pips full-b" role="img" aria-label="{{m.pipsLabel}}"><sc-for list="{{m.pips}}" as="p" hint-placeholder-count="3"><i class="{{p.cls}}"></i></sc-for></span>
+<div class="mv-langs">
+<sc-for list="{{m.langs}}" as="l" hint-placeholder-count="2"><span class="lchip">{{l.n}}<b>{{l.v}}</b></span></sc-for>
+</div>
+</div>
+</article>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="section" id="schedule" aria-labelledby="sched-title">
+<div class="wrap">
+<div class="sec-head">
+<div class="sec-titles"><p class="eyebrow">Schedule</p><h2 class="h2" id="sched-title">Plan your match day</h2></div>
+<div class="sec-acts"><span class="small">Times in your time zone (WIB)</span><a class="link" href="#schedule">Full schedule →</a></div>
+</div>
+<div class="panel rd">
+<div class="rd-head" aria-hidden="true"><div class="rd-day"><b>Today</b><span>Sat, Oct 10</span></div><div class="rd-day"><b>Tomorrow</b><span>Sun, Oct 11</span></div></div>
+<div class="rd-ruler" aria-hidden="true">
+<sc-for list="{{ticks}}" as="t" hint-placeholder-count="6"><span style="left: {{t.left}}">{{t.label}}</span></sc-for>
+</div>
+<ol class="rd-lanes" style="height: {{rdH}}">
+<sc-for list="{{rd}}" as="b" hint-placeholder-count="6">
+<li class="{{b.cls}}" style="left: {{b.left}}; width: {{b.w}}; top: {{b.top}}">
+<sc-if value="{{b.isNow}}" hint-placeholder-val="{{ false }}"><span>Now · 15:42</span></sc-if>
+<sc-if value="{{b.isMatch}}" hint-placeholder-val="{{ true }}">
+<div class="{{b.blockCls}}">
+<a class="stretch" href="#schedule"><span class="sr">{{b.a.n}} vs {{b.b.n}}, {{b.when}}</span></a>
+<span class="rd-top"><span>{{b.when}} · Bo3</span><span class="{{b.bcls}}"><sc-if value="{{b.live}}" hint-placeholder-val="{{ false }}"><span class="dot" aria-hidden="true"></span></sc-if>{{b.badge}}</span></span>
+<span class="rd-teams"><span class="mark xs {{b.a.cls}}" aria-hidden="true">{{b.a.s}}</span>{{b.a.s}}<span class="rd-vs">vs</span>{{b.b.s}}<span class="mark xs {{b.b.cls}}" aria-hidden="true">{{b.b.s}}</span></span>
+<sc-if value="{{b.tk}}" hint-placeholder-val="{{ false }}"><span class="rd-tk"><span class="q"><i style="width: {{b.tkW}}"></i></span>{{b.tkLeft}}</span></sc-if>
+</div>
+</sc-if>
+</li>
+</sc-for>
+</ol>
+<div class="rd-foot" aria-hidden="true"><span><i class="k-live"></i>On air now</span><span><i class="k-next"></i>Coming up</span><span>Top edge: team colours</span></div>
+</div>
+</div>
+</section>
+
+<section class="section before-band" id="standings" aria-labelledby="race-title">
+<div class="wrap feature">
+<div class="text">
+<p class="eyebrow">Standings</p>
+<h2 class="h2" id="race-title">The race to the {{lg.short}} playoffs</h2>
+<p class="body">The top six after week 9 move on. Bars show each team's win rate in its own colours; the last five results read left to right.</p>
+<div class="text-actions">
+<a class="link" href="#standings">Full standings →</a>
+</div>
+</div>
+<div class="panel race sp {{stdRev}}">
+<div class="stages" role="list" aria-label="Season progress">
+<div class="stage done" role="listitem"><b>Regular season</b>Weeks 1–7 done</div>
+<div class="stage now" role="listitem"><span class="stage-fill" style="width: 50%"></span><b>Week 8 of 9</b>On now</div>
+<div class="stage" role="listitem"><b>Playoffs</b>From Nov 6</div>
+</div>
+<p class="race-cap"><span>{{lg.name}} Season 18</span><button class="reveal" type="button" onClick="{{stdReveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show standings</button></p>
+<div class="lad-h" aria-hidden="true"><span>#</span><span>Team</span><span style="text-align: right">W–L</span><span class="c-bar">Win rate</span><span style="text-align: right">Last 5</span></div>
+<ol class="lad-body" aria-hidden="{{stdHidden}}">
+<sc-for list="{{ladder}}" as="r" hint-placeholder-count="8">
+<li class="{{r.rowCls}}">
+<span class="lad-rank">{{r.rank}}</span>
+<span class="lad-team"><span class="mark sm {{r.t.cls}}" aria-hidden="true">{{r.t.s}}</span><span>{{r.t.n}}</span></span>
+<span class="lad-wl">{{r.wl}}</span>
+<span class="lad-bar {{r.t.cls}}" aria-hidden="true"><i style="width: {{r.bar}}"></i></span>
+<span class="form" role="img" aria-label="{{r.formLabel}}"><sc-for list="{{r.form}}" as="f" hint-placeholder-count="5"><i class="{{f.cls}}">{{f.r}}</i></sc-for></span>
+<sc-if value="{{r.cut}}" hint-placeholder-val="{{ false }}"><span class="cut-lbl">Playoff line</span></sc-if>
+</li>
+</sc-for>
+</ol>
+</div>
+</div>
+</section>
+
+<section class="band" id="teams" aria-labelledby="teams-title">
+<div class="waves" aria-hidden="true"><svg viewBox="0 0 1440 400" preserveAspectRatio="none"><path class="w1" d="M0 300C240 240 420 360 720 290S1180 200 1440 260"></path><path class="w3" d="M0 340C300 290 460 390 740 330S1160 250 1440 300"></path><path class="w4" d="M0 370C280 330 520 400 800 360S1220 310 1440 350"></path></svg></div>
+<div class="wrap">
+<div class="center">
+<p class="eyebrow">Teams</p>
+<h2 class="h2" id="teams-title">Follow the teams you root for</h2>
+<p class="body">Followed teams show first in Live, Schedule and Replays, and you get a reminder before they play.</p>
+</div>
+<div class="wall">
+<sc-for list="{{wall}}" as="w" hint-placeholder-count="8">
+<article class="wt {{w.t.cls}}">
+<div class="wt-top"><span class="mark md {{w.t.cls}}" aria-hidden="true">{{w.t.s}}</span><span class="wt-rank">{{w.rank}}</span></div>
+<p class="wt-big" aria-hidden="true">{{w.t.s}}</p>
+<div><h3><a href="#teams">{{w.t.n}}</a></h3><p class="wt-rec">{{w.rec}}</p></div>
+<button class="{{w.on}}" type="button" aria-pressed="{{w.pressed}}" aria-label="{{w.followLabel}}" onClick="{{w.follow}}"><span class="f-off">Follow</span><span class="f-on"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Following</span></button>
+</article>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="section after-band before-band" id="replays" aria-labelledby="rep-title">
+<div class="wrap">
+<div class="sec-head">
+<div class="sec-titles"><p class="eyebrow">Replays</p><h2 class="h2" id="rep-title">Missed a match? Watch it back</h2></div>
+<div class="sec-acts">
+<button class="switch" type="button" role="switch" aria-checked="{{hiddenPressed}}" onClick="{{toggleHidden}}"><span class="track" aria-hidden="true"></span>Hide results</button>
+<a class="link" href="#replays">Browse all replays →</a>
+</div>
+</div>
+<div class="shelf sp {{repRev}}">
+<article class="feat">
+<a class="thumb {{feat.ta}} {{feat.tb}}" href="#replays"><span class="sr">Watch {{feat.title}}</span><span class="v-tl"><span class="chip">Full replay</span></span><span class="chip chip-dark dur">{{feat.dur}}</span></a>
+<div class="vm"><span>{{lg.short}} · Regular season, week 8</span><span aria-hidden="true">·</span><span>{{feat.ago}}</span></div>
+<h3><a href="#replays">{{feat.title}}</a></h3>
+<div class="games" role="group" aria-label="Games in this series">
+<sc-for list="{{gchips}}" as="g" hint-placeholder-count="3">
+<a class="gchip" href="#replays" aria-current="{{g.cur}}">{{g.label}}<span class="t">{{g.t}}</span><span class="full won">{{g.won}}</span></a>
+</sc-for>
+<button class="reveal" type="button" onClick="{{repReveal}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Show winners</button>
+</div>
+</article>
+<ul class="side">
+<sc-for list="{{side}}" as="v" hint-placeholder-count="4">
+<li class="srep">
+<span class="thumb {{v.ta}} {{v.tb}}"><span class="chip chip-dark dur">{{v.dur}}</span></span>
+<div><h3><a class="stretch" href="#replays">{{v.title}}</a></h3><p class="vm"><span>Full replay · {{v.ago}}</span><span class="full won">· {{v.won}}</span></p></div>
+</li>
+</sc-for>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="closing only-guest" id="join" aria-labelledby="join-title">
+<div class="waves" aria-hidden="true"><svg viewBox="0 0 1440 400" preserveAspectRatio="none"><path class="w1" d="M0 250C240 170 420 330 720 240S1180 140 1440 220"></path><path class="w2" d="M0 290C260 220 480 360 760 280S1200 190 1440 270"></path><path class="w3" d="M0 200C300 140 460 280 740 200S1160 100 1440 170"></path></svg></div>
+<div class="wrap closing-in">
+<p class="eyebrow">Free account</p>
+<h2 class="h2" id="join-title">Follow your teams. Never miss a match.</h2>
+<ul class="perks">
+<li><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Reminders before your teams play</li>
+<li><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Live chat during matches</li>
+<li><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>Pick up replays where you stopped</li>
+</ul>
+<div class="closing-acts"><a class="btn btn-primary" href="#join">Create free account</a><a class="ghost" href="#join">Log in</a></div>
+</div>
+</section>
+
+</main>
+
+<footer class="footer">
+<div class="wrap">
+<div class="fcols">
+<div class="fbrand"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"><p>Live Mobile Legends tournaments, replays and stats in one place.</p></div>
+<nav aria-label="Watch"><h2 class="fh">Watch</h2><ul class="flinks"><li><a href="#live-now">Live</a></li><li><a href="#schedule">Matches</a></li><li><a href="#replays">Replays</a></li></ul></nav>
+<nav aria-label="Explore"><h2 class="fh">Explore</h2><ul class="flinks"><li><a href="#standings">Tournaments</a></li><li><a href="#teams">Teams</a></li><li><a href="#teams">Players</a></li></ul></nav>
+<nav aria-label="Account"><h2 class="fh">Account</h2><ul class="flinks"><li><a href="#join">Log in</a></li><li><a href="#join">Favorites</a></li><li><a href="#join">Tickets</a></li></ul></nav>
+</div>
+<div class="flegal"><span>© 2026 THUMBZ</span><span>Match data: ph-mpl.com; other leagues are demo data built from it. © Moonton.</span></div>
+</div>
+</footer>
+
+<sc-if value="{{instCard}}" hint-placeholder-val="{{ true }}">
+<aside class="inst" aria-label="Install the app">
+<img src="/_blob/dba23e58bc27cca0d7b480fbcdd04b02" alt="" width="44" height="44">
+<div><b>Get the THUMBZ app</b><span>Reminders before your teams play, full-screen player.</span></div>
+<button class="btn btn-primary" type="button" onClick="{{installTap}}">{{instAction}}</button>
+<button class="inst-x" type="button" aria-label="Not now" onClick="{{instDismiss}}"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+</aside>
+</sc-if>
+<sc-if value="{{instSheet}}" hint-placeholder-val="{{ false }}">
+<section class="inst-sheet" role="dialog" aria-labelledby="inst-title">
+<h2 id="inst-title">Add THUMBZ to your Home Screen</h2>
+<ol>
+<li>Tap Share in the browser bar<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"></path><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"></path></svg></li>
+<li>Choose Add to Home Screen<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"></rect><path d="M12 8v8M8 12h8"></path></svg></li>
+<li>Open THUMBZ from your Home Screen<img src="/_blob/dba23e58bc27cca0d7b480fbcdd04b02" alt="" width="28" height="28" style="width: 28px; height: 28px; border-radius: 7px"></li>
+</ol>
+<button class="btn btn-outline" type="button" onClick="{{instClose}}">Got it</button>
+</section>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;league&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;MPL PH&quot;,&quot;MPL ID&quot;],&quot;default&quot;:&quot;MPL ID&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Android Chrome&quot;,&quot;iPhone Safari&quot;,&quot;Installed&quot;],&quot;default&quot;:&quot;Android Chrome&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;viewer&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Guest&quot;,&quot;Signed in&quot;],&quot;default&quot;:&quot;Guest&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;hideScores&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;section&quot;:&quot;Preview&quot;},&quot;phone&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;no&quot;},&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:5200}}">
+class Component extends DCLogic {
+  componentWillUnmount() {
+    clearTimeout(this.toastTimer);
+  }
+
+  say(text) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: text });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 3000);
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const phone = this.props.phone === 'yes';
+    const signedIn = (this.props.viewer ?? 'Guest') === 'Signed in';
+    const hidden = s.hidden ?? (this.props.hideScores ?? false);
+    const device = this.props.device ?? 'Android Chrome';
+    const instCan = device !== 'Installed' && !s.installed;
+    const key = s.league || ((this.props.league ?? 'MPL PH') === 'MPL ID' ? 'id' : 'ph');
+    const revealed = s.revealed || [];
+
+    // MPL ID is seeded as a copy of MPL PH week 8 with these teams swapped in.
+    const T = {
+      APBR: ['AP BREN', 'APBR'], FLCN: ['Team Falcons', 'FLCN'], OMG: ['Smart Omega', 'OMG'], ONICPH: ['ONIC PH', 'ONIC'],
+      RORA: ['Aurora Gaming', 'RORA'], TLPH: ['Team Liquid PH', 'TLPH'], TNC: ['TNC Pro Team', 'TNC'], TWIS: ['Twisted Minds PH', 'TWIS'],
+      ONIC: ['ONIC Esports', 'ONIC'], RRQ: ['RRQ Hoshi', 'RRQ'], EVOS: ['EVOS Legends', 'EVOS'], BTR: ['Bigetron by Vitality', 'BTR'],
+      TLID: ['Team Liquid ID', 'TLID'], AE: ['Alter Ego', 'AE'], DEWA: ['Dewa United', 'DEWA'], GEEK: ['Geek Fam ID', 'GEEK']
+    };
+    const MAP = { APBR: 'RRQ', FLCN: 'EVOS', OMG: 'BTR', ONICPH: 'ONIC', RORA: 'AE', TLPH: 'TLID', TNC: 'DEWA', TWIS: 'GEEK' };
+    const team = (c) => {
+      const code = key === 'id' ? MAP[c] : c;
+      const low = code.toLowerCase();
+      return { code: code, n: T[code][0], s: T[code][1], cls: 'c-' + low, ta: 'ta-' + low, tb: 'tb-' + low };
+    };
+    const LG = {
+      ph: { name: 'MPL Philippines', short: 'MPL PH', mark: 'PH', mcls: 'c-lph', shift: 0, views: [48.2, 26.1, 12.4],
+        langs: [['English', 0.65], ['Filipino', 0.35]],
+        chat: [['mika.ph', 'that rotation was clean'], ['j0shua', '{B} can still flip this'], ['paolo', '{A} macro is different'], ['kat.mnl', 'that Lord steal was insane'], ['dex', 'turtle fight now'], ['ange', 'gold lead getting bigger'], ['ria', 'lets go {B}'], ['marco', 'gg if they take Lord']] },
+      id: { name: 'MPL Indonesia', short: 'MPL ID', mark: 'ID', mcls: 'c-lid', shift: -1, views: [24.6, 12.4, 8.2],
+        langs: [['Bahasa Indonesia', 0.65], ['English', 0.35]],
+        chat: [['Raka', 'setup-nya bagus banget'], ['Sari', '{B} masih bisa comeback'], ['Fajar', 'rotasinya rapi'], ['Dimas', 'Lord fight incoming'], ['Nadia', 'turtle fight sekarang'], ['Bayu', 'gold lead makin gede'], ['Tika', 'gg kalau Lord diambil'], ['Rizky', 'ayo {A}']] }
+    };
+    const lg = LG[key];
+    const sub = 'Season 18 · Regular season, week 8';
+    const rev = (id) => (revealed.indexOf(id) >= 0 ? 'revealed' : '');
+    const reveal = (id) => () => this.setState({ revealed: ((this.state && this.state.revealed) || []).concat([id]) });
+    const pad = (n) => String(n).padStart(2, '0');
+    const clock = (h) => {
+      const x = h + lg.shift;
+      const hh = Math.floor(x);
+      return pad(hh) + ':' + pad(Math.round((x - hh) * 60));
+    };
+    const kfmt = (v) => v.toFixed(1) + 'K';
+    const mmss = (sec) => Math.floor(sec / 60) + ':' + pad(sec % 60);
+
+    const live = [
+      { id: 'l1', a: 'APBR', b: 'FLCN', sa: 1, sb: 0, game: 2, wins: ['a'], start: 14 + 10 / 60, clock: '14:32', p: 48 },
+      { id: 'l2', a: 'TLPH', b: 'RORA', sa: 1, sb: 1, game: 3, wins: ['a', 'b'], start: 14 + 40 / 60, clock: '8:15', p: 27 },
+      { id: 'l3', a: 'ONICPH', b: 'TWIS', sa: 0, sb: 0, game: 1, wins: [], start: 15 + 5 / 60, clock: '21:47', p: 72 }
+    ].map((m, i) => {
+      const a = team(m.a);
+      const b = team(m.b);
+      const lead = m.sa > m.sb ? a : (m.sb > m.sa ? b : null);
+      const note = m.game === 3 ? 'Game 3 · Decider' : (lead ? 'Game ' + m.game + ' · Match point ' + lead.s : 'Game ' + m.game);
+      const pips = [0, 1, 2].map((g) => {
+        if (g < m.wins.length) return { cls: 'pip ' + (m.wins[g] === 'a' ? a.cls : b.cls) };
+        return { cls: g === m.wins.length ? 'pip live' : 'pip next' };
+      });
+      const total = lg.views[i];
+      return {
+        id: m.id, a: a, b: b, sa: m.sa, sb: m.sb, game: m.game, clock: m.clock, start: m.start, note: note, pips: pips,
+        pipsLabel: 'Series: ' + m.sa + '–' + m.sb + ', game ' + m.game + ' of 3 live',
+        viewers: kfmt(total), bar: m.p + '%', when: clock(m.start),
+        langs: lg.langs.map((l) => ({ n: l[0], v: kfmt(total * l[1]), w: Math.round(l[1] * 100) + '%' })),
+        rev: rev(m.id), reveal: reveal(m.id),
+        slug: (a.n + ' vs ' + b.n).toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      };
+    });
+    const h = live[0];
+    const li = s.lang ?? 0;
+    const chat = lg.chat.map((c) => ({ who: c[0], msg: c[1].replace('{A}', h.a.s).replace('{B}', h.b.s) }));
+
+    // Rundown: two equal day windows (today 13–19, tomorrow 16–22), so a best-of-3 block is 1/6 of a day.
+    const x = (day, hr) => (day === 0 ? (hr - 13) / 12 : 0.5 + (hr - 16) / 12);
+    const pct = (v) => (v * 100).toFixed(2) + '%';
+    const nowH = 15 + 42 / 60;
+    const rd = live.map((m, i) => ({
+      isNow: false, isMatch: true, live: true, tk: false, cls: 'rd-item', blockCls: 'rd-block live sp ' + m.rev,
+      a: m.a, b: m.b, when: 'Today ' + m.when, badge: 'Live', bcls: 'badge b-live',
+      left: 'calc(' + pct(x(0, m.start + lg.shift)) + ' + 3px)', w: 'calc(16.667% - 6px)', top: (36 + i * 86) + 'px'
+    }));
+    rd.push({ isNow: true, isMatch: false, cls: 'rd-now', left: pct(x(0, nowH)), w: '2px', top: '0px' });
+    [{ a: 'TNC', b: 'OMG', start: 17, sold: 258, cap: 300 }, { a: 'FLCN', b: 'ONICPH', start: 19.5 }].forEach((u, i) => {
+      const d = 24 + u.start + lg.shift - nowH;
+      const hh = Math.floor(d);
+      rd.push({
+        isNow: false, isMatch: true, live: false, cls: 'rd-item', blockCls: 'rd-block',
+        a: team(u.a), b: team(u.b), when: 'Tomorrow ' + clock(u.start),
+        badge: i === 0 ? 'In ' + hh + 'h ' + pad(Math.round((d - hh) * 60)) + 'm' : 'Tickets soon',
+        bcls: i === 0 ? 'badge b-info' : 'badge b-plain',
+        tk: !!u.cap, tkW: u.cap ? Math.round((u.sold / u.cap) * 100) + '%' : '0%', tkLeft: u.cap ? (u.cap - u.sold) + ' seats left' : '',
+        left: 'calc(' + pct(x(1, u.start + lg.shift)) + ' + 3px)', w: 'calc(16.667% - 6px)', top: '36px'
+      });
+    });
+    const ticks = [[0, 13], [0, 15], [0, 17], [1, 16], [1, 18], [1, 20]].map((t) => ({ left: pct(x(t[0], t[1])), label: pad(t[1]) + ':00' }));
+
+    const STD = [['APBR', 11, 3, 'WWLWW'], ['TLPH', 10, 4, 'WLWWL'], ['FLCN', 9, 5, 'LWWWL'], ['ONICPH', 8, 6, 'WLLWW'], ['TWIS', 7, 7, 'LWLWW'], ['RORA', 6, 8, 'WLLLW'], ['TNC', 3, 11, 'LLWLL'], ['OMG', 2, 12, 'LLLWL']];
+    const ladder = STD.map((r, i) => {
+      const t = team(r[0]);
+      return {
+        rank: i + 1, t: t, wl: r[1] + '–' + r[2], bar: Math.round((r[1] / (r[1] + r[2])) * 100) + '%',
+        form: r[3].split('').map((f) => ({ r: f, cls: f === 'W' ? 'w' : 'l' })),
+        formLabel: 'Last five: ' + r[3].split('').join(' '),
+        rowCls: i === 5 ? 'lad-row cut' : 'lad-row', cut: i === 5
+      };
+    });
+
+    const followed = s.followed || ['APBR', 'RRQ'];
+    const wall = STD.map((r, i) => {
+      const t = team(r[0]);
+      const on = signedIn && followed.indexOf(t.code) >= 0;
+      return {
+        t: t, rank: '#' + (i + 1), rec: r[1] + '–' + r[2] + ' · ' + Math.round((r[1] / (r[1] + r[2])) * 100) + '% wins',
+        on: on ? 'chip-btn on' : 'chip-btn', pressed: on ? 'true' : 'false', followLabel: 'Follow ' + t.n,
+        follow: () => {
+          if (!signedIn) {
+            this.say('Log in to follow teams.');
+            return;
+          }
+          const now = (this.state && this.state.followed) || ['APBR', 'RRQ'];
+          const was = now.indexOf(t.code) >= 0;
+          this.setState({ followed: was ? now.filter((c) => c !== t.code) : now.concat([t.code]) });
+          this.say(was ? 'Unfollowed ' + t.n + '.' : 'Following ' + t.n + '. Their matches now show first.');
+        }
+      };
+    });
+
+    const D1 = { a: team('APBR'), b: team('TNC'), games: [['a', 1062], ['b', 1265], ['a', 958]] };
+    const D2 = { a: team('OMG'), b: team('TLPH'), games: [['b', 1150], ['b', 993]] };
+    const vid = (d, g) => ({
+      title: d.a.n + ' vs ' + d.b.n + ', Game ' + (g + 1), dur: mmss(d.games[g][1] + 46), ago: 'Yesterday',
+      won: (d.games[g][0] === 'a' ? d.a : d.b).s + ' won', ta: d.a.ta, tb: d.b.tb
+    });
+    const gchips = D1.games.map((gm, g) => ({ label: 'Game ' + (g + 1), t: mmss(gm[1]), won: (gm[0] === 'a' ? D1.a : D1.b).s, cur: g === 2 ? 'true' : 'false' }));
+
+    // League bar: every tournament from GET /tournaments. M8 and EWC are title-only placeholders here.
+    const tabs = [
+      ['ph', 'MPL PH', 'MPL Philippines Season 18', 3],
+      ['id', 'MPL ID', 'MPL Indonesia Season 18', 3],
+      ['m8', 'M8 Tournament', 'M8 Tournament', 0],
+      ['ewc', 'EWC 2027', 'Esports World Cup 2027', 0]
+    ].map((t) => ({
+      name: t[1], full: t[2], live: t[3], isLive: t[3] > 0,
+      current: t[0] === key ? 'page' : 'false',
+      pick: () => {
+        if (t[0] === 'ph' || t[0] === 'id') {
+          this.setState({ league: t[0], lang: 0 });
+          return;
+        }
+        this.say(t[1] + ' is a placeholder tab in this mock.');
+      }
+    }));
+    const installTap = () => {
+      if (device === 'iPhone Safari') {
+        this.setState({ instSheet: true, menu: false });
+        return;
+      }
+      this.setState({ installed: true, menu: false });
+      this.say('Chrome asked "Install THUMBZ?" and the app was added.');
+    };
+
+    return {
+      appCls: phone ? 'app app--phone' : 'app',
+      siteCls: 'site ' + (signedIn ? 'is-user' : 'is-guest') + (hidden ? ' nospoil' : ''),
+      tabs: tabs,
+      instCan: instCan,
+      instCard: instCan && !s.instDismissed && !s.instSheet,
+      instSheet: instCan && !!s.instSheet,
+      instAction: device === 'iPhone Safari' ? 'How to' : 'Install',
+      installTap: installTap,
+      instDismiss: () => this.setState({ instDismissed: true }),
+      instClose: () => this.setState({ instSheet: false, instDismissed: true }),
+      lg: lg,
+      h: h,
+      mv: live.slice(1),
+      watching: kfmt(lg.views[0] + lg.views[1] + lg.views[2]),
+      chat: chat,
+      lastChat: chat[chat.length - 1],
+      events: [['14:02', h.a.n + ' secured the Lord'], ['12:40', h.b.n + ' took the second Turtle'], ['11:15', h.a.n + ' destroyed the mid outer tower']].map((e) => ({ t: e[0], x: e[1] })),
+      chartLabel: 'Gold difference over Game ' + h.game + '. ' + h.b.n + ' led for the first four minutes; ' + h.a.n + ' leads by about 3,200 gold at 14:30.',
+      mcLangs: h.langs.map((l, i) => ({ n: l.n, v: l.v, w: l.w, pressed: i === li ? 'true' : 'false', pick: () => this.setState({ lang: i }) })),
+      langLabel: (h.langs[li] || h.langs[0]).n,
+      rd: rd,
+      rdH: (36 + 3 * 86) + 'px',
+      ticks: ticks,
+      ladder: ladder,
+      stdRev: rev('std'),
+      stdReveal: reveal('std'),
+      stdHidden: hidden && revealed.indexOf('std') < 0 ? 'true' : 'false',
+      wall: wall,
+      feat: vid(D1, 2),
+      gchips: gchips,
+      side: [vid(D1, 1), vid(D1, 0), vid(D2, 1), vid(D2, 0)],
+      repRev: rev('rep'),
+      repReveal: reveal('rep'),
+      hiddenPressed: hidden ? 'true' : 'false',
+      toggleHidden: () => this.setState({ hidden: !hidden, revealed: [] }),
+      bannerCls: s.bannerOff ? 'banner is-off' : 'banner',
+      closeBanner: () => this.setState({ bannerOff: true }),
+      menuOpen: s.menu ? 'true' : 'false',
+      drawerCls: s.menu ? 'drawer open' : 'drawer',
+      toggleMenu: () => this.setState({ menu: !(this.state && this.state.menu) }),
+      closeMenu: () => this.setState({ menu: false }),
+      toastCls: s.toast ? 'toast show' : 'toast',
+      toastText: s.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

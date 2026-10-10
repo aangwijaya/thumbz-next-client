@@ -84,7 +84,7 @@ export function SearchBox({ initialQuery }: { initialQuery: string }) {
         maxLength={100}
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder="Search ONIC, KarlTzy, MPL PH…"
+        placeholder="Search teams, players, tournaments…"
         className="h-14 w-full rounded-lg border border-stone bg-paper pl-12 pr-12 font-graphik text-body-lg text-ink shadow-subtle placeholder:text-graphite focus:border-ink focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-ember"
       />
       <span

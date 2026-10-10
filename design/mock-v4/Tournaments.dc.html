@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ tournaments v4</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app">
+<div class="site is-guest">
+
+<header class="hdr">
+<div class="wrap hdr-in">
+<a class="logo-link" href="#top" aria-label="THUMBZ home"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"></a>
+<nav class="nav" aria-label="Primary">
+<a href="#top"><span class="dot" aria-hidden="true"></span>Live<span class="count">6</span></a>
+<a href="#top">Matches</a>
+<a href="#top" aria-current="page">Tournaments</a>
+<a href="#top">Teams</a>
+<a href="#top">Replays</a>
+</nav>
+<div class="hdr-actions">
+<a class="icon-btn" href="#top" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></a>
+<a class="ghost desk" href="#top">Log in</a>
+<a class="btn btn-outline btn-sm desk" href="#top">Sign up</a>
+<button class="icon-btn menu-btn" type="button" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></button>
+</div>
+</div>
+</header>
+
+<main id="top" class="wrap" style="padding-bottom: 72px">
+<div class="pg-head">
+<div class="pg-titles">
+<p class="eyebrow">Tournaments</p>
+<h1 class="h1-page">Pick a league to follow</h1>
+<p class="body">Every league on THUMBZ, where it stands this week and who leads it. More leagues appear here as they are added.</p>
+</div>
+</div>
+
+<div class="lg-grid">
+<sc-for list="{{leagues}}" as="l" hint-placeholder-count="2">
+<article class="panel lg rise">
+<div class="lg-top">
+<span class="mark xl {{l.mcls}}" aria-hidden="true">{{l.mark}}</span>
+<div><h2><a class="stretch" href="League.dc.html">{{l.name}}</a></h2><p class="lg-sub">{{l.region}} · {{l.dates}}</p></div>
+<span class="badge b-live"><span class="dot" aria-hidden="true"></span>3 live</span>
+</div>
+<div class="lg-facts">
+<div><b>8</b>teams</div>
+<div><b>Week 8</b>of 9</div>
+<div><b>{{l.prize}}</b>prize pool</div>
+</div>
+<div class="stages" role="list" aria-label="Season progress">
+<div class="stage done" role="listitem"><b>Regular season</b>Weeks 1–7</div>
+<div class="stage now" role="listitem"><span class="stage-fill" style="width: 50%"></span><b>Week 8</b>On now</div>
+<div class="stage" role="listitem"><b>Playoffs</b>{{l.playoffs}}</div>
+</div>
+<div>
+<p class="small" style="margin-bottom: 4px; font-weight: 600">Top three</p>
+<ol class="mini">
+<sc-for list="{{l.top}}" as="r" hint-placeholder-count="3">
+<li><span class="small">{{r.rank}}</span><span class="tn"><span class="mark sm {{r.cls}}" aria-hidden="true">{{r.s}}</span>{{r.n}}</span><span class="small">{{r.wl}}</span></li>
+</sc-for>
+</ol>
+</div>
+<div class="lg-acts" style="position: relative; z-index: 2"><a class="btn btn-outline btn-sm" href="League.dc.html">Open league</a><a class="link" href="Matches.dc.html">Matches →</a></div>
+</article>
+</sc-for>
+</div>
+</main>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      leagues: [
+        { name: 'MPL Philippines Season 18', mark: 'PH', mcls: 'c-lph', region: 'Philippines', dates: 'Aug 19 – Nov 17', prize: 'TBA', playoffs: 'From Nov 6',
+          top: [{ rank: 1, n: 'AP BREN', s: 'APBR', cls: 'c-apbr', wl: '11–3' }, { rank: 2, n: 'Team Liquid PH', s: 'TLPH', cls: 'c-tlph', wl: '10–4' }, { rank: 3, n: 'Team Falcons', s: 'FLCN', cls: 'c-flcn', wl: '9–5' }] },
+        { name: 'MPL Indonesia Season 18', mark: 'ID', mcls: 'c-lid', region: 'Indonesia', dates: 'Aug 12 – Nov 10', prize: '$500K', playoffs: 'From Oct 30',
+          top: [{ rank: 1, n: 'RRQ Hoshi', s: 'RRQ', cls: 'c-rrq', wl: '11–3' }, { rank: 2, n: 'Team Liquid ID', s: 'TLID', cls: 'c-tlid', wl: '10–4' }, { rank: 3, n: 'EVOS Legends', s: 'EVOS', cls: 'c-evos', wl: '9–5' }] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

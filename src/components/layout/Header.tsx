@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AccountArea, DrawerAccountLink } from "@/components/layout/AccountArea";
 import { HeaderShell } from "@/components/layout/HeaderShell";
+import { InstallDrawerRow, InstallPill } from "@/components/pwa/InstallApp";
 import { SearchCommand } from "@/components/search/SearchCommand";
 import { SpoilerToggle } from "@/components/spoiler/SpoilerToggle";
 import { Badge } from "@/components/ui/Badge";
@@ -87,6 +88,7 @@ export async function Header() {
         triggerClassName={`grid size-11 place-items-center min-[641px]:size-10 rounded-lg text-pencil transition-colors hover:bg-cream hover:text-ink ${focusRing}`}
       />
       <AccountArea linkClassName={ghostLink} />
+      <InstallPill />
     </>
   );
 
@@ -103,6 +105,7 @@ export async function Header() {
           ) : null}
         </Link>
       ))}
+      <InstallDrawerRow className={drawerLink} />
       <DrawerAccountLink className={drawerLink} />
     </>
   );
