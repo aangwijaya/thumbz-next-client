@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 
 import { MatchDayList } from "@/components/match/MatchDayList";
+import { LeagueBar } from "@/components/tournaments/LeagueBar";
+import { getLiveCounts, getTournaments, tournamentLabel } from "@/lib/api/tournaments";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
-import { getEnvelope, getOptional, query } from "@/lib/api/server";
-import type { MatchStatus, MatchSummary, TournamentSummary } from "@/lib/api/types";
+import { getEnvelope, query } from "@/lib/api/server";
+import type { MatchStatus, MatchSummary } from "@/lib/api/types";
 import {
   enumParam,
   hrefWith,
@@ -46,7 +48,7 @@ export default async function MatchesPage({ searchParams }: Props) {
   // Upcoming reads soonest first; everything else most recent first.
   const order = status === "scheduled" ? "asc" : "desc";
 
-  const [list, tournaments] = await Promise.all([
+  const [list, tournaments, liveCounts] = await Promise.all([
     getEnvelope<MatchSummary[]>(
       `/matches${query({
         status,
@@ -59,7 +61,8 @@ export default async function MatchesPage({ searchParams }: Props) {
       })}`,
       { revalidate: status === "live" ? 10 : 30, tags: ["matches", "live", "catalog"] },
     ),
-    getOptional<TournamentSummary[]>(`/tournaments${query({ pageSize: 8, sort: "start_date", order: "desc" })}`),
+    getTournaments(),
+    getLiveCounts(),
   ]);
 
   const matches = list?.data ?? [];
@@ -70,6 +73,28 @@ export default async function MatchesPage({ searchParams }: Props) {
 
   return (
     <div className="flex-1 bg-paper">
+      <LeagueBar
+        allHref="/tournaments"
+        tabs={[
+          {
+            key: "all",
+            label: "All",
+            title: "All tournaments",
+            href: href({ tournament: null }),
+            active: !tournamentId,
+            live: 0,
+            divider: true,
+          },
+          ...tournaments.map((tournament) => ({
+            key: tournament?.id ?? "",
+            label: tournamentLabel(tournament),
+            title: tournament?.name ?? "Tournament",
+            href: href({ tournament: tournament?.id ?? null }),
+            active: tournamentId === tournament?.id,
+            live: liveCounts[tournament?.id ?? ""] ?? 0,
+          })),
+        ]}
+      />
       <Container size="page" className="flex flex-col gap-8 py-10 min-[801px]:py-14">
         <PageHeader
           eyebrow="Schedule & results"
@@ -89,19 +114,6 @@ export default async function MatchesPage({ searchParams }: Props) {
               })),
             ]}
           />
-          {tournaments && tournaments.length > 0 ? (
-            <FilterChips
-              label="Tournament"
-              chips={[
-                { label: "All tournaments", href: href({ tournament: null }), active: !tournamentId },
-                ...tournaments.map((tournament) => ({
-                  label: tournament?.name ?? "Tournament",
-                  href: href({ tournament: tournament?.id ?? null }),
-                  active: tournamentId === tournament?.id,
-                })),
-              ]}
-            />
-          ) : null}
         </div>
 
         {matches.length === 0 ? (

@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Tabs } from "@/components/ui/Tabs";
 import { apiFetch } from "@/lib/api/client";
+import { query } from "@/lib/api/server";
 import { isApiError } from "@/lib/api/errors";
 import type {
   ApiEnvelope,
@@ -102,7 +103,7 @@ async function StandingsTab({ id }: { id: string }) {
 
 async function TeamsTab({ id }: { id: string }) {
   const response = await apiFetch<ApiEnvelope<TeamSummary[]>>(
-    `/tournaments/${id}/teams`,
+    `/teams${query({ tournament_id: id, pageSize: 50 })}`,
     { next: { revalidate: 30, tags: ["catalog"] } },
   );
   const teams = response?.data ?? [];

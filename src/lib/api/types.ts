@@ -83,6 +83,8 @@ export interface TournamentSummary {
   prize_pool: string | null;
   logo_url: string | null;
   featured: boolean;
+  /** Computed by the API from the tournament's matches. */
+  current_stage?: MatchStage | null;
 }
 
 export interface TournamentDetail extends TournamentSummary {

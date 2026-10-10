@@ -5,9 +5,10 @@ import { formatStartsIn } from "@/lib/utils/format";
 
 interface ScheduleProps {
   matches: HomePayload["upcoming"];
+  tournamentId: string | null;
 }
 
-export function Schedule({ matches }: ScheduleProps) {
+export function Schedule({ matches, tournamentId }: ScheduleProps) {
   // Ticket availability arrives embedded in the home payload: only on-sale
   // tickets get a box, and no request is made per match.
   const tickets: Record<string, TicketAvailability> = {};
@@ -22,7 +23,7 @@ export function Schedule({ matches }: ScheduleProps) {
       eyebrow="Up next"
       title="Plan your match day"
       body="Every upcoming match in your local time. Some playoff matches also sell seats at the venue."
-      action={{ href: "/matches", label: "See full schedule" }}
+      action={{ href: tournamentId ? `/matches?tournament=${tournamentId}` : "/matches", label: "See full schedule" }}
     >
       <SchedulePlanner
         matches={matches}

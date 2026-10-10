@@ -8,9 +8,10 @@ import type { VideoSummary } from "@/lib/api/types";
 
 interface ReplaysProps {
   videos: VideoSummary[];
+  tournamentId: string | null;
 }
 
-export function Replays({ videos }: ReplaysProps) {
+export function Replays({ videos, tournamentId }: ReplaysProps) {
   return (
     <section
       id="replays"
@@ -30,7 +31,9 @@ export function Replays({ videos }: ReplaysProps) {
           </div>
           <div className="flex flex-wrap items-center gap-5">
             <SpoilerToggle variant="switch" />
-            <ArrowLink href="/matches?status=completed">Browse all replays</ArrowLink>
+            <ArrowLink href={`/matches?status=completed${tournamentId ? `&tournament=${tournamentId}` : ""}`}>
+              Browse all replays
+            </ArrowLink>
           </div>
         </div>
 
