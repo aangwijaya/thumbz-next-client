@@ -38,3 +38,14 @@ export function tournamentLabel(tournament: Pick<TournamentSummary, "name"> | nu
   if (code) return `MPL ${code}`;
   return name.replace(/\s+Season\s+\d+$/i, "");
 }
+
+const REGION_COLORS: Record<string, string> = { PH: "#0f66ae", ID: "#cf3520" };
+
+/** What a league's mark shows without a logo: its region code ("PH") in a region colour. */
+export function leagueMark(tournament: Pick<TournamentSummary, "region" | "name" | "logo_url"> | null | undefined) {
+  const code = REGION_CODES[tournament?.region ?? ""];
+  return {
+    source: { name: tournament?.name, logo_url: tournament?.logo_url, color_primary: code ? REGION_COLORS[code] : null },
+    label: code,
+  };
+}

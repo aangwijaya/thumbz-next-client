@@ -21,10 +21,12 @@ interface LogoSource {
 interface LogoMarkProps {
   source?: LogoSource | null;
   size?: LogoMarkSize;
+  /** Text instead of the name's initials (e.g. a league's region code). */
+  label?: string;
 }
 
 // Decorative: callers always render the name next to the mark.
-export function LogoMark({ source, size = "md" }: LogoMarkProps) {
+export function LogoMark({ source, size = "md", label }: LogoMarkProps) {
   const { box, text, px } = sizeClasses[size];
 
   if (source?.logo_url) {
@@ -54,7 +56,7 @@ export function LogoMark({ source, size = "md" }: LogoMarkProps) {
         borderColor: `color-mix(in oklab, ${color} 35%, transparent)`,
       }}
     >
-      {initialsOf(source?.name ?? "?")}
+      {label ?? initialsOf(source?.name ?? "?")}
     </span>
   );
 }
