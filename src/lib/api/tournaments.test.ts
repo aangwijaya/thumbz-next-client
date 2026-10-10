@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { pickTournament, tournamentLabel } from "./tournaments";
+import { tournamentLabel } from "@/lib/leagues";
+
+import { pickTournament } from "./tournaments";
 import type { TournamentSummary } from "./types";
 
 const tournament = (patch: Partial<TournamentSummary>): TournamentSummary => ({

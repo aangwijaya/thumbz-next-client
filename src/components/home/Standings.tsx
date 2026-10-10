@@ -2,7 +2,7 @@ import { FeatureRow } from "@/components/home/FeatureRow";
 import { RaceLadder, formByTeam } from "@/components/tournaments/RaceLadder";
 import { StageTracker } from "@/components/tournaments/StageTracker";
 import { getOptional, query } from "@/lib/api/server";
-import { tournamentLabel } from "@/lib/api/tournaments";
+import { tournamentLabel } from "@/lib/leagues";
 import type { MatchSummary, StageInfo, StandingsPayload, TournamentSummary } from "@/lib/api/types";
 import { leagueFormat } from "@/lib/leagues";
 

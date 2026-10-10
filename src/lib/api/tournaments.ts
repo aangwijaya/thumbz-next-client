@@ -25,24 +25,6 @@ export function pickTournament(list: TournamentSummary[], id?: string | null): T
   );
 }
 
-const REGION_CODES: Record<string, string> = {
-  Philippines: "PH",
-  Indonesia: "ID",
-  Malaysia: "MY",
-  Singapore: "SG",
-  Cambodia: "KH",
-  Myanmar: "MM",
-};
-
-/** A short tab label: "MPL Philippines Season 18" → "MPL PH"; other names drop "Season N". */
-export function tournamentLabel(tournament: Pick<TournamentSummary, "name"> | null | undefined): string {
-  const name = tournament?.name?.trim() || "Tournament";
-  const mpl = /^MPL (\w+)/.exec(name);
-  const code = mpl ? REGION_CODES[mpl[1] ?? ""] : undefined;
-  if (code) return `MPL ${code}`;
-  return name.replace(/\s+Season\s+\d+$/i, "");
-}
-
 /** Live matches per tournament id, for the counts in the league bar (one request). */
 export const getLiveCounts = cache(async (): Promise<Record<string, number>> => {
   const live = await getOptional<MatchSummary[]>(`/matches/live${query({ pageSize: 50 })}`, {
