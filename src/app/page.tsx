@@ -127,11 +127,9 @@ export default async function HomePage({
             </Suspense>
           ) : null}
           {teams.length > 0 ? (
-            <Teams
-              teams={teams}
-              liveMatches={liveMatches}
-              upcoming={upcoming}
-            />
+            <Suspense fallback={null}>
+              <Teams teams={teams} tournamentId={tournament?.id ?? null} />
+            </Suspense>
           ) : null}
           {videos.length > 0 ? <Replays videos={videos} tournamentId={tournament?.id ?? null} /> : null}
         </FollowProvider>
