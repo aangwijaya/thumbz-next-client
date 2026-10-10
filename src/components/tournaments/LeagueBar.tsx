@@ -35,7 +35,7 @@ export function LeagueBar({ tabs, allHref }: { tabs: LeagueTab[]; allHref?: stri
                 scroll={false}
                 title={tab.title}
                 aria-current={tab.active ? "page" : undefined}
-                className={`relative inline-flex items-center gap-[7px] whitespace-nowrap px-3 font-graphik text-sm font-bold leading-none transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:origin-left after:rounded-t-sm after:bg-ink after:transition-transform after:duration-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-deep-ember ${
+                className={`relative inline-flex items-center gap-[7px] whitespace-nowrap px-3 font-graphik text-sm font-bold leading-none [word-spacing:0.14em] transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:origin-left after:rounded-t-sm after:bg-ink after:transition-transform after:duration-300 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-deep-ember ${
                   tab.active ? "text-ink after:scale-x-100" : "text-pencil after:scale-x-0 hover:text-ink"
                 }`}
               >
