@@ -12,7 +12,7 @@ import { MatchLanguageProvider } from "@/components/home/MatchLanguage";
 import { Replays } from "@/components/home/Replays";
 import { Schedule } from "@/components/home/Schedule";
 import { Teams } from "@/components/home/Teams";
-import { Tournaments, TournamentsFallback } from "@/components/home/Tournaments";
+import { Standings, StandingsFallback } from "@/components/home/Standings";
 import { YourTeams } from "@/components/home/YourTeams";
 import { getFollowedTeams } from "@/lib/api/favorites";
 import { getHome } from "@/lib/api/home";
@@ -49,7 +49,6 @@ export default async function HomePage({
   const featured = home?.featured_live_match ?? null;
   const liveNow = home?.live_now ?? [];
   const upcoming = home?.upcoming ?? [];
-  const tournaments = home?.featured_tournaments ?? [];
   const teams = home?.popular_teams ?? [];
   const videos = home?.latest_videos ?? [];
   const continueWatching = home?.continue_watching ?? [];
@@ -121,10 +120,10 @@ export default async function HomePage({
           {upcoming.length > 0 || liveMatches.length > 0 ? (
             <Schedule matches={upcoming} live={liveMatches} tournamentId={tournament?.id ?? null} />
           ) : null}
-          {tournaments.length > 0 ? (
-            // Standings per tournament stream in without holding up the page.
-            <Suspense fallback={<TournamentsFallback />}>
-              <Tournaments tournaments={tournaments} />
+          {tournament ? (
+            // The ladder streams in without holding up the page.
+            <Suspense fallback={<StandingsFallback />}>
+              <Standings tournament={tournament} />
             </Suspense>
           ) : null}
           {teams.length > 0 ? (

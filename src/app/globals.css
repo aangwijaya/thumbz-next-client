@@ -85,6 +85,15 @@
     }
   }
 
+  /* Bars that fill from their start edge (standings, team totals). */
+  --animate-grow: grow 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
   --animate-wave-reveal: wave-reveal 1800ms cubic-bezier(0.22, 0.7, 0.2, 1) both;
 
   @keyframes wave-reveal {
