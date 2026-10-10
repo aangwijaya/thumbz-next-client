@@ -1,6 +1,6 @@
 # v4: league switcher, MPL Indonesia and bolder pages
 
-Status: **mock reviewed, not built yet.** This file holds everything needed to
+Status: **mock approved 2026-10-11; build in progress** (see Progress). This file holds everything needed to
 pick the work up later: the request, the decisions, the mock, and the
 implementation units.
 
@@ -69,15 +69,26 @@ Review notes on the first mock, all applied in the canvas:
   core item" per lane, full build order for a picked player); on phones a
   lane-vs-lane race list.
 
-## Open questions (decide before building those parts)
+## Answers (2026-10-11)
 
-- Series/game pips on list rows need `games` on `MatchSummary` (additive) —
-  propose to backend or drop.
-- Short tab labels ("MPL PH") need `short_name` on tournaments — or show the
-  full name.
-- Playoff line (top 6) and "week 8 of 9" have no fields — per-league constant,
-  new fields, or drop.
-- Roam player names for MPL ID.
+- Series/game pips: a `games` field on `MatchSummary` may be proposed, but
+  dummy data in the frontend is fine for now.
+- Short tab labels: made in the frontend (`tournamentLabel()` in
+  `src/lib/api/tournaments.ts`), no database field.
+- Playoff line and "week N of M": a per-league constant; dummy values are fine.
+- MPL ID roam players: RRQ Said, TLID lyoni, Alter Ego ALEXANDER, BTR Finn,
+  EVOS Muezza, ONIC Kiboy, NAVI Aprho, Dewa Shane, Geek Frenzy. NAVI is seeded
+  as a team without matches this week.
+
+## Progress
+
+| Unit | Where | Commit | Checked |
+| --- | --- | --- | --- |
+| B1 + B4 `/home?tournament_id` (contract, DTO, scoped queries, tests, OpenAPI) | thumbz-server `v4` | `fb69173` | typecheck, lint; DB tests pending (local Postgres was down) |
+| B2 + B3 seed: `seedLeague()` + MPL ID from the PH week | thumbz-server `v4` | `0146322` | typecheck, lint, dry run up to the first query; reseed pending |
+| F1–F6 league bar, tournament plumbing, links, copy, Teams tab fix | this repo `v4` | `5479b1f` | typecheck, lint, vitest |
+| F7 install the app on phones | this repo `v4` | `da503d4` | typecheck, lint, vitest |
+| F8+ mock sections | — | — | needs the local stack running for screenshots |
 
 ## Implementation units (after approval)
 
