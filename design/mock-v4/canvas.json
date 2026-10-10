@@ -1,0 +1,150 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "HomePhone.dc.html": {
+      "expand": "fill",
+      "h": 7400,
+      "is_interactive": true,
+      "title": "Home · Mobile 390",
+      "w": 390,
+      "x": 1520,
+      "y": 0
+    },
+    "League.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "is_interactive": true,
+      "title": "League page · Desktop 1440",
+      "w": 1440,
+      "x": 1520,
+      "y": 11800
+    },
+    "LeaguePhone.dc.html": {
+      "expand": "fill",
+      "h": 3400,
+      "is_interactive": true,
+      "title": "League page · Mobile 390",
+      "w": 390,
+      "x": 3040,
+      "y": 11800
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 5200,
+      "is_interactive": true,
+      "title": "Home · Desktop 1440",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Match.dc.html": {
+      "expand": "fill",
+      "h": 2900,
+      "is_interactive": true,
+      "title": "Match page · Desktop 1440",
+      "w": 1440,
+      "x": 0,
+      "y": 15600
+    },
+    "MatchPhone.dc.html": {
+      "expand": "fill",
+      "h": 4200,
+      "is_interactive": true,
+      "title": "Match page · Mobile 390",
+      "w": 390,
+      "x": 1520,
+      "y": 15600
+    },
+    "Matches.dc.html": {
+      "expand": "fill",
+      "h": 2300,
+      "is_interactive": true,
+      "title": "Matches · Desktop 1440",
+      "w": 1440,
+      "x": 0,
+      "y": 7800
+    },
+    "MatchesPhone.dc.html": {
+      "expand": "fill",
+      "h": 3600,
+      "is_interactive": true,
+      "title": "Matches · Mobile 390",
+      "w": 390,
+      "x": 1520,
+      "y": 7800
+    },
+    "Notes.dc.html": {
+      "h": 2500,
+      "title": "Data notes",
+      "w": 1000,
+      "x": 1990,
+      "y": 0
+    },
+    "Tournaments.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "title": "Tournaments · Desktop 1440",
+      "w": 1440,
+      "x": 0,
+      "y": 11800
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-10T04:30:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t-home": {
+      "kind": "title1",
+      "maxW": 2990,
+      "text": "Home: league switcher + bolder sections",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t-leagues": {
+      "kind": "title1",
+      "maxW": 3430,
+      "text": "Tournaments and league page",
+      "w": 240,
+      "x": 0,
+      "y": 11500
+    },
+    "t-match": {
+      "kind": "title1",
+      "maxW": 1910,
+      "text": "Match page: series, live stats, item sequence",
+      "w": 240,
+      "x": 0,
+      "y": 15300
+    },
+    "t-matches": {
+      "kind": "title1",
+      "maxW": 1910,
+      "text": "Matches",
+      "w": 240,
+      "x": 0,
+      "y": 7500
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "HomePhone.dc.html",
+    "Notes.dc.html",
+    "Matches.dc.html",
+    "MatchesPhone.dc.html",
+    "Tournaments.dc.html",
+    "League.dc.html",
+    "LeaguePhone.dc.html",
+    "Match.dc.html",
+    "MatchPhone.dc.html"
+  ],
+  "pages": [],
+  "title": "THUMBZ v4 — Leagues"
+}

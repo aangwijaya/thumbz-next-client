@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>THUMBZ matches v4</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./thumbz.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="{{appCls}}">
+<div class="{{toastCls}}" role="status" aria-live="polite"><span>{{toastText}}</span></div>
+<div class="{{siteCls}}">
+
+<header class="hdr">
+<div class="wrap hdr-in">
+<a class="logo-link" href="#top" aria-label="THUMBZ home"><img class="logo" src="/_blob/d5d3e29c652efa4cad152fc1d370d17b" alt="THUMBZ" width="1080" height="154"></a>
+<nav class="nav" aria-label="Primary">
+<a href="#top"><span class="dot" aria-hidden="true"></span>Live<span class="count">6</span></a>
+<a href="#top" aria-current="page">Matches</a>
+<a href="#top">Tournaments</a>
+<a href="#top">Teams</a>
+<a href="#top">Replays</a>
+</nav>
+<div class="hdr-actions">
+<button class="icon-btn" type="button" aria-pressed="{{hiddenPressed}}" aria-label="Hide scores and results" title="Hide scores and results" onClick="{{toggleHidden}}"><svg class="ic eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="ic eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.2A10.3 10.3 0 0 1 12 5c6.5 0 10 7 10 7a17.3 17.3 0 0 1-3.1 4.1"></path><path d="M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.5-1.1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button>
+<a class="icon-btn" href="#top" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></a>
+<a class="ghost desk only-guest" href="#top">Log in</a>
+<a class="btn btn-outline btn-sm desk only-guest" href="#top">Sign up</a>
+<a class="avatar only-user" href="#top" aria-label="Your account">A</a>
+<button class="icon-btn menu-btn" type="button" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg></button>
+</div>
+</div>
+</header>
+
+<div class="lbar">
+<div class="wrap lbar-in">
+<nav class="ltabs" aria-label="Tournament">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<a class="ltab" href="#top" aria-current="{{t.current}}" title="{{t.full}}" onClick="{{t.pick}}">{{t.name}}<sc-if value="{{t.isLive}}" hint-placeholder-val="{{ false }}"><span class="lc"><span class="dot" aria-hidden="true"></span>{{t.live}}<span class="sr"> matches live</span></span></sc-if></a>
+<sc-if value="{{t.sepAfter}}" hint-placeholder-val="{{ false }}"><span class="lsep" aria-hidden="true"></span></sc-if>
+</sc-for>
+</nav>
+<a class="lbar-all" href="Tournaments.dc.html">All tournaments →</a>
+</div>
+</div>
+
+<main id="top" class="wrap" style="padding-bottom: 64px">
+<div class="pg-head">
+<div class="pg-titles">
+<p class="eyebrow">Schedule and results</p>
+<h1 class="h1-page">Matches</h1>
+<p class="small">{{cur.name}} · times in your time zone (WIB)</p>
+</div>
+<nav class="seg" aria-label="Match status">
+<sc-for list="{{segs}}" as="g" hint-placeholder-count="4">
+<a href="#top" aria-current="{{g.current}}" onClick="{{g.pick}}"><sc-if value="{{g.live}}" hint-placeholder-val="{{ false }}"><span class="dot" aria-hidden="true"></span></sc-if>{{g.label}}<span class="n">{{g.n}}</span></a>
+</sc-for>
+</nav>
+</div>
+
+<nav class="week" aria-label="Pick a day">
+<a class="wk-arrow" href="#top" aria-label="Previous week"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a>
+<sc-for list="{{week}}" as="d" hint-placeholder-count="7">
+<a class="{{d.cls}}" href="#top" aria-current="{{d.current}}" aria-label="{{d.label}}"><span>{{d.dow}}</span><b>{{d.day}}</b><span class="dots"><sc-for list="{{d.dots}}" as="x" hint-placeholder-count="2"><i class="{{x.cls}}"></i></sc-for></span></a>
+</sc-for>
+<a class="wk-arrow" href="#top" aria-label="Next week"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg></a>
+</nav>
+
+<sc-for list="{{groups}}" as="grp" hint-placeholder-count="3">
+<section class="grp" aria-label="{{grp.title}}">
+<h2 class="grp-h"><b>{{grp.title}}</b><span>{{grp.sub}}</span></h2>
+<ul>
+<sc-for list="{{grp.rows}}" as="m" hint-placeholder-count="2">
+<li class="{{m.cls}}">
+<a class="stretch" href="#top"><span class="sr">{{m.a.n}} vs {{m.b.n}}</span></a>
+<sc-if value="{{m.isLive}}" hint-placeholder-val="{{ false }}">
+<span class="thumb {{m.a.ta}} {{m.b.tb}}"><span class="v-tl"><span class="chip"><span class="dot" aria-hidden="true"></span>Live</span></span><span class="mv-bar" aria-hidden="true"><i style="width: {{m.bar}}"></i></span></span>
+</sc-if>
+<sc-if value="{{m.notLive}}" hint-placeholder-val="{{ true }}">
+<div class="sr-when"><time>{{m.time}}</time><span>Bo3</span></div>
+</sc-if>
+<div class="sr-teams">
+<div class="{{m.aCls}}"><span class="mark md {{m.a.cls}}" aria-hidden="true">{{m.a.s}}</span><span class="n">{{m.a.n}}</span><span class="s"><span class="full">{{m.sa}}</span></span></div>
+<div class="{{m.bCls}}"><span class="mark md {{m.b.cls}}" aria-hidden="true">{{m.b.s}}</span><span class="n">{{m.b.n}}</span><span class="s"><span class="full">{{m.sb}}</span></span></div>
+<p class="sr-meta">{{m.meta}}</p>
+</div>
+<div class="sr-games">
+<sc-if value="{{m.hasGames}}" hint-placeholder-val="{{ true }}">
+<span class="gpips full-b" role="img" aria-label="{{m.gLabel}}"><sc-for list="{{m.games}}" as="g" hint-placeholder-count="3"><span class="gp"><i class="{{g.cls}}"></i>{{g.t}}</span></sc-for></span>
+<span class="safe-b small">Results hidden</span>
+</sc-if>
+<sc-if value="{{m.isUp}}" hint-placeholder-val="{{ false }}">
+<span class="{{m.badgeCls}}">{{m.badge}}</span>
+</sc-if>
+</div>
+<div class="sr-act">
+<sc-if value="{{m.isLive}}" hint-placeholder-val="{{ false }}"><a class="btn btn-primary btn-sm" href="#top">Watch</a><span class="small">{{m.viewers}} watching</span></sc-if>
+<sc-if value="{{m.isUp}}" hint-placeholder-val="{{ false }}"><button class="bell" type="button" aria-pressed="{{m.remind}}" onClick="{{m.toggleRemind}}"><svg class="ic bold" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>{{m.remindLabel}}</button><span class="small">{{m.ticket}}</span></sc-if>
+<sc-if value="{{m.isDone}}" hint-placeholder-val="{{ false }}"><a class="link" href="#top">Watch replay</a><span class="small">{{m.total}}</span><button class="reveal" type="button" onClick="{{m.reveal}}">Show result</button></sc-if>
+</div>
+</li>
+</sc-for>
+</ul>
+</section>
+</sc-for>
+
+<nav class="pager" aria-label="Pages"><a href="#top" aria-current="page">1</a><a href="#top">2</a><a href="#top" aria-label="Next page">→</a></nav>
+</main>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"league":{"editor":"enum","options":["All","MPL PH","MPL ID"],"default":"MPL PH","section":"Preview"},"viewer":{"editor":"enum","options":["Guest","Signed in"],"default":"Signed in","section":"Preview"},"hideScores":{"editor":"boolean","default":false,"section":"Preview"},"phone":{"editor":null,"default":"no"},"$preview":{"width":1440,"height":2300}}'>
+class Component extends DCLogic {
+  componentWillUnmount() {
+    clearTimeout(this.toastTimer);
+  }
+
+  say(text) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: text });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 3000);
+  }
+
+  renderVals() {
+    const s = this.state || {};
+    const phone = this.props.phone === 'yes';
+    const signedIn = (this.props.viewer ?? 'Signed in') === 'Signed in';
+    const hidden = s.hidden ?? (this.props.hideScores ?? false);
+    const propKey = { All: 'all', 'MPL PH': 'ph', 'MPL ID': 'id' }[this.props.league ?? 'MPL PH'] || 'ph';
+    const key = s.league || propKey;
+    const status = s.status || 'all';
+    const revealed = s.revealed || [];
+    const reminders = s.reminders || ['ph-u1'];
+
+    const T = {
+      APBR: ['AP BREN', 'APBR'], FLCN: ['Team Falcons', 'FLCN'], OMG: ['Smart Omega', 'OMG'], ONICPH: ['ONIC PH', 'ONIC'],
+      RORA: ['Aurora Gaming', 'RORA'], TLPH: ['Team Liquid PH', 'TLPH'], TNC: ['TNC Pro Team', 'TNC'], TWIS: ['Twisted Minds PH', 'TWIS'],
+      ONIC: ['ONIC Esports', 'ONIC'], RRQ: ['RRQ Hoshi', 'RRQ'], EVOS: ['EVOS Legends', 'EVOS'], BTR: ['Bigetron by Vitality', 'BTR'],
+      TLID: ['Team Liquid ID', 'TLID'], AE: ['Alter Ego', 'AE'], DEWA: ['Dewa United', 'DEWA'], GEEK: ['Geek Fam ID', 'GEEK']
+    };
+    const MAP = { APBR: 'RRQ', FLCN: 'EVOS', OMG: 'BTR', ONICPH: 'ONIC', RORA: 'AE', TLPH: 'TLID', TNC: 'DEWA', TWIS: 'GEEK' };
+    const team = (c, lk) => {
+      const code = lk === 'id' ? MAP[c] : c;
+      const low = code.toLowerCase();
+      return { code: code, n: T[code][0], s: T[code][1], cls: 'c-' + low, ta: 'ta-' + low, tb: 'tb-' + low };
+    };
+    const pad = (n) => String(n).padStart(2, '0');
+    const mmss = (sec) => Math.floor(sec / 60) + ':' + pad(sec % 60);
+    const LG = { ph: { short: 'MPL PH', shift: 0, views: ['48.2K', '26.1K', '12.4K'] }, id: { short: 'MPL ID', shift: -1, views: ['24.6K', '12.4K', '8.2K'] } };
+    const clock = (lk, hr) => {
+      const x = hr + LG[lk].shift;
+      const hh = Math.floor(x);
+      return pad(hh) + ':' + pad(Math.round((x - hh) * 60));
+    };
+
+    const rowsFor = (lk) => {
+      const L = LG[lk];
+      const tag = L.short + ' · Regular season, week 8';
+      const live = [
+        { id: 'l1', a: 'APBR', b: 'FLCN', sa: 1, sb: 0, wins: ['a'], game: 2, p: 48, durs: [1062] },
+        { id: 'l2', a: 'TLPH', b: 'RORA', sa: 1, sb: 1, wins: ['a', 'b'], game: 3, p: 27, durs: [1190, 1302] },
+        { id: 'l3', a: 'ONICPH', b: 'TWIS', sa: 0, sb: 0, wins: [], game: 1, p: 72, durs: [] }
+      ].map((m, i) => {
+        const a = team(m.a, lk);
+        const b = team(m.b, lk);
+        const games = [0, 1, 2].map((g) => {
+          if (g < m.wins.length) return { cls: 'pip ' + (m.wins[g] === 'a' ? a.cls : b.cls), t: mmss(m.durs[g]) };
+          return g === m.wins.length ? { cls: 'pip live', t: 'Live' } : { cls: 'pip next', t: '—' };
+        });
+        const id = lk + '-' + m.id;
+        return {
+          kind: 'live', cls: 'sr lv sp ' + (revealed.indexOf(id) >= 0 ? 'revealed' : ''), isLive: true, notLive: false, isUp: false, isDone: false, hasGames: true,
+          a: a, b: b, sa: m.sa, sb: m.sb, aCls: 'tm', bCls: 'tm', games: games, gLabel: 'Series ' + m.sa + '–' + m.sb + ', game ' + m.game + ' live',
+          meta: tag + ' · Game ' + m.game + ' of 3', bar: m.p + '%', viewers: L.views[i]
+        };
+      });
+      const up = [{ id: 'u1', a: 'TNC', b: 'OMG', start: 17, d: '25h 18m', ticket: '42 seats left · Arena' }, { id: 'u2', a: 'FLCN', b: 'ONICPH', start: 19.5, d: '27h 48m', ticket: 'Tickets soon' }].map((u, i) => {
+        const id = lk + '-' + u.id;
+        const on = reminders.indexOf(id) >= 0;
+        const a = team(u.a, lk);
+        const b = team(u.b, lk);
+        return {
+          kind: 'up', cls: 'sr', isLive: false, notLive: true, isUp: true, isDone: false, hasGames: false,
+          a: a, b: b, sa: '', sb: '', aCls: 'tm', bCls: 'tm', time: clock(lk, u.start), meta: tag,
+          badge: i === 0 ? 'Starts in ' + u.d : 'Bo3 · Tomorrow', badgeCls: i === 0 ? 'badge b-info' : 'badge b-plain',
+          remind: on ? 'true' : 'false', remindLabel: on ? 'Reminder on' : 'Remind me', ticket: u.ticket,
+          toggleRemind: () => {
+            if (!signedIn) {
+              this.say('Log in to get match reminders.');
+              return;
+            }
+            const now = (this.state && this.state.reminders) || ['ph-u1'];
+            this.setState({ reminders: on ? now.filter((r) => r !== id) : now.concat([id]) });
+            this.say(on ? 'Reminder removed.' : 'We will remind you 15 minutes before ' + a.s + ' vs ' + b.s + '.');
+          }
+        };
+      });
+      const done = [{ id: 'd1', a: 'APBR', b: 'TNC', sa: 2, sb: 1, start: 15, games: [['a', 1062], ['b', 1265], ['a', 958]] }, { id: 'd2', a: 'OMG', b: 'TLPH', sa: 0, sb: 2, start: 18, games: [['b', 1150], ['b', 993]] }].map((m) => {
+        const id = lk + '-' + m.id;
+        const a = team(m.a, lk);
+        const b = team(m.b, lk);
+        const total = m.games.reduce((t, g) => t + g[1], 0);
+        return {
+          kind: 'done', cls: 'sr sp ' + (revealed.indexOf(id) >= 0 ? 'revealed' : ''), isLive: false, notLive: true, isUp: false, isDone: true, hasGames: true,
+          a: a, b: b, sa: m.sa, sb: m.sb, aCls: m.sa < m.sb ? 'tm behind' : 'tm', bCls: m.sb < m.sa ? 'tm behind' : 'tm', time: clock(lk, m.start), meta: tag,
+          games: m.games.map((g) => ({ cls: 'pip ' + (g[0] === 'a' ? a.cls : b.cls), t: mmss(g[1]) })).concat(m.games.length < 3 ? [{ cls: 'pip next', t: 'Not played' }] : []),
+          gLabel: 'Games won: ' + m.games.map((g) => (g[0] === 'a' ? a.s : b.s)).join(', '),
+          total: m.games.length + ' games · ' + Math.floor(total / 60) + ' min',
+          reveal: () => this.setState({ revealed: ((this.state && this.state.revealed) || []).concat([id]) })
+        };
+      });
+      return { live: live, up: up, done: done };
+    };
+
+    const keys = key === 'all' ? ['ph', 'id'] : [key];
+    const sets = keys.map(rowsFor);
+    const pick = (k) => sets.reduce((all, x) => all.concat(x[k]), []);
+    const live = pick('live');
+    const up = pick('up');
+    const done = pick('done');
+    const groups = [];
+    if (status === 'all' || status === 'live') groups.push({ title: 'Live now', sub: live.length + ' on air', rows: live });
+    if (status === 'all' || status === 'up') groups.push({ title: 'Tomorrow', sub: 'Sun, Oct 11', rows: up });
+    if (status === 'all' || status === 'done') groups.push({ title: 'Yesterday', sub: 'Fri, Oct 9', rows: done });
+
+    const segDefs = [['all', 'All', live.length + up.length + done.length], ['live', 'Live', live.length], ['up', 'Upcoming', up.length], ['done', 'Results', done.length]];
+    const segs = segDefs.map((d) => ({ label: d[1], n: d[2], live: d[0] === 'live', current: status === d[0] ? 'page' : 'false', pick: () => this.setState({ status: d[0] }) }));
+
+    const per = keys.length;
+    const week = [['Mon', 5, 0, 0], ['Tue', 6, 0, 0], ['Wed', 7, 0, 0], ['Thu', 8, 0, 0], ['Fri', 9, 2, 0], ['Sat', 10, 0, 3], ['Sun', 11, 2, 0]].map((d) => {
+      const dots = [];
+      for (let i = 0; i < d[3] * per && dots.length < 4; i++) dots.push({ cls: 'lv' });
+      for (let i = 0; i < d[2] * per && dots.length < 4; i++) dots.push({ cls: '' });
+      const count = (d[2] + d[3]) * per;
+      return {
+        dow: d[0] === 'Sat' ? 'Today' : d[0], day: d[1], dots: dots, current: d[1] === 10 ? 'date' : 'false',
+        cls: count ? 'wd' : 'wd none', label: d[0] + ' Oct ' + d[1] + ', ' + (count ? count + ' matches' : 'no matches')
+      };
+    });
+
+    // Same league bar as Home, with "All" first. M8 and EWC are title-only placeholders.
+    const tabDefs = [['all', 'All', 'All tournaments', 6], ['ph', 'MPL PH', 'MPL Philippines Season 18', 3], ['id', 'MPL ID', 'MPL Indonesia Season 18', 3], ['m8', 'M8 Tournament', 'M8 Tournament', 0], ['ewc', 'EWC 2027', 'Esports World Cup 2027', 0]];
+    const tabs = tabDefs.map((t) => ({
+      name: t[1], full: t[2], live: t[3], isLive: t[3] > 0 && t[0] !== 'all', sepAfter: t[0] === 'all',
+      current: t[0] === key ? 'page' : 'false',
+      pick: () => {
+        if (t[0] === 'm8' || t[0] === 'ewc') {
+          this.say(t[1] + ' is a placeholder tab in this mock.');
+          return;
+        }
+        this.setState({ league: t[0] });
+      }
+    }));
+    const curName = { all: 'All tournaments', ph: 'MPL Philippines Season 18', id: 'MPL Indonesia Season 18' }[key];
+
+    return {
+      appCls: phone ? 'app app--phone' : 'app',
+      siteCls: 'site ' + (signedIn ? 'is-user' : 'is-guest') + (hidden ? ' nospoil' : ''),
+      tabs: tabs,
+      cur: { name: curName },
+      segs: segs,
+      week: week,
+      groups: groups,
+      hiddenPressed: hidden ? 'true' : 'false',
+      toggleHidden: () => this.setState({ hidden: !hidden, revealed: [] }),
+      toastCls: s.toast ? 'toast show' : 'toast',
+      toastText: s.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>
