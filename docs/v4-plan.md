@@ -88,7 +88,20 @@ Review notes on the first mock, all applied in the canvas:
 | B2 + B3 seed: `seedLeague()` + MPL ID from the PH week | thumbz-server `v4` | `0146322` | typecheck, lint, dry run up to the first query; reseed pending |
 | F1–F6 league bar, tournament plumbing, links, copy, Teams tab fix | this repo `v4` | `5479b1f` | typecheck, lint, vitest |
 | F7 install the app on phones | this repo `v4` | `da503d4` | typecheck, lint, vitest |
-| F8+ mock sections | — | — | needs the local stack running for screenshots |
+| Backend checks after the stack came up: reseed (PH unchanged + MPL ID), unit 304/304, e2e 194/194, `/home` scoped by curl | thumbz-server `v4` | `b850300` (e2e fix) | all green |
+| F8 Live now multiview | this repo | `a456439` | screenshots 1440/390 |
+| F8 Schedule rundown | this repo | `cd2d653` | screenshots 1440/390 |
+| F8 Standings race | this repo | `7e9d363`, `d8b4865` | screenshots 1440/390 |
+| F8 Team wall | this repo | `1cfb8ed` | screenshots 1440/390 |
+| F8 Replay shelf | this repo | `c36173d` | screenshots 1440/390 |
+| F8 `/matches` series rows, status counts, week strip | this repo | `5f9d5e2` | screenshots 1440/390 |
+| F8 `/tournaments` + league page | this repo | `2fab13a` | screenshots 1440/390 |
+| F8 match page: series cells, scoreboard, lanes, item sequence | this repo | `b4094bc` | screenshots 1440/390; production build passes |
+
+Deviations from the mock: no per-match reminder bell on `/matches` (reminders
+are per followed team today); the separate "picks" row on the match page is
+covered by the lane rows (hero per player); "Your teams" and "Continue
+watching" are unchanged; the week strip counts UTC days.
 
 ## Implementation units (after approval)
 
