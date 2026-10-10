@@ -258,12 +258,13 @@ export function useMatchRelated(id: string, enabled = true) {
   });
 }
 
-export function useMatchEconomy(id: string, live = false) {
+export function useMatchEconomy(id: string, live = false, game?: number) {
   // Pushes replace polling while the realtime channel is up (contract §14).
   const connected = useRealtimeConnected();
   return useQuery({
-    queryKey: queryKeys.matchEconomy(id),
-    queryFn: () => fetchData<GoldSnapshot[]>(`/matches/${id}/economy`),
+    // Without a game: the current one, which realtime pushes update.
+    queryKey: game == null ? queryKeys.matchEconomy(id) : [...queryKeys.matchEconomy(id), game],
+    queryFn: () => fetchData<GoldSnapshot[]>(`/matches/${id}/economy${game == null ? "" : `?game_number=${game}`}`),
     refetchInterval: live && !connected ? LIVE_POLL_MS : undefined,
   });
 }
