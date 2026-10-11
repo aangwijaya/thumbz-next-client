@@ -5,6 +5,8 @@ import { useState } from "react";
 
 const TABS = ["chat", "moments", "stats", "more"] as const;
 type Tab = (typeof TABS)[number];
+// Phones open on Stats; desktop always shows the chat beside the player.
+const DEFAULT_TAB: Tab = "stats";
 
 function isTab(value: string | null): value is Tab {
   return (TABS as readonly string[]).includes(value ?? "");
@@ -26,14 +28,14 @@ const tabClass =
 export function WatchLayout({ stage, chat, moments, stats, more }: WatchLayoutProps) {
   const searchParams = useSearchParams();
   const initial = searchParams.get("tab");
-  const [tab, setTabState] = useState<Tab>(isTab(initial) ? initial : "chat");
+  const [tab, setTabState] = useState<Tab>(isTab(initial) ? initial : DEFAULT_TAB);
 
   // Deep-linkable (?tab=stats) without a server round trip: the native
   // History API updates the URL and Next keeps useSearchParams in sync.
   function setTab(next: Tab) {
     setTabState(next);
     const params = new URLSearchParams(window.location.search);
-    if (next === "chat") params.delete("tab");
+    if (next === DEFAULT_TAB) params.delete("tab");
     else params.set("tab", next);
     const query = params.toString();
     window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
