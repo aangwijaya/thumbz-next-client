@@ -20,7 +20,6 @@ const eslintConfig = defineConfig([
     // Third-party agent skills (not app code).
     ".agents/**",
     ".claude/**",
-    ".hermes/**",
   ]),
 ]);
 
