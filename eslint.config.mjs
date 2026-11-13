@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     ".lighthouseci/**",
+    // Third-party agent skills (not app code).
+    ".agents/**",
+    ".claude/**",
   ]),
 ]);
 
