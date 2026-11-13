@@ -7,7 +7,7 @@ import { fetchMatchComments } from "@/lib/api/endpoints";
 import { useRealtimeConnected, useRealtimeRoom } from "@/lib/realtime/hooks";
 import type { MatchComment } from "@/lib/api/types";
 
-import { appendOlder, mergeNewer } from "./comment-list";
+import { appendOlder, mergeNewer, visibleComments } from "./comment-list";
 
 // Contract §6.2: poll comments about every 5s, never faster. While the
 // realtime channel is up, comments are pushed and polling is only a slow
@@ -40,15 +40,21 @@ export function useMatchChat(): MatchChatValue {
   return value;
 }
 
+// How often the held-back chat is re-checked so messages surface on time.
+const DELAY_TICK_MS = 5_000;
+
 // Polls a live match's comments once for every view of them on the page.
 export function MatchChatProvider({
   matchId,
   live = true,
+  delaySeconds = 0,
   children,
 }: {
   matchId: string;
   /** Only live chats keep polling; others load once. */
   live?: boolean;
+  /** Broadcast delay: other people's comments newer than this stay hidden. */
+  delaySeconds?: number;
   children: React.ReactNode;
 }) {
   const { isVisible } = useSpoilers();
@@ -60,6 +66,23 @@ export function MatchChatProvider({
   const [olderCursor, setOlderCursor] = useState<string | null>(null);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const initialized = useRef(false);
+  const ownIds = useRef(new Set<string>());
+  const [now, setNow] = useState(() => Date.now());
+  // Real-time handlers compare against the latest list without re-subscribing.
+  const commentsRef = useRef(comments);
+  commentsRef.current = comments;
+
+  const delayMs = live ? Math.max(0, delaySeconds * 1000) : 0;
+
+  useEffect(() => {
+    if (delayMs <= 0) return;
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), DELAY_TICK_MS);
+    return () => clearInterval(timer);
+  }, [delayMs]);
+
+  // Only other people's comments wait for the stream; own comments appear now.
+  const shown = delayMs > 0 ? visibleComments(comments, now - delayMs, ownIds.current) : comments;
 
   const poll = useCallback(async () => {
     try {
@@ -104,8 +127,10 @@ export function MatchChatProvider({
     {
       "comment:new": (data) => {
         const comment = data as MatchComment;
+        // Our own POST is pushed back too: do not count it twice.
+        const isNew = !comment?.id || !commentsRef.current.some((item) => item?.id === comment.id);
         setComments((previous) => mergeNewer([comment], previous));
-        setTotal((count) => (count == null ? count : count + 1));
+        if (comment?.id && isNew) setTotal((count) => (count == null ? count : count + 1));
       },
       "comment:deleted": (data) => {
         const id = (data as { id?: string })?.id;
@@ -131,6 +156,7 @@ export function MatchChatProvider({
   }, [poll, visible, live, connected]);
 
   function addComment(comment: MatchComment) {
+    if (comment?.id) ownIds.current.add(comment.id);
     setComments((previous) => mergeNewer([comment], previous));
     setTotal((count) => (count == null ? count : count + 1));
   }
@@ -139,7 +165,7 @@ export function MatchChatProvider({
     <MatchChatContext.Provider
       value={{
         matchId,
-        comments,
+        comments: shown,
         total,
         loaded,
         visible,

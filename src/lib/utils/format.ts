@@ -1,12 +1,22 @@
 import type { BroadcastLanguage, MatchStage } from "@/lib/api/types";
 
 export function formatViewerCount(count: number): string {
-  if (count >= 1_000_000) return `${trimOneDecimal(count / 1_000_000)}M`;
-  if (count >= 1_000) {
-    const scaled = trimOneDecimal(count / 1_000);
+  if (!Number.isFinite(count)) return "0";
+  const value = Math.max(0, count);
+  if (value >= 1_000_000_000_000) return `${trimOneDecimal(value / 1_000_000_000_000)}T`;
+  if (value >= 1_000_000_000) {
+    const scaled = trimOneDecimal(value / 1_000_000_000);
+    return scaled === "1000" ? "1T" : `${scaled}B`;
+  }
+  if (value >= 1_000_000) {
+    const scaled = trimOneDecimal(value / 1_000_000);
+    return scaled === "1000" ? "1B" : `${scaled}M`;
+  }
+  if (value >= 1_000) {
+    const scaled = trimOneDecimal(value / 1_000);
     return scaled === "1000" ? "1M" : `${scaled}K`;
   }
-  return String(Math.round(count));
+  return String(Math.round(value));
 }
 
 function trimOneDecimal(value: number): string {
