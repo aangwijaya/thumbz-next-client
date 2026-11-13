@@ -8,6 +8,8 @@ export const DEMO_USER = {
   password: process.env.E2E_PASSWORD ?? "thumbz-demo-123",
 };
 export const API_URL = process.env.E2E_API_URL ?? "http://localhost:3001/api/v1";
+/** Fresh sign-up needs a Supabase project with email confirmation off. */
+export const CAN_SIGN_UP = process.env.E2E_FRESH_SIGNUP === "1";
 
 /** Phones collapse the header nav into a menu; tests branch on it rather than guess. */
 export const isPhone = (page: Page) => (page.viewportSize()?.width ?? 1280) <= 900;

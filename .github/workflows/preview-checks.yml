@@ -1,45 +1,46 @@
 name: Preview checks
 
-# Runs when Vercel finishes a preview deployment (or by hand against any URL):
-# cross-browser end-to-end tests and Lighthouse budgets on the real build.
+# Builds the pull request locally and runs the cross-browser end-to-end tests
+# and Lighthouse budgets against that production build.
+#
+# Why not the Vercel preview URL: previews sit behind Deployment Protection and
+# Vercel sends `x-robots-tag: noindex`, while the API only allows a fixed CORS
+# origin list. Auditing the deployment directly therefore fails on SEO, console
+# errors and authenticated pages. `http://localhost:3000` is an allowed API
+# origin, has a valid robots.txt and serves the same commit, so this runs the
+# build the way the README's local results were produced.
 #
 # Repository settings:
-#   vars.E2E_API_URL                      API the preview talks to (staging), e.g. https://api-staging.example/api/v1
-#   secrets.E2E_EMAIL / E2E_PASSWORD      a demo account on that API's Supabase project
-#   secrets.VERCEL_AUTOMATION_BYPASS_SECRET  only if previews use Deployment Protection
-# The staging API needs PAYMENTS_SANDBOX=true and Supabase email confirmation
-# off (the checkout test signs up a fresh account per run).
+#   secrets.E2E_EMAIL / E2E_PASSWORD   a demo account in the shared Supabase project
+#   vars.E2E_API_URL                   API the build talks to (production)
+# Fresh sign-up flows (checkout, DRM device limit) need a Supabase project with
+# email confirmation off; set E2E_FRESH_SIGNUP=1 there.
 on:
-  deployment_status:
+  pull_request:
   workflow_dispatch:
-    inputs:
-      base_url:
-        description: Site to test, e.g. https://thumbz-git-feature-x.vercel.app
-        required: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: preview-${{ github.event.deployment_status.environment_url || inputs.base_url }}
+  group: preview-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
-  BASE_URL: ${{ inputs.base_url || github.event.deployment_status.environment_url }}
+  NEXT_TELEMETRY_DISABLED: "1"
+  # Public config is inlined at build time so the local build talks to the
+  # shared production API and Supabase project.
+  NEXT_PUBLIC_API_URL: ${{ vars.E2E_API_URL || 'https://thumbz-server-production.up.railway.app/api/v1' }}
+  NEXT_PUBLIC_SUPABASE_URL: https://qshjcszsvsgwpcgggkiv.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_o87DH8dOSULCVGmz1aTLhA_OStJipIq
+  NEXT_PUBLIC_SITE_URL: https://thumbz-next-client.vercel.app
 
 jobs:
   e2e:
     name: Playwright (Chrome, Safari, iPhone, Pixel)
-    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Preview')
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      E2E_BASE_URL: ${{ inputs.base_url || github.event.deployment_status.environment_url }}
-      E2E_API_URL: ${{ vars.E2E_API_URL }}
-      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
-      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-      E2E_SW: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,7 +49,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
-      - run: npx playwright test
+      - run: npm run build
+      - name: Run Playwright against the production build
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          E2E_API_URL: ${{ vars.E2E_API_URL || 'https://thumbz-server-production.up.railway.app/api/v1' }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_SW: '1'
+        run: |
+          npm start > next.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/robots.txt >/dev/null && break
+            sleep 2
+          done
+          curl -sf http://localhost:3000/robots.txt >/dev/null || { cat next.log; exit 1; }
+          npx playwright test
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,7 +74,7 @@ jobs:
 
   lighthouse:
     name: Lighthouse budgets
-    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Preview')
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -66,15 +82,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - name: Collect and assert (lighthouserc.json budgets)
-        env:
-          BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
-          urls=""
-          for path in / /matches /videos /tournaments "/search?q=onic"; do urls="$urls --collect.url=${BASE_URL%/}$path"; done
-          headers=""
-          if [ -n "$BYPASS" ]; then headers="--collect.settings.extraHeaders={\"x-vercel-protection-bypass\":\"$BYPASS\"}"; fi
-          npx -y @lhci/cli@0.15.1 collect $urls $headers
+          npm start > next.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/robots.txt >/dev/null && break
+            sleep 2
+          done
+          curl -sf http://localhost:3000/robots.txt >/dev/null || { cat next.log; exit 1; }
+          npx -y @lhci/cli@0.15.1 collect
           npx -y @lhci/cli@0.15.1 assert
       - uses: actions/upload-artifact@v4
         if: always()

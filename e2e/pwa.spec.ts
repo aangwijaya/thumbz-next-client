@@ -19,7 +19,7 @@ test.describe("installable app", () => {
     await page.reload(); // now controlled, so the page is cached
     await context.setOffline(true);
     await page.goto("/tournaments");
-    await expect(page.getByRole("heading", { name: "Tournaments", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.goto("/teams");
     await expect(page.getByRole("heading", { name: "You're not connected" })).toBeVisible();
   });

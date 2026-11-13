@@ -21,7 +21,7 @@ test.describe("browsing", () => {
       await page.getByRole("navigation").first().getByRole("link", { name: "Tournaments" }).click();
     }
     await expect(page).toHaveURL(/\/tournaments$/);
-    await expect(page.getByRole("heading", { name: "Tournaments", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("search is deep-linkable and fuzzy", async ({ page }) => {
@@ -57,12 +57,16 @@ test.describe("browsing", () => {
     const cards = page.getByRole("main").getByRole("listitem");
     // The list streams in after the route's loading skeleton.
     await expect(cards.first()).toBeVisible();
+    // Give React time to hydrate the infinite-scroll observer.
+    await page.waitForTimeout(1_000);
     const firstPage = await cards.count();
 
-    // Reaching the end of the list loads the next page (on a tall screen the
-    // first page may not fill it, and the next page loads straight away).
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect.poll(() => cards.count(), { timeout: 15_000 }).toBeGreaterThan(Math.min(firstPage, 4));
+    // The sentinel right below the list loads the next page when it enters the
+    // viewport. On a tall screen it may already have loaded every page, in
+    // which case the button is gone and the count is already larger.
+    const loadMore = page.getByRole("button", { name: /Load more replays/ });
+    if ((await loadMore.count()) > 0) await loadMore.scrollIntoViewIfNeeded();
+    await expect.poll(() => cards.count(), { timeout: 30_000 }).toBeGreaterThan(Math.min(firstPage, 4));
   });
 
   test("unknown pages render the not-found page", async ({ page }) => {

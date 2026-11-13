@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-import { API_URL, expect, test } from "./fixtures";
+import { API_URL, CAN_SIGN_UP, expect, test } from "./fixtures";
 
 /** Width of the decoded picture: > 0 once the key was released and frames decode. */
 const decodedWidth = (page: Page) => page.evaluate(() => document.querySelector("video")?.videoWidth ?? 0);
@@ -20,7 +20,10 @@ test.describe("protected replay (DRM)", () => {
     await expect(page.getByText("Protected").first()).toBeVisible();
     await expect(page.getByText("Sign in to watch this replay")).toBeVisible();
   });
+});
 
+test.describe("protected replay (DRM device limit)", () => {
+  test.skip(!CAN_SIGN_UP, "fresh sign-up needs email confirmation off (E2E_FRESH_SIGNUP=1)");
   test("plays with a per-session key and enforces the device limit", async ({ freshUser: page, browserName }, testInfo) => {
     // Real iOS plays this through native HLS (AVFoundation). Playwright's
     // iPhone project is Linux WebKit with an iPhone UA: no native HLS, and its

@@ -1,4 +1,4 @@
-import { API_URL, expect, test } from "./fixtures";
+import { API_URL, CAN_SIGN_UP, expect, test } from "./fixtures";
 
 /** An upcoming or live match with QRIS ticket sales open (sandbox gateway), if any. */
 async function matchOnSale(): Promise<string | null> {
@@ -19,6 +19,7 @@ async function matchOnSale(): Promise<string | null> {
 }
 
 test.describe("checkout (sandbox gateway)", () => {
+  test.skip(!CAN_SIGN_UP, "fresh sign-up needs email confirmation off (E2E_FRESH_SIGNUP=1)");
   test("QRIS order is paid in real time and issues ticket QR codes", async ({ freshUser: page }) => {
     const id = await matchOnSale();
     test.skip(!id, "no match with QRIS ticket sales in this environment");
