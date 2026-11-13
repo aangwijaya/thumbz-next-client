@@ -6,17 +6,18 @@ import { useSyncExternalStore } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { LiveDot } from "@/components/ui/LiveDot";
 import { LogoMark } from "@/components/ui/LogoMark";
-import type { MatchSummary, TicketAvailability } from "@/lib/api/types";
-import { dateKey, useTimeZone } from "@/lib/hooks/useTimeZone";
+import type { MatchSummary } from "@/lib/api/types";
+import { useTimeZone } from "@/lib/hooks/useTimeZone";
 import { shortTeamName } from "@/lib/utils/format";
 import { teamColors } from "@/lib/utils/team-colors";
 
+import { buildRundown, clock, daySubtitle, dayTitle, startsIn, type RundownMatch } from "./schedule-rundown";
+
 interface ScheduleRundownProps {
   live: MatchSummary[];
-  upcoming: Array<MatchSummary & { ticket?: TicketAvailability | null }>;
+  upcoming: RundownMatch[];
 }
 
-const HOUR = 3_600_000;
 const LANE_PX = 86;
 const TOP_PX = 36;
 // The current minute, ticking. Null on the server: the timeline depends on
@@ -27,47 +28,6 @@ function subscribeMinute(callback: () => void) {
 }
 function useNow(): number | null {
   return useSyncExternalStore(subscribeMinute, () => Math.floor(Date.now() / 60_000) * 60_000, () => null);
-}
-
-/** A best-of-N takes about 40 minutes a game on the timeline. */
-const blockMs = (match: MatchSummary) => (match?.best_of ?? 1) * 40 * 60_000;
-const startOf = (match: MatchSummary) => Date.parse(match?.started_at ?? match?.scheduled_at ?? "");
-
-interface Block {
-  match: MatchSummary & { ticket?: TicketAvailability | null };
-  start: number;
-  end: number;
-  live: boolean;
-  day: number;
-  lane: number;
-}
-
-interface Day {
-  key: string;
-  from: number;
-  to: number;
-}
-
-function clock(ms: number, timeZone: string): string {
-  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone }).format(ms);
-}
-
-function dayTitle(key: string, timeZone: string, now: number): string {
-  if (key === dateKey(new Date(now), timeZone)) return "Today";
-  if (key === dateKey(new Date(now + 24 * HOUR), timeZone)) return "Tomorrow";
-  return new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "UTC" }).format(new Date(`${key}T12:00:00Z`));
-}
-
-function daySubtitle(key: string): string {
-  return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(
-    new Date(`${key}T12:00:00Z`),
-  );
-}
-
-function startsIn(ms: number, now: number): string {
-  const minutes = Math.max(0, Math.round((ms - now) / 60_000));
-  const hours = Math.floor(minutes / 60);
-  return hours > 0 ? `In ${hours}h ${String(minutes % 60).padStart(2, "0")}m` : `In ${minutes}m`;
 }
 
 /**
@@ -84,66 +44,18 @@ export function ScheduleRundown({ live, upcoming }: ScheduleRundownProps) {
   }
   const now = minute;
 
-  const all = [
-    ...live.map((match) => ({ match, live: true })),
-    ...upcoming.map((match) => ({ match, live: false })),
-  ]
-    .map((item) => ({ ...item, start: startOf(item.match) }))
-    .filter((item) => !Number.isNaN(item.start))
-    .sort((a, b) => a.start - b.start);
-
-  // A live series runs at least half an hour past now on the ruler.
-  const endOf = (item: { match: MatchSummary; live: boolean; start: number }) =>
-    Math.max(item.start + blockMs(item.match), item.live ? now + 30 * 60_000 : 0);
-
-  // At most two match days: today (with whatever is live) and the next one.
-  const dayKeys: string[] = [];
-  for (const item of all) {
-    const key = dateKey(new Date(item.start), timeZone);
-    if (!dayKeys.includes(key)) dayKeys.push(key);
-  }
-  const shownKeys = dayKeys.slice(0, 2);
-  const items = all.filter((item) => shownKeys.includes(dateKey(new Date(item.start), timeZone)));
-
-  const days: Day[] = shownKeys.map((key) => {
-    const inDay = items.filter((item) => dateKey(new Date(item.start), timeZone) === key);
-    const first = Math.min(...inDay.map((item) => item.start));
-    const last = Math.max(...inDay.map((item) => endOf(item)));
-    const from = Math.floor((first - HOUR) / HOUR) * HOUR;
-    // At least six hours wide, so a single match still reads as a block.
-    const to = Math.max(Math.ceil((last + HOUR) / HOUR) * HOUR, from + 6 * HOUR);
-    return { key, from, to };
-  });
-
-  // Overlapping matches go to the next lane down.
-  const laneEnds: number[][] = days.map(() => []);
-  const blocks: Block[] = items.map((item) => {
-    const day = shownKeys.indexOf(dateKey(new Date(item.start), timeZone));
-    const ends = laneEnds[day] ?? [];
-    let lane = ends.findIndex((end) => end <= item.start);
-    if (lane === -1) lane = ends.length;
-    ends[lane] = endOf(item);
-    return { match: item.match, start: item.start, end: endOf(item), live: item.live, day, lane };
-  });
-  const lanes = Math.max(1, ...blocks.map((block) => block.lane + 1));
-  const share = 100 / Math.max(1, days.length);
-  const x = (day: number, ms: number) => {
-    const d = days[day];
-    if (!d) return 0;
-    return day * share + ((ms - d.from) / (d.to - d.from)) * share;
-  };
-
-  const ticks = days.flatMap((day, index) => {
-    const out: Array<{ left: number; label: string }> = [];
-    for (let t = day.from; t < day.to; t += 2 * HOUR) out.push({ left: x(index, t), label: clock(t, timeZone) });
-    return out;
-  });
-  const today = days[0] && days[0].key === dateKey(new Date(now), timeZone) && now >= days[0].from && now <= days[0].to;
+  const { days, blocks, ticks, lanes, needle } = buildRundown(live, upcoming, now, timeZone);
   const nextUpcoming = blocks.find((block) => !block.live);
-
   // Phone order: live first, then the needle, then what is coming.
   const nowIndex = blocks.findIndex((block) => !block.live);
-  const showNeedle = today || blocks.some((block) => block.live);
+
+  if (days.length === 0) {
+    return (
+      <div className="rounded-lg border border-stone bg-paper px-6 py-10 text-center text-sm text-pencil shadow-subtle">
+        No matches scheduled yet. The full schedule lists later match days.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-stone bg-paper px-6 pb-6 pt-5 shadow-subtle max-[640px]:px-4 max-[640px]:pb-4 max-[640px]:pt-2">
@@ -165,9 +77,18 @@ export function ScheduleRundown({ live, upcoming }: ScheduleRundownProps) {
 
       <ol
         aria-label="Live and upcoming matches"
-        className="relative flex flex-col gap-2.5 pt-2 min-[641px]:block min-[641px]:h-(--rundown-h) min-[641px]:pt-0 min-[641px]:[background-image:linear-gradient(to_right,#eeecea_1px,transparent_1px)] min-[641px]:[background-size:calc(100%/6)_100%]"
+        className="relative flex flex-col gap-2.5 pt-2 min-[641px]:block min-[641px]:h-(--rundown-h) min-[641px]:pt-0"
         style={{ ["--rundown-h" as string]: `${TOP_PX + lanes * LANE_PX}px` }}
       >
+        {/* Grid lines come from the same ticks as the labels, so they always line up. */}
+        {ticks.map((tick) => (
+          <li
+            key={`grid-${tick.left}`}
+            aria-hidden="true"
+            className="absolute inset-y-0 border-l border-[#eeecea] max-[640px]:hidden"
+            style={{ left: `${tick.left}%` }}
+          />
+        ))}
         {days.length > 1 ? (
           <li aria-hidden="true" className="absolute inset-y-0 left-1/2 w-px bg-stone max-[640px]:hidden" />
         ) : null}
@@ -177,14 +98,21 @@ export function ScheduleRundown({ live, upcoming }: ScheduleRundownProps) {
           const ticket = match?.ticket?.on_sale ? match.ticket : null;
           const left = ticket?.quota_remaining ?? 0;
           const total = ticket?.quota_total ?? 0;
-          const when = `${dayTitle(shownKeys[block.day] ?? "", timeZone, now)} ${clock(block.start, timeZone)}`;
+          const dayKey = days[block.day]?.key ?? "";
+          const when = `${dayTitle(dayKey, timeZone, now)} ${clock(block.start, timeZone)}`;
           return (
-            <WithNeedle key={match?.id ?? index} needle={showNeedle && index === nowIndex} now={now} left={x(0, now)} timeZone={timeZone}>
+            <WithNeedle
+              key={match?.id ?? index}
+              needle={needle !== null && index === nowIndex}
+              now={now}
+              left={needle?.left ?? 0}
+              timeZone={timeZone}
+            >
               <li
                 className="relative min-[641px]:absolute min-[641px]:left-(--l) min-[641px]:top-(--t) min-[641px]:h-[76px] min-[641px]:w-(--w)"
                 style={{
-                  ["--l" as string]: `calc(${x(block.day, block.start)}% + 3px)`,
-                  ["--w" as string]: `max(176px, calc(${x(block.day, block.end) - x(block.day, block.start)}% - 6px))`,
+                  ["--l" as string]: `calc(${block.left}% + 3px)`,
+                  ["--w" as string]: `max(176px, calc(${block.right - block.left}% - 6px))`,
                   ["--t" as string]: `${TOP_PX + block.lane * LANE_PX}px`,
                 }}
               >
@@ -200,7 +128,7 @@ export function ScheduleRundown({ live, upcoming }: ScheduleRundownProps) {
                   />
                   <span className="flex items-center justify-between gap-2 text-caption text-pencil">
                     <span className="truncate">
-                      <span className="min-[641px]:hidden">{dayTitle(shownKeys[block.day] ?? "", timeZone, now)} </span>
+                      <span className="min-[641px]:hidden">{dayTitle(dayKey, timeZone, now)} </span>
                       {clock(block.start, timeZone)} · Bo{match?.best_of ?? 1}
                     </span>
                     {block.live ? (
@@ -245,7 +173,7 @@ export function ScheduleRundown({ live, upcoming }: ScheduleRundownProps) {
             </WithNeedle>
           );
         })}
-        {showNeedle && nowIndex === -1 ? <Needle left={x(0, now)} label={`Now · ${clock(now, timeZone)}`} /> : null}
+        {needle && nowIndex === -1 ? <Needle left={needle.left} label={`Now · ${clock(now, timeZone)}`} /> : null}
       </ol>
 
       <p aria-hidden="true" className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-pencil">
