@@ -50,7 +50,7 @@ test.describe("live match page", () => {
     test.skip(!isPhone(page), "phone layout only");
     const id = await firstLiveMatchId();
     test.skip(!id, "no live match in this environment");
-    await page.goto(`/matches/${id}`);
+    await page.goto(`/matches/${id}`, { waitUntil: "domcontentloaded" });
     const tabs = page.getByRole("tablist", { name: "Match" });
     // A tall panel, then scroll into it: the bar should pin under the header.
     // (Touch WebKit has no wheel events, so scroll the page directly.)

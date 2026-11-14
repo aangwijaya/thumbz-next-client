@@ -33,7 +33,7 @@ export async function firstLiveMatchId(): Promise<string | null> {
  */
 async function signUpFreshUser(page: Page): Promise<void> {
   const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@thumbz.local`;
-  await page.goto("/login?mode=register&next=/profile");
+  await page.goto("/login?mode=register&next=/profile", { waitUntil: "domcontentloaded" });
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill(`pw-${Math.random().toString(36).slice(2)}-E2e!`);
   await page.getByRole("button", { name: "Create account" }).click();

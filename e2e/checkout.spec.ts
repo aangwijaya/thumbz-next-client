@@ -23,7 +23,7 @@ test.describe("checkout (sandbox gateway)", () => {
   test("QRIS order is paid in real time and issues ticket QR codes", async ({ freshUser: page }) => {
     const id = await matchOnSale();
     test.skip(!id, "no match with QRIS ticket sales in this environment");
-    await page.goto(`/matches/${id}?tab=more#tickets`);
+    await page.goto(`/matches/${id}?tab=more#tickets`, { waitUntil: "domcontentloaded" });
     const panel = page.locator("#tickets");
     await panel.scrollIntoViewIfNeeded();
     await panel.locator("label", { hasText: "QRIS" }).click();

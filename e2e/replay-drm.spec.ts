@@ -16,7 +16,7 @@ test.describe("protected replay (DRM)", () => {
   test("asks signed-out visitors to sign in", async ({ page }) => {
     const id = await protectedVideoId();
     test.skip(!id, "no protected replay registered (scripts/media/register.ts)");
-    await page.goto(`/videos/${id}`);
+    await page.goto(`/videos/${id}`, { waitUntil: "domcontentloaded" });
     await expect(page.getByText("Protected").first()).toBeVisible();
     await expect(page.getByText("Sign in to watch this replay")).toBeVisible();
   });
@@ -40,7 +40,7 @@ test.describe("protected replay (DRM device limit)", () => {
       if (url.includes("/drm/hls/key")) keyRequests.push(url.includes("token=") ? "hls-key+token" : "hls-key");
     });
 
-    await page.goto(`/videos/${id}`);
+    await page.goto(`/videos/${id}`, { waitUntil: "domcontentloaded" });
     // Chromium: DASH + ClearKey via EME. Linux WebKit has no ClearKey CDM for
     // this content and takes HLS AES-128 through MSE; real Safari plays HLS natively.
     await expect.poll(() => decodedWidth(page), { timeout: 30_000 }).toBeGreaterThan(0);
