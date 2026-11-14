@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-import { API_URL, expect, test } from "./fixtures";
+import { API_URL, CAN_SIGN_UP, expect, test } from "./fixtures";
 
 /** Width of the decoded picture: > 0 once the key was released and frames decode. */
 const decodedWidth = (page: Page) => page.evaluate(() => document.querySelector("video")?.videoWidth ?? 0);
@@ -16,11 +16,14 @@ test.describe("protected replay (DRM)", () => {
   test("asks signed-out visitors to sign in", async ({ page }) => {
     const id = await protectedVideoId();
     test.skip(!id, "no protected replay registered (scripts/media/register.ts)");
-    await page.goto(`/videos/${id}`);
+    await page.goto(`/videos/${id}`, { waitUntil: "domcontentloaded" });
     await expect(page.getByText("Protected").first()).toBeVisible();
     await expect(page.getByText("Sign in to watch this replay")).toBeVisible();
   });
+});
 
+test.describe("protected replay (DRM device limit)", () => {
+  test.skip(!CAN_SIGN_UP, "fresh sign-up needs email confirmation off (E2E_FRESH_SIGNUP=1)");
   test("plays with a per-session key and enforces the device limit", async ({ freshUser: page, browserName }, testInfo) => {
     // Real iOS plays this through native HLS (AVFoundation). Playwright's
     // iPhone project is Linux WebKit with an iPhone UA: no native HLS, and its
@@ -37,7 +40,7 @@ test.describe("protected replay (DRM)", () => {
       if (url.includes("/drm/hls/key")) keyRequests.push(url.includes("token=") ? "hls-key+token" : "hls-key");
     });
 
-    await page.goto(`/videos/${id}`);
+    await page.goto(`/videos/${id}`, { waitUntil: "domcontentloaded" });
     // Chromium: DASH + ClearKey via EME. Linux WebKit has no ClearKey CDM for
     // this content and takes HLS AES-128 through MSE; real Safari plays HLS natively.
     await expect.poll(() => decodedWidth(page), { timeout: 30_000 }).toBeGreaterThan(0);

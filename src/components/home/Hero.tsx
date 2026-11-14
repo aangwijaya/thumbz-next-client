@@ -251,7 +251,9 @@ export function Hero({
 
         <div className="col-start-1 row-start-3 mt-5 motion-safe:animate-rise motion-safe:[animation-delay:120ms] min-[901px]:col-start-2 min-[901px]:row-start-1 min-[901px]:row-end-3 min-[901px]:mt-0 min-[901px]:self-start min-[901px]:pb-[clamp(40px,5vw,72px)]">
           {isLive && match ? (
-            <HeroChatProvider matchId={match.id}>{media}</HeroChatProvider>
+            <HeroChatProvider matchId={match.id} delaySeconds={match.stream_delay_seconds ?? 30}>
+              {media}
+            </HeroChatProvider>
           ) : (
             media
           )}
