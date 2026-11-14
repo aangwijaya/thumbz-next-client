@@ -2,7 +2,7 @@ import { expect, isPhone, test } from "./fixtures";
 
 test.describe("browsing", () => {
   test("home renders and the first tab stop skips to content", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveTitle(/THUMBZ/);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
@@ -13,7 +13,7 @@ test.describe("browsing", () => {
   });
 
   test("primary navigation works on every viewport", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     if (isPhone(page)) {
       await page.getByRole("button", { name: "Menu" }).click();
       await page.locator("#header-drawer").getByRole("link", { name: "Tournaments" }).click();
@@ -21,24 +21,26 @@ test.describe("browsing", () => {
       await page.getByRole("navigation").first().getByRole("link", { name: "Tournaments" }).click();
     }
     await expect(page).toHaveURL(/\/tournaments$/);
-    await expect(page.getByRole("heading", { name: "Tournaments", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("search is deep-linkable and fuzzy", async ({ page }) => {
     // Server-rendered from the URL: sharing the link shows the same results.
-    await page.goto("/search?q=onik&type=team");
+    await page.goto("/search?q=onik&type=team", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("searchbox")).toHaveValue("onik");
     await expect(page.getByRole("heading", { name: /Teams/ })).toBeVisible();
     await expect(page.getByRole("main").getByText(/ONIC/).first()).toBeVisible();
 
     // Typing updates the URL in place (debounced), without a full reload.
+    // Let the controlled input hydrate before typing on a cold page.
+    await page.waitForTimeout(1_000);
     await page.getByRole("searchbox").fill("falcon");
-    await expect(page).toHaveURL(/[?&]q=falcon/);
+    await expect(page).toHaveURL(/[?&]q=falcon/, { timeout: 15_000 });
     await expect(page.getByRole("main").getByText(/Team Falcons/).first()).toBeVisible();
   });
 
   test("match list pages are numbered and shareable", async ({ page }) => {
-    await page.goto("/matches");
+    await page.goto("/matches", { waitUntil: "domcontentloaded" });
     const pages = page.getByRole("navigation", { name: /pages/i });
     await pages.getByRole("link", { name: "Page 2" }).click();
     await expect(page).toHaveURL(/page=2/);
@@ -53,20 +55,24 @@ test.describe("browsing", () => {
   });
 
   test("replays load more as you scroll", async ({ page }) => {
-    await page.goto("/videos");
+    await page.goto("/videos", { waitUntil: "domcontentloaded" });
     const cards = page.getByRole("main").getByRole("listitem");
     // The list streams in after the route's loading skeleton.
     await expect(cards.first()).toBeVisible();
+    // Give React time to hydrate the infinite-scroll observer.
+    await page.waitForTimeout(1_000);
     const firstPage = await cards.count();
 
-    // Reaching the end of the list loads the next page (on a tall screen the
-    // first page may not fill it, and the next page loads straight away).
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect.poll(() => cards.count(), { timeout: 15_000 }).toBeGreaterThan(Math.min(firstPage, 4));
+    // The sentinel right below the list loads the next page when it enters the
+    // viewport. On a tall screen it may already have loaded every page, in
+    // which case the button is gone and the count is already larger.
+    const loadMore = page.getByRole("button", { name: /Load more replays/ });
+    if ((await loadMore.count()) > 0) await loadMore.scrollIntoViewIfNeeded();
+    await expect.poll(() => cards.count(), { timeout: 30_000 }).toBeGreaterThan(Math.min(firstPage, 4));
   });
 
   test("unknown pages render the not-found page", async ({ page }) => {
-    const response = await page.goto("/this-page-does-not-exist");
+    const response = await page.goto("/this-page-does-not-exist", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
   });

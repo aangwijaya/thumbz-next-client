@@ -16,3 +16,20 @@ export function appendOlder(older: MatchComment[], previous: MatchComment[]): Ma
   const fresh = older.filter((comment) => comment?.id && !known.has(comment.id));
   return fresh.length > 0 ? [...previous, ...fresh] : previous;
 }
+
+/**
+ * Comments that are safe to show while the video runs behind: anything newer
+ * than `cutoff` (contract §14 stream_delay_seconds) waits, except the visitor's
+ * own comments — hiding what they just wrote would feel broken.
+ */
+export function visibleComments(
+  comments: MatchComment[],
+  cutoff: number,
+  ownIds: ReadonlySet<string> = new Set(),
+): MatchComment[] {
+  return comments.filter((comment) => {
+    if (comment?.id && ownIds.has(comment.id)) return true;
+    const created = Date.parse(comment?.created_at ?? "");
+    return Number.isFinite(created) && created <= cutoff;
+  });
+}

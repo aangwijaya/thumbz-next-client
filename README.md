@@ -60,11 +60,14 @@ SEO are 100 on the audited pages (`/search` is `noindex` on purpose).
 End-to-end environment variables: `E2E_BASE_URL` (default
 `http://localhost:3000`), `E2E_API_URL`, `E2E_EMAIL` / `E2E_PASSWORD` (a demo
 account), `E2E_SW=1` to include service-worker tests (production build),
-`E2E_NO_SANDBOX=1` where Chromium's sandbox is unavailable (containers, WSL).
+`E2E_FRESH_SIGNUP=1` where Supabase email confirmation is off (enables the
+fresh-account checkout/DRM tests), `E2E_NO_SANDBOX=1` where Chromium's sandbox
+is unavailable (containers, WSL).
 
 CI: `ci.yml` (lint, types, unit + coverage, build) on every push and PR;
-`preview-checks.yml` runs Playwright and Lighthouse against each Vercel
-preview.
+`preview-checks.yml` builds each PR locally and runs Playwright and Lighthouse
+against that production build. Vercel previews are protected and noindex, so
+auditing them directly fails on SEO and cross-origin API calls.
 
 Match data: MPL Philippines (ph-mpl.com), © Moonton, used for a
 non-commercial portfolio.

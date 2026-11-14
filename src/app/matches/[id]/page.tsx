@@ -141,7 +141,11 @@ export default async function MatchPage({ params }: Props) {
         <FollowProvider signedIn={token !== null} initialTeams={followed}>
           <MatchLanguageProvider initial={broadcasts[0]?.language ?? null}>
             <LiveMatchProvider matchId={match?.id ?? id}>
-            <MatchChatProvider matchId={match?.id ?? id} live={isLive}>
+            <MatchChatProvider
+              matchId={match?.id ?? id}
+              live={isLive}
+              delaySeconds={isLive ? (match?.stream_delay_seconds ?? 30) : 0}
+            >
               <Container
                 size="watch"
                 className="flex items-center justify-between gap-4 max-[900px]:hidden"
